@@ -77,31 +77,31 @@ object MockImpl {
   import reflect.makro.Context
   
   def mock[T: c.TypeTag](c: Context)(factory: c.Expr[MockFactoryBase]): c.Expr[T] = {
-    val maker = MockMaker[T](c)(factory, stub = false)
+    val maker = MockMaker[T](c)(factory, stub = false, module = false)
 
     maker.make
   }
 
   def mockObject[T: c.TypeTag](c: Context)(o: c.Expr[T])(factory: c.Expr[MockFactoryBase]): c.Expr[T] = {
-    val maker = MockMaker[T](c)(factory, stub = false)
+    val maker = MockMaker[T](c)(factory, stub = false, module = true)
     
-    maker.makeObject
+    maker.make
   }
   
   def stub[T: c.TypeTag](c: Context)(factory: c.Expr[MockFactoryBase]): c.Expr[T] = {
-    val maker = MockMaker[T](c)(factory, stub = true)
+    val maker = MockMaker[T](c)(factory, stub = true, module = false)
 
     maker.make
   }
   
-  def MockMaker[T: c.TypeTag](c: Context)(factory: c.Expr[MockFactoryBase], stub: Boolean) = {
+  def MockMaker[T: c.TypeTag](c: Context)(factory: c.Expr[MockFactoryBase], stub: Boolean, module: Boolean) = {
     val m = new MockMaker[c.type](c)
-    new m.MockMakerInner[T](factory, stub)
+    new m.MockMakerInner[T](factory, stub, module)
   }
   
   //! TODO - get rid of this nasty two-stage construction when https://issues.scala-lang.org/browse/SI-5521 is fixed
   class MockMaker[C <: Context](val ctx: C) {
-    class MockMakerInner[T: ctx.TypeTag](factory: ctx.Expr[MockFactoryBase], stub: Boolean) {
+    class MockMakerInner[T: ctx.TypeTag](factory: ctx.Expr[MockFactoryBase], stub: Boolean, module: Boolean) {
       import ctx.mirror._
       import ctx.universe._
       import Flag._
@@ -206,7 +206,7 @@ object MockImpl {
         }
       
       def overrideIfNecessary(m: Symbol) =
-        if (nme.isConstructorName(m.name) || m.hasFlag(DEFERRED))
+        if (module || nme.isConstructorName(m.name) || m.hasFlag(DEFERRED))
           Modifiers()
         else
           Modifiers(OVERRIDE)
@@ -312,6 +312,20 @@ object MockImpl {
               New(Ident(anon)), 
               newTermName("<init>")), 
             List()))
+            
+      def anonObject(members: List[Tree]) =
+        Block(
+          ModuleDef(
+            Modifiers(),
+            newTermName("$anon"),
+            Template(
+              List(TypeTree(TypeTag.Object.tpe)),
+              ValDef(Modifiers(PRIVATE),
+                newTermName("_"),
+                TypeTree(),
+                EmptyTree),
+              initDef +: members)),
+          Literal(Constant(null)))
       
       // <|expr|>.asInstanceOf[<|t|>]
       def castTo(expr: Tree, t: Type) =
@@ -329,7 +343,7 @@ object MockImpl {
       val members = forwarders ++ mocks
       
       def make() = {
-        val result = castTo(anonClass(members), typeToMock)
+        val result = if (module) anonObject(members) else anonClass(members)
 
 //        println("------------")
 //        println(showRaw(result))
@@ -337,11 +351,7 @@ object MockImpl {
 //        println(show(result))
 //        println("------------")
     
-        ctx.Expr(result)
-      }
-      
-      def makeObject() = {
-        ctx.Expr(castTo(Literal(Constant(null)), typeToMock))
+        ctx.Expr(castTo(result, typeToMock))
       }
     }
   }

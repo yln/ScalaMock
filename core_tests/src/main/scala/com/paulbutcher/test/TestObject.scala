@@ -21,5 +21,5 @@
 package com.paulbutcher.test
 
 object TestObject {
-  def m(x: Int, y: String) = (x, y)
+  def m(x: Int, y: String) = s"m: $x, $y"
 }
