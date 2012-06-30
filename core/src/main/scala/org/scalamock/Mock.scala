@@ -25,7 +25,9 @@ trait Mock {
   import language.implicitConversions
   
   def mock[T](implicit factory: MockFactoryBase) = macro MockImpl.mock[T]
-  
+
+  def mockObject[T](o: T)(implicit factory: MockFactoryBase) = macro MockImpl.mockObject[T]
+
   implicit def toMockFunction0[R: Defaultable](f: () => R) = macro MockImpl.toMockFunction0[R]
   implicit def toMockFunction1[T1, R: Defaultable](f: T1 => R) = macro MockImpl.toMockFunction1[T1, R]
   implicit def toMockFunction2[T1, T2, R: Defaultable](f: (T1, T2) => R) = macro MockImpl.toMockFunction2[T1, T2, R]
@@ -78,6 +80,12 @@ object MockImpl {
     val maker = MockMaker[T](c)(factory, stub = false)
 
     maker.make
+  }
+
+  def mockObject[T: c.TypeTag](c: Context)(o: c.Expr[T])(factory: c.Expr[MockFactoryBase]): c.Expr[T] = {
+    val maker = MockMaker[T](c)(factory, stub = false)
+    
+    maker.makeObject
   }
   
   def stub[T: c.TypeTag](c: Context)(factory: c.Expr[MockFactoryBase]): c.Expr[T] = {
@@ -330,6 +338,10 @@ object MockImpl {
 //        println("------------")
     
         ctx.Expr(result)
+      }
+      
+      def makeObject() = {
+        ctx.Expr(castTo(Literal(Constant(null)), typeToMock))
       }
     }
   }
