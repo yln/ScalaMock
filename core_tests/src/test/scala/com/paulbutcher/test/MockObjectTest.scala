@@ -30,13 +30,17 @@ class MockObjectTest extends FreeSpec with PowerMockFactory {
   
   "Mock objects should" - {
     "fail if expectations are not set" in {
-      val m = mockObject(TestObject)
+      withExpectations {
+        val m = mockObject(TestObject)
 //      (TestObject.m _).expects(42, "foo").returning("it worked")
 //      expect("it worked") { TestObject.m(42, "foo") }
+      }
     }
     
     "succeed if expectations are met" in {
-      val m = mockObject(TestObject)
+      withExpectations {
+        val m = mockObject(TestObject)
+      }
     }
   }
 }
