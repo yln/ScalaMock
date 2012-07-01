@@ -26,7 +26,7 @@ import org.scalatest.{OneInstancePerTest, Suite}
 trait PowerMockFactory extends MockFactory with OneInstancePerTest { this: Suite =>
   
   override def newInstance = {
-    val mockingClassLoader = new MockingClassLoader
+    val mockingClassLoader = new MockingClassLoader(this)
     val clazz = Class.forName(getClass.getName, true, mockingClassLoader)
     clazz.newInstance.asInstanceOf[Suite with OneInstancePerTest]
   }

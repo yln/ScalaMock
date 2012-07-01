@@ -23,7 +23,7 @@ package org.scalamock
 trait Mock {
   import language.experimental.macros
   import language.implicitConversions
-  
+
   def mock[T](implicit factory: MockFactoryBase) = macro MockImpl.mock[T]
 
   def mockObject[T](o: T)(implicit factory: MockFactoryBase) = macro MockImpl.mockObject[T]
@@ -52,7 +52,7 @@ trait Mock {
   def stub[T](implicit factory: MockFactoryBase) = macro MockImpl.stub[T]
 
   implicit def toStubFunction0[R: Defaultable](f: () => R) = macro MockImpl.toStubFunction0[R]
-  implicit def toStubFunction1[T1,  R: Defaultable](f: T1 => R) = macro MockImpl.toStubFunction1[T1, R]
+  implicit def toStubFunction1[T1, R: Defaultable](f: T1 => R) = macro MockImpl.toStubFunction1[T1, R]
   implicit def toStubFunction2[T1, T2, R: Defaultable](f: (T1, T2) => R) = macro MockImpl.toStubFunction2[T1, T2, R]
   implicit def toStubFunction3[T1, T2, T3, R: Defaultable](f: (T1, T2, T3) => R) = macro MockImpl.toStubFunction3[T1, T2, T3, R]
   implicit def toStubFunction4[T1, T2, T3, T4, R: Defaultable](f: (T1, T2, T3, T4) => R) = macro MockImpl.toStubFunction4[T1, T2, T3, T4, R]
@@ -75,7 +75,7 @@ trait Mock {
 
 object MockImpl {
   import reflect.makro.Context
-  
+
   def mock[T: c.TypeTag](c: Context)(factory: c.Expr[MockFactoryBase]): c.Expr[T] = {
     val maker = MockMaker[T](c)(factory, stub = false, module = null)
 
@@ -84,21 +84,21 @@ object MockImpl {
 
   def mockObject[T: c.TypeTag](c: Context)(o: c.Expr[T])(factory: c.Expr[MockFactoryBase]): c.Expr[T] = {
     val maker = MockMaker[T](c)(factory, stub = false, module = o)
-    
+
     maker.make
   }
-  
+
   def stub[T: c.TypeTag](c: Context)(factory: c.Expr[MockFactoryBase]): c.Expr[T] = {
     val maker = MockMaker[T](c)(factory, stub = true, module = null)
 
     maker.make
   }
-  
+
   def MockMaker[T: c.TypeTag](c: Context)(factory: c.Expr[MockFactoryBase], stub: Boolean, module: c.Expr[T]) = {
     val m = new MockMaker[c.type](c)
     new m.MockMakerInner[T](factory, stub, module)
   }
-  
+
   //! TODO - get rid of this nasty two-stage construction when https://issues.scala-lang.org/browse/SI-5521 is fixed
   class MockMaker[C <: Context](val ctx: C) {
     class MockMakerInner[T: ctx.TypeTag](factory: ctx.Expr[MockFactoryBase], stub: Boolean, module: ctx.Expr[T]) {
@@ -107,7 +107,7 @@ object MockImpl {
       import Flag._
       import definitions._
       import language.reflectiveCalls
-      
+
       def mockFunctionClass(paramCount: Int): Type = paramCount match {
         case 0 => typeOf[MockFunction0[_]]
         case 1 => typeOf[MockFunction1[_, _]]
@@ -121,7 +121,7 @@ object MockImpl {
         case 9 => typeOf[MockFunction9[_, _, _, _, _, _, _, _, _, _]]
         case _ => ctx.abort(ctx.enclosingPosition, "ScalaMock: Can't handle methods with more than 9 parameters (yet)")
       }
-      
+
       def stubFunctionClass(paramCount: Int): Type = paramCount match {
         case 0 => typeOf[StubFunction0[_]]
         case 1 => typeOf[StubFunction1[_, _]]
@@ -135,19 +135,19 @@ object MockImpl {
         case 9 => typeOf[StubFunction9[_, _, _, _, _, _, _, _, _, _]]
         case _ => ctx.abort(ctx.enclosingPosition, "ScalaMock: Can't handle methods with more than 9 parameters (yet)")
       }
-      
+
       def classType(paramCount: Int) = if (stub) stubFunctionClass(paramCount) else mockFunctionClass(paramCount)
-  
+
       // Convert a methodType into its ultimate result type
       // For nullary and normal methods, this is just the result type
       // For curried methods, this is the final result type of the result type
       def finalResultType(methodType: Type): Type = methodType match {
-        case NullaryMethodType(result) => result 
+        case NullaryMethodType(result) => result
         case MethodType(_, result) => finalResultType(result)
         case PolyType(_, result) => finalResultType(result)
         case _ => methodType
       }
-      
+
       // Convert a methodType into a list of lists of params:
       // UnaryMethodType => Nil
       // Normal method => List(List(p1, p2, ...))
@@ -157,28 +157,28 @@ object MockImpl {
         case PolyType(_, result) => paramss(result)
         case _ => Nil
       }
-  
+
       //! TODO - remove this when isStable becomes part of the macro API
       def isStable(s: Symbol) = s.asInstanceOf[{ def isStable: Boolean }].isStable
-      
+
       //! TODO - remove this when isAccessor becomes part of the macro API
       def isAccessor(s: Symbol) = s.asInstanceOf[{ def isAccessor: Boolean }].isAccessor
-      
+
       def paramCount(methodType: Type): Int = methodType match {
         case MethodType(params, result) => params.length + paramCount(result)
         case PolyType(_, result) => paramCount(result)
         case _ => 0
       }
-      
+
       def paramTypes(methodType: Type): List[Type] =
         paramss(methodType).flatten map { _.typeSignature }
-      
+
       def isPathDependentThis(t: Type): Boolean = t match {
         case TypeRef(pre, _, _) => isPathDependentThis(pre)
         case ThisType(tpe) => tpe == typeToMock.typeSymbol
         case _ => false
       }
-      
+
       def paramType(t: Type) = t match {
         case TypeRef(pre, sym, args) if sym == JavaRepeatedParamClass =>
           TypeTree(TypeRef(pre, RepeatedParamClass, args))
@@ -187,13 +187,13 @@ object MockImpl {
         case _ =>
           TypeTree(t)
       }
-  
+
       def membersNotInObject = (typeToMock.members filterNot (m => isMemberOfObject(m))).toList
-      
+
       //! TODO - switch to using narrow when it becomes part of the macro API
       def resolvedType(m: Symbol) =
         m.typeSignatureIn(SuperType(ThisType(typeToMock.typeSymbol), typeToMock))
-      
+
       def buildParams(methodType: Type) =
         paramss(methodType) map { params =>
           params map { p =>
@@ -204,68 +204,68 @@ object MockImpl {
               EmptyTree)
           }
         }
-      
+
       def overrideIfNecessary(m: Symbol) =
         if ((module != null) || nme.isConstructorName(m.name) || m.hasFlag(DEFERRED))
           Modifiers()
         else
           Modifiers(OVERRIDE)
-      
+
       // def <|name|>(p1: T1, p2: T2, ...): T = <|mockname|>(p1, p2, ...)
       def methodDef(m: Symbol, methodType: Type, body: Tree): DefDef = {
         val params = buildParams(methodType)
         DefDef(
           overrideIfNecessary(m),
-          m.name, 
-          methodType.typeParams map TypeDef _, 
+          m.name,
+          methodType.typeParams map TypeDef _,
           params,
           paramType(finalResultType(methodType)),
           body)
       }
-      
+
       def methodImpl(m: Symbol, methodType: Type, body: Tree): DefDef = {
         methodType match {
           case NullaryMethodType(_) => methodDef(m, methodType, body)
           case MethodType(_, _) => methodDef(m, methodType, body)
           case PolyType(_, _) => methodDef(m, methodType, body)
-          case _ => ctx.abort(ctx.enclosingPosition, 
-              s"ScalaMock: Don't know how to handle ${methodType.getClass}. Please open a ticket at https://github.com/paulbutcher/ScalaMock/issues")
+          case _ => ctx.abort(ctx.enclosingPosition,
+            s"ScalaMock: Don't know how to handle ${methodType.getClass}. Please open a ticket at https://github.com/paulbutcher/ScalaMock/issues")
         }
       }
-      
+
       def forwarderImpl(m: Symbol) = {
         val mt = resolvedType(m)
         if (isStable(m)) {
           ValDef(
-            Modifiers(), 
-            newTermName(m.name.toString), 
-            TypeTree(mt), 
+            Modifiers(),
+            newTermName(m.name.toString),
+            TypeTree(mt),
             TypeApply(
               Select(
-                Literal(Constant(null)), 
+                Literal(Constant(null)),
                 newTermName("asInstanceOf")),
               List(Ident(mt.typeSymbol))))
         } else {
           val body = Apply(
-                       Select(Select(This(anon), mockFunctionName(m)), newTermName("apply")),
-                       paramss(mt).flatten map { p => Ident(newTermName(p.name.toString)) })
+            Select(Select(This(anon), mockFunctionName(m)), newTermName("apply")),
+            paramss(mt).flatten map { p => Ident(newTermName(p.name.toString)) })
           methodImpl(m, mt, body)
         }
       }
 
       def mockFunctionName(m: Symbol) = {
         val method = typeToMock.member(m.name)
-        newTermName("mock$"+ m.name +"$"+ method.asTermSymbol.alternatives.indexOf(m))
+        newTermName("mock$" + m.name + "$" + method.asTermSymbol.alternatives.indexOf(m))
       }
-      
+
       // val <|mockname|> = new MockFunctionN[T1, T2, ..., R](factory, '<|name|>)
       def mockMethod(m: Symbol): ValDef = {
         val mt = resolvedType(m)
         val clazz = classType(paramCount(mt))
         val types = (paramTypes(mt) map paramType _) :+ paramType(finalResultType(mt))
         ValDef(Modifiers(),
-          mockFunctionName(m), 
-          TypeTree(), 
+          mockFunctionName(m),
+          TypeTree(),
           Apply(
             Select(
               New(
@@ -274,45 +274,56 @@ object MockImpl {
                   types)),
               newTermName("<init>")),
             List(
-              factory.tree, 
+              factory.tree,
               Apply(
                 Select(Select(Ident(newTermName("scala")), newTermName("Symbol")), newTermName("apply")),
                 List(Literal(Constant(m.name.toString)))))))
       }
-      
+
       // def <init>() = super.<init>()
-      def initDef = 
+      def initDef =
         DefDef(
-          Modifiers(), 
-          newTermName("<init>"), 
-          List(), 
-          List(List()), 
+          Modifiers(),
+          newTermName("<init>"),
+          List(),
+          List(List()),
           TypeTree(),
           Block(
             Apply(
-              Select(Super(This(newTypeName("")), newTypeName("")), newTermName("<init>")), 
+              Select(Super(This(newTypeName("")), newTypeName("")), newTermName("<init>")),
               List())))
-        
+
       def isMemberOfObject(m: Symbol) = TypeTag.Object.tpe.member(m.name) != NoSymbol
-  
+
       // new <|typeToMock|> { <|members|> }
       def anonClass(members: List[Tree]) =
         Block(
           List(
             ClassDef(
-              Modifiers(FINAL), 
+              Modifiers(FINAL),
               anon,
               List(),
               Template(
-                List(TypeTree(typeToMock)), 
+                List(TypeTree(typeToMock)),
                 emptyValDef,
                 initDef +: members))),
           Apply(
             Select(
-              New(Ident(anon)), 
-              newTermName("<init>")), 
+              New(Ident(anon)),
+              newTermName("<init>")),
             List()))
-            
+
+      def packageName(sym: Symbol): String =
+        if (sym == RootClass)
+          ""
+        else
+          packageName(sym.owner) + sym.name +"." 
+
+      def moduleClassName = {
+        val sym = typeToMock.typeSymbol
+        packageName(sym.owner) + sym.name +"$"
+      }
+
       // {
       //   object $anon { <|members|> }
       //   factory.registerMockObject(<|module|>, $anon)
@@ -332,54 +343,56 @@ object MockImpl {
               initDef +: members)),
           Apply(
             Select(factory.tree, newTermName("registerMockObject")),
-            List(module.tree, Ident(newTermName("$anon")))),
+            List(
+              Literal(Constant(moduleClassName)),
+              Ident(newTermName("$anon")))),
           Literal(Constant(null)))
-      
+
       // <|expr|>.asInstanceOf[<|t|>]
       def castTo(expr: Tree, t: Type) =
         TypeApply(
           Select(expr, newTermName("asInstanceOf")),
           List(TypeTree(t)))
-  
+
       val typeToMock = typeOf[T]
-      val anon = newTypeName("$anon") 
-      val methodsToMock = membersNotInObject filter { m => 
+      val anon = newTypeName("$anon")
+      val methodsToMock = membersNotInObject filter { m =>
         m.isMethod && (!(isStable(m) || isAccessor(m)) || m.hasFlag(DEFERRED))
       }
       val forwarders = methodsToMock map forwarderImpl _
       val mocks = methodsToMock map mockMethod _
       val members = forwarders ++ mocks
-      
+
       def make() = {
         val result = if (module != null) anonObject(members) else anonClass(members)
 
-//        println("------------")
-//        println(showRaw(result))
-//        println("------------")
-//        println(show(result))
-//        println("------------")
-    
+        //        println("------------")
+        //        println(showRaw(result))
+        //        println("------------")
+        //        println(show(result))
+        //        println("------------")
+
         ctx.Expr(castTo(result, typeToMock))
       }
     }
   }
-  
+
   // Given something of the structure <|o.m _|> where o is a mock object
   // and m is a method, find the corresponding MockFunction instance
   def findMockFunction[F: c.TypeTag, M: c.TypeTag](c: Context)(f: c.Expr[F], actuals: List[c.universe.Type]): c.Expr[M] = {
     import c.universe._
-    
+
     def mockFunctionName(name: Name, t: Type) = {
       val method = t.member(name)
       if (method.isOverloaded) {
-        val term = method.asTermSymbol 
+        val term = method.asTermSymbol
         val m = term.resolveOverloaded(NoPrefix, List(), actuals)
-        "mock$"+ name +"$"+ term.alternatives.indexOf(m)
+        "mock$" + name + "$" + term.alternatives.indexOf(m)
       } else {
-        "mock$"+ name +"$0"
-      }    
+        "mock$" + name + "$0"
+      }
     }
-    
+
     def findApplication(tree: Tree): (Tree, Name) = tree match {
       case Select(o, n) => (o, n)
       case Block(_, t) => findApplication(t)
@@ -387,8 +400,8 @@ object MockImpl {
       case Function(_, t) => findApplication(t)
       case Apply(t, _) => findApplication(t)
       case TypeApply(t, _) => findApplication(t)
-      case _ => c.abort(c.enclosingPosition, 
-          s"ScalaMock: Unrecognised structure: ${showRaw(tree)}. Please open a ticket at https://github.com/paulbutcher/ScalaMock/issues")
+      case _ => c.abort(c.enclosingPosition,
+        s"ScalaMock: Unrecognised structure: ${showRaw(tree)}. Please open a ticket at https://github.com/paulbutcher/ScalaMock/issues")
     }
 
     val (obj, name) = findApplication(f.tree)

@@ -115,8 +115,15 @@ trait MockFactoryBase extends Mock {
 
   protected implicit def MatchEpsilonToMockParameter[T](m: MatchEpsilon) = new EpsilonMockParameter(m)
   
-  def registerMockObject(o: AnyRef, m: AnyRef) {
-    mockObjectMap.get += ((o.getClass.getName, m.getClass.getName))
+  def registerMockObject(objectName: String, mock: AnyRef) {
+    mockObjectMap.get += ((objectName, mock.getClass.getName))
+  }
+  
+  def getMockObject(name: String): Option[String] = {
+    mockObjectMap.get match {
+      case map if map != null => map.get(name)
+      case _ => None
+    }
   }
   
   private[scalamock] def handle(call: Call) = {

@@ -34,6 +34,7 @@ class MockObjectTest extends FreeSpec with PowerMockFactory {
         val m = mockObject(TestObject)
 //      (TestObject.m _).expects(42, "foo").returning("it worked")
 //      expect("it worked") { TestObject.m(42, "foo") }
+        TestObject.m(42, "foo")
       }
     }
     

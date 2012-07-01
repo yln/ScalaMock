@@ -22,7 +22,7 @@ package org.scalamock
 
 import java.net.{URL, URLClassLoader}
 
-class MockingClassLoader extends ClassLoader {
+class MockingClassLoader(factory: MockFactoryBase) extends ClassLoader {
   
   val defaultClassLoader = getClass.getClassLoader.asInstanceOf[URLClassLoader]
   val urls = defaultClassLoader.getURLs
@@ -31,7 +31,13 @@ class MockingClassLoader extends ClassLoader {
 
     override def loadClass(name: String): Class[_] = MockingClassLoader.this.loadClass(name)
     
-    def loadClassInternal(name: String) = super.loadClass(name)
+    def loadClassInternal(name: String) = {
+      factory.getMockObject(name) match {
+        case Some(mock) => println(s"$name --> $mock")
+        case None =>
+      }
+      super.loadClass(name)
+    }
   }
 
   val loader = new ClassLoaderInternal
