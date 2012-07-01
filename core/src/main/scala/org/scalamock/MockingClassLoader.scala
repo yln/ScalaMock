@@ -20,8 +20,11 @@
 
 package org.scalamock
 
+import java.io.ByteArrayOutputStream
 import java.net.{URL, URLClassLoader}
 import collection.mutable.ListMap
+import org.objectweb.asm.{ClassReader, ClassWriter}
+import org.objectweb.asm.commons.{Remapper, RemappingClassAdapter}
 
 class MockingClassLoader(factory: MockFactoryBase) extends ClassLoader {
   
@@ -39,17 +42,57 @@ class MockingClassLoader(factory: MockFactoryBase) extends ClassLoader {
   class ClassLoaderInternal extends URLClassLoader(urls) {
 
     override def loadClass(name: String): Class[_] = MockingClassLoader.this.loadClass(name)
-    
-    private[scalamock] def loadClassInternal(name: String) = {
-      mockObjectMap.get(name) match {
-        case Some(mock) => println(s"$name --> $mock")
-        case None =>
-      }
-      super.loadClass(name)
-    }
   
     def registerMockObject(objectName: String, mock: AnyRef) {
       mockObjectMap += ((objectName, mock.getClass.getName))
+    }
+    
+    private[scalamock] def loadClassInternal(name: String) = {
+      mockObjectMap.get(name) match {
+        case Some(mock) =>
+          println(s"$name --> $mock")
+          val className = nameAsPath(name)
+          val mockName = nameAsPath(mock)
+          val bytecode = getClassAsBytes(mockName)
+          val remappedByteCode = renameClass(bytecode, mockName, className)
+          defineClass(name, remappedByteCode, 0, remappedByteCode.length)
+
+        case None => super.loadClass(name)
+      }
+    }
+    
+    private def nameAsPath(name: String) = name.replace('.', '/')
+
+    private def getClassAsBytes(className: String) = {
+      val in = getResourceAsStream(className + ".class")
+      if (in != null) {
+        val out = new ByteArrayOutputStream
+        
+        val buffer = new Array[Byte](1024)
+        while (in.read(buffer) != -1)
+          out.write(buffer)
+        
+        out.toByteArray
+      } else {
+        null
+      }
+    }
+    
+    private def renameClass(bytecode: Array[Byte], from: String, to: String) = {
+      val classReader = new ClassReader(bytecode)
+      val classWriter = new ClassWriter(classReader, 0)
+      val remapper = new RenamingRemapper(from, to)
+      classReader.accept(new RemappingClassAdapter(classWriter, remapper), 0)
+      classWriter.toByteArray
+    }
+    
+    private class RenamingRemapper(from: String, to: String) extends Remapper {
+      override def map(typeName: String) = {
+        if (typeName == from)
+          to
+        else
+          typeName
+      }
     }
   }
 
