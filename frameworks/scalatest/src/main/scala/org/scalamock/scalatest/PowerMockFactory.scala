@@ -1,4 +1,4 @@
-// Copyright (c) 2011-2012 Paul Butcher
+// Copyright (c) 2011-12 Paul Butcher
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -18,25 +18,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package com.paulbutcher.test
+package org.scalamock.scalatest
 
-import org.scalamock.scalatest.PowerMockFactory
-import org.scalatest.FreeSpec
-import org.scalamock._
+import org.scalamock.MockingClassLoader
+import org.scalatest.{OneInstancePerTest, Suite}
 
-class MockObjectTest extends FreeSpec with PowerMockFactory {
+trait PowerMockFactory extends MockFactory with OneInstancePerTest { this: Suite =>
   
-  autoVerify = false
-  
-  "Mock objects should" - {
-    "fail if expectations are not set" in {
-      val m = mockObject(TestObject)
-//      (TestObject.m _).expects(42, "foo").returning("it worked")
-//      expect("it worked") { TestObject.m(42, "foo") }
-    }
-    
-    "succeed if expectations are met" in {
-      val m = mockObject(TestObject)
-    }
+  override def newInstance = {
+    val mockingClassLoader = new MockingClassLoader
+    val clazz = Class.forName(getClass.getName, true, mockingClassLoader)
+    clazz.newInstance.asInstanceOf[Suite with OneInstancePerTest]
   }
 }

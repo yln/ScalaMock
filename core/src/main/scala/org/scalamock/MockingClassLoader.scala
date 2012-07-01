@@ -18,25 +18,36 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package com.paulbutcher.test
+package org.scalamock
 
-import org.scalamock.scalatest.PowerMockFactory
-import org.scalatest.FreeSpec
-import org.scalamock._
+import java.net.{URL, URLClassLoader}
 
-class MockObjectTest extends FreeSpec with PowerMockFactory {
+class MockingClassLoader extends ClassLoader {
   
-  autoVerify = false
+  val defaultClassLoader = getClass.getClassLoader.asInstanceOf[URLClassLoader]
+  val urls = defaultClassLoader.getURLs
   
-  "Mock objects should" - {
-    "fail if expectations are not set" in {
-      val m = mockObject(TestObject)
-//      (TestObject.m _).expects(42, "foo").returning("it worked")
-//      expect("it worked") { TestObject.m(42, "foo") }
-    }
+  protected class ClassLoaderInternal extends URLClassLoader(urls) {
+
+    override def loadClass(name: String): Class[_] = MockingClassLoader.this.loadClass(name)
     
-    "succeed if expectations are met" in {
-      val m = mockObject(TestObject)
+    def loadClassInternal(name: String) = super.loadClass(name)
+  }
+
+  val loader = new ClassLoaderInternal
+
+  override def loadClass(name: String): Class[_] = {
+    println(s"loading: $name")
+    if (useDefault(name)) {
+      defaultClassLoader.loadClass(name)
+    } else {
+      loader.loadClassInternal(name)
     }
   }
+
+  private def useDefault(name: String) =
+    name.startsWith("scala.") || 
+    name.startsWith("java.") || 
+    name.startsWith("org.scalatest.") ||
+    name.startsWith("org.scalamock.")
 }
