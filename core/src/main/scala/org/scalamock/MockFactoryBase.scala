@@ -19,7 +19,7 @@
 
 package org.scalamock
 
-import collection.mutable.{ListBuffer, ListMap}
+import collection.mutable.ListBuffer
 
 trait MockFactoryBase extends Mock {
   import language.implicitConversions
@@ -115,17 +115,6 @@ trait MockFactoryBase extends Mock {
 
   protected implicit def MatchEpsilonToMockParameter[T](m: MatchEpsilon) = new EpsilonMockParameter(m)
   
-  def registerMockObject(objectName: String, mock: AnyRef) {
-    mockObjectMap.get += ((objectName, mock.getClass.getName))
-  }
-  
-  def getMockObject(name: String): Option[String] = {
-    mockObjectMap.get match {
-      case map if map != null => map.get(name)
-      case _ => None
-    }
-  }
-  
   private[scalamock] def handle(call: Call) = {
     callLog.get += call
     expectationContext.get.handle(call)
@@ -148,7 +137,6 @@ trait MockFactoryBase extends Mock {
   private def resetExpectations() {
     callLog set new CallLog
     expectationContext set new UnorderedHandlers
-    mockObjectMap set new ListMap[String, String]
   }
   
   private def verifyExpectations() {
@@ -157,7 +145,6 @@ trait MockFactoryBase extends Mock {
       reportUnsatisfiedExpectation
     
     expectationContext set null
-    mockObjectMap set null
   }
   
   private def errorContext =
@@ -185,6 +172,4 @@ trait MockFactoryBase extends Mock {
   private val callLog = new InheritableThreadLocal[CallLog]
   
   private val expectationContext = new InheritableThreadLocal[Handlers]
-  
-  private val mockObjectMap = new InheritableThreadLocal[ListMap[String, String]]
 }

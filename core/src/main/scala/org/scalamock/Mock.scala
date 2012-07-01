@@ -247,7 +247,7 @@ object MockImpl {
               List(Ident(mt.typeSymbol))))
         } else {
           val body = Apply(
-            Select(Select(This(anon), mockFunctionName(m)), newTermName("apply")),
+            Select(Select(This(newTypeName("")), mockFunctionName(m)), newTermName("apply")),
             paramss(mt).flatten map { p => Ident(newTermName(p.name.toString)) })
           methodImpl(m, mt, body)
         }
@@ -301,7 +301,7 @@ object MockImpl {
           List(
             ClassDef(
               Modifiers(FINAL),
-              anon,
+              newTypeName("$anon"),
               List(),
               Template(
                 List(TypeTree(typeToMock)),
@@ -309,7 +309,7 @@ object MockImpl {
                 initDef +: members))),
           Apply(
             Select(
-              New(Ident(anon)),
+              New(Ident(newTypeName("$anon"))),
               newTermName("<init>")),
             List()))
 
@@ -326,7 +326,7 @@ object MockImpl {
 
       // {
       //   object $anon { <|members|> }
-      //   factory.registerMockObject(<|module|>, $anon)
+      //   getClass.getClassLoader.asInstanceOf[MockingClassLoader#ClassLoaderInternal].registerMockObject(<|module|>, $anon)
       //   null
       // }
       def anonObject(members: List[Tree]) =
@@ -342,7 +342,21 @@ object MockImpl {
                 EmptyTree),
               initDef +: members)),
           Apply(
-            Select(factory.tree, newTermName("registerMockObject")),
+            Select(
+              TypeApply(
+                Select(
+                  Apply(
+                    Select(
+                      Apply(
+                        Select(
+                          This(newTypeName("")),
+                          newTermName("getClass")),
+                        List()),
+                      newTermName("getClassLoader")),
+                    List()),
+                  newTermName("asInstanceOf")),
+                List(TypeTree(typeOf[org.scalamock.MockingClassLoader#ClassLoaderInternal]))),
+              newTermName("registerMockObject")),
             List(
               Literal(Constant(moduleClassName)),
               Ident(newTermName("$anon")))),
@@ -355,7 +369,6 @@ object MockImpl {
           List(TypeTree(t)))
 
       val typeToMock = typeOf[T]
-      val anon = newTypeName("$anon")
       val methodsToMock = membersNotInObject filter { m =>
         m.isMethod && (!(isStable(m) || isAccessor(m)) || m.hasFlag(DEFERRED))
       }

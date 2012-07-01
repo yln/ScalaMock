@@ -21,26 +21,12 @@
 package org.scalamock
 
 import java.net.{URL, URLClassLoader}
+import collection.mutable.ListMap
 
 class MockingClassLoader(factory: MockFactoryBase) extends ClassLoader {
   
   val defaultClassLoader = getClass.getClassLoader.asInstanceOf[URLClassLoader]
   val urls = defaultClassLoader.getURLs
-  
-  protected class ClassLoaderInternal extends URLClassLoader(urls) {
-
-    override def loadClass(name: String): Class[_] = MockingClassLoader.this.loadClass(name)
-    
-    def loadClassInternal(name: String) = {
-      factory.getMockObject(name) match {
-        case Some(mock) => println(s"$name --> $mock")
-        case None =>
-      }
-      super.loadClass(name)
-    }
-  }
-
-  val loader = new ClassLoaderInternal
 
   override def loadClass(name: String): Class[_] = {
     if (useDefault(name)) {
@@ -49,10 +35,31 @@ class MockingClassLoader(factory: MockFactoryBase) extends ClassLoader {
       loader.loadClassInternal(name)
     }
   }
+  
+  class ClassLoaderInternal extends URLClassLoader(urls) {
+
+    override def loadClass(name: String): Class[_] = MockingClassLoader.this.loadClass(name)
+    
+    private[scalamock] def loadClassInternal(name: String) = {
+      mockObjectMap.get(name) match {
+        case Some(mock) => println(s"$name --> $mock")
+        case None =>
+      }
+      super.loadClass(name)
+    }
+  
+    def registerMockObject(objectName: String, mock: AnyRef) {
+      mockObjectMap += ((objectName, mock.getClass.getName))
+    }
+  }
 
   private def useDefault(name: String) =
     name.startsWith("scala.") || 
     name.startsWith("java.") || 
     name.startsWith("org.scalatest.") ||
     name.startsWith("org.scalamock.")
+
+  private val loader = new ClassLoaderInternal
+  
+  private val mockObjectMap = new ListMap[String, String]
 }
