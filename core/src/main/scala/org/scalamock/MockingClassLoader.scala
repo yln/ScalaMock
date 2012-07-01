@@ -37,7 +37,6 @@ class MockingClassLoader extends ClassLoader {
   val loader = new ClassLoaderInternal
 
   override def loadClass(name: String): Class[_] = {
-    println(s"loading: $name")
     if (useDefault(name)) {
       defaultClassLoader.loadClass(name)
     } else {

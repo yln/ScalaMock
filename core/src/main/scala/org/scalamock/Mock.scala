@@ -313,6 +313,11 @@ object MockImpl {
               newTermName("<init>")), 
             List()))
             
+      // {
+      //   object $anon { <|members|> }
+      //   factory.registerMockObject($anon)
+      //   null
+      // }
       def anonObject(members: List[Tree]) =
         Block(
           ModuleDef(
@@ -325,6 +330,9 @@ object MockImpl {
                 TypeTree(),
                 EmptyTree),
               initDef +: members)),
+          Apply(
+            Select(factory.tree, newTermName("registerMockObject")),
+            List(Ident(newTermName("$anon")))),
           Literal(Constant(null)))
       
       // <|expr|>.asInstanceOf[<|t|>]
