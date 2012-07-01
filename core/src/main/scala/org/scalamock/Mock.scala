@@ -77,31 +77,31 @@ object MockImpl {
   import reflect.makro.Context
   
   def mock[T: c.TypeTag](c: Context)(factory: c.Expr[MockFactoryBase]): c.Expr[T] = {
-    val maker = MockMaker[T](c)(factory, stub = false, module = false)
+    val maker = MockMaker[T](c)(factory, stub = false, module = null)
 
     maker.make
   }
 
   def mockObject[T: c.TypeTag](c: Context)(o: c.Expr[T])(factory: c.Expr[MockFactoryBase]): c.Expr[T] = {
-    val maker = MockMaker[T](c)(factory, stub = false, module = true)
+    val maker = MockMaker[T](c)(factory, stub = false, module = o)
     
     maker.make
   }
   
   def stub[T: c.TypeTag](c: Context)(factory: c.Expr[MockFactoryBase]): c.Expr[T] = {
-    val maker = MockMaker[T](c)(factory, stub = true, module = false)
+    val maker = MockMaker[T](c)(factory, stub = true, module = null)
 
     maker.make
   }
   
-  def MockMaker[T: c.TypeTag](c: Context)(factory: c.Expr[MockFactoryBase], stub: Boolean, module: Boolean) = {
+  def MockMaker[T: c.TypeTag](c: Context)(factory: c.Expr[MockFactoryBase], stub: Boolean, module: c.Expr[T]) = {
     val m = new MockMaker[c.type](c)
     new m.MockMakerInner[T](factory, stub, module)
   }
   
   //! TODO - get rid of this nasty two-stage construction when https://issues.scala-lang.org/browse/SI-5521 is fixed
   class MockMaker[C <: Context](val ctx: C) {
-    class MockMakerInner[T: ctx.TypeTag](factory: ctx.Expr[MockFactoryBase], stub: Boolean, module: Boolean) {
+    class MockMakerInner[T: ctx.TypeTag](factory: ctx.Expr[MockFactoryBase], stub: Boolean, module: ctx.Expr[T]) {
       import ctx.mirror._
       import ctx.universe._
       import Flag._
@@ -206,7 +206,7 @@ object MockImpl {
         }
       
       def overrideIfNecessary(m: Symbol) =
-        if (module || nme.isConstructorName(m.name) || m.hasFlag(DEFERRED))
+        if ((module != null) || nme.isConstructorName(m.name) || m.hasFlag(DEFERRED))
           Modifiers()
         else
           Modifiers(OVERRIDE)
@@ -315,7 +315,7 @@ object MockImpl {
             
       // {
       //   object $anon { <|members|> }
-      //   factory.registerMockObject($anon)
+      //   factory.registerMockObject(<|module|>, $anon)
       //   null
       // }
       def anonObject(members: List[Tree]) =
@@ -332,7 +332,7 @@ object MockImpl {
               initDef +: members)),
           Apply(
             Select(factory.tree, newTermName("registerMockObject")),
-            List(Ident(newTermName("$anon")))),
+            List(module.tree, Ident(newTermName("$anon")))),
           Literal(Constant(null)))
       
       // <|expr|>.asInstanceOf[<|t|>]
@@ -351,7 +351,7 @@ object MockImpl {
       val members = forwarders ++ mocks
       
       def make() = {
-        val result = if (module) anonObject(members) else anonClass(members)
+        val result = if (module != null) anonObject(members) else anonClass(members)
 
 //        println("------------")
 //        println(showRaw(result))
