@@ -348,9 +348,7 @@ object MockImpl {
                   Apply(
                     Select(
                       Apply(
-                        Select(
-                          This(newTypeName("")),
-                          newTermName("getClass")),
+                        Select(This(newTypeName("")), newTermName("getClass")),
                         List()),
                       newTermName("getClassLoader")),
                     List()),
@@ -379,11 +377,11 @@ object MockImpl {
       def make() = {
         val result = if (module != null) anonObject(members) else anonClass(members)
 
-        //        println("------------")
-        //        println(showRaw(result))
-        //        println("------------")
-        //        println(show(result))
-        //        println("------------")
+//        println("------------")
+//        println(showRaw(result))
+//        println("------------")
+//        println(show(result))
+//        println("------------")
 
         ctx.Expr(castTo(result, typeToMock))
       }
