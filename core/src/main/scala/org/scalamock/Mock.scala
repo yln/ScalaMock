@@ -278,10 +278,12 @@ object MockImpl {
           List(List()), 
           TypeTree(),
           Block(
-            Apply(
-              Select(Super(This(TypeName("")), TypeName("")), TermName("<init>")), 
-              List())))
-        
+            List(
+              Apply(
+                Select(Super(This(TypeName("")), TypeName("")), TermName("<init>")), 
+                List())),
+            Literal(Constant(()))))
+          
       def isMemberOfObject(m: Symbol) = TypeTag.Object.tpe.member(m.name) != NoSymbol
   
       // new <|typeToMock|> { <|members|> }
