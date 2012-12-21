@@ -30,8 +30,10 @@ object BuildSettings {
     organization := "org.scalamock",
     version := buildVersion,
     scalaVersion := buildScalaVersion,
+    scalaHome := Some(file("/Users/paul/personal/kepler/build/pack")),
     scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature"),
     scalacOptions in (Compile, doc) ++= Opts.doc.title("ScalaMock") ++ Opts.doc.version(buildVersion) ++ Seq("-doc-root-content", "rootdoc.txt", "-version"),
+    unmanagedBase := file("/Users/paul/personal/kepler/build/pack/lib"),
     resolvers += Resolver.sonatypeRepo("releases"),
     resolvers += Resolver.sonatypeRepo("snapshots"),
 
@@ -93,7 +95,6 @@ object ShellPrompt {
 object Dependencies {
   val scalatest =  "org.scalatest" % "scalatest_2.10.0" % "2.0.M5"
   val specs2 = "org.specs2" %% "specs2" % "1.13"
-  val reflect = "org.scala-lang" % "scala-reflect" % BuildSettings.buildScalaVersion
 }
 
 object ScalaMockBuild extends Build {
@@ -108,15 +109,14 @@ object ScalaMockBuild extends Build {
       publishArtifact in (Compile, packageBin) := false,
       publishArtifact in (Compile, packageSrc) := false,
       sources in Compile <<= (Seq(core, scalatestSupport, specs2Support).map(sources in Compile in _).join).map(_.flatten),
-      libraryDependencies ++= Seq(reflect, scalatest, specs2)
+      libraryDependencies ++= Seq(scalatest, specs2)
     )) aggregate(core, core_tests, scalatestSupport, specs2Support, examples)
 
   lazy val core = Project(
     "core", 
     file("core"),
     settings = buildSettings ++ Seq(
-      name := "ScalaMock Core",
-	  libraryDependencies ++= Seq(reflect)
+      name := "ScalaMock Core"
     ))
 
   lazy val scalatestSupport = Project(
