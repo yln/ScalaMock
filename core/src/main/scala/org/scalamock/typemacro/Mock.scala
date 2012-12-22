@@ -32,12 +32,12 @@ object MockImpl {
   def mock[T: c.WeakTypeTag](c: Context): c.Tree = {
     import c.universe._
 
+    val typeToMock = weakTypeOf[T]
     val Expr(Block(List(ClassDef(_, _, _, template)), _)) = reify {
       class Dummy {
       }
     }
-
-    val name = c.freshName(c.enclosingImpl.name).toTypeName
+    val name = c.freshName(typeToMock.typeSymbol.name).toTypeName
     c.introduceTopLevel(ClassDef(NoMods, name, Nil, template))
     Ident(name)
   }
