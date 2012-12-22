@@ -20,8 +20,20 @@
 
 package com.paulbutcher.test.typemacro
 
+import com.paulbutcher.test._
 import org.scalatest.FreeSpec
 import org.scalamock.scalatest.typemacro.MockFactory
 
 class MockTest extends FreeSpec with MockFactory {
+
+  autoVerify = false
+  
+  "Mocks should" - {
+    "fail if an unexpected method call is made" in {
+      withExpectations {
+        val m = new mock[TestTrait]
+        intercept[ExpectationException] { m.oneParam(42) }
+      }
+    }
+  }
 }
