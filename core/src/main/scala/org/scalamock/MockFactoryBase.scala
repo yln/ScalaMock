@@ -19,7 +19,7 @@
 
 package org.scalamock
 
-trait MockFactoryBase extends Mock {
+trait MockFactoryBase {
   import language.implicitConversions
   
   type ExpectationException <: Exception

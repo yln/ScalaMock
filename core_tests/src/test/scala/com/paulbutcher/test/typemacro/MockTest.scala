@@ -21,6 +21,7 @@
 package com.paulbutcher.test.typemacro
 
 import org.scalatest.FreeSpec
+import org.scalamock.scalatest.typemacro.MockFactory
 
-class MockTest extends FreeSpec {
+class MockTest extends FreeSpec with MockFactory {
 }

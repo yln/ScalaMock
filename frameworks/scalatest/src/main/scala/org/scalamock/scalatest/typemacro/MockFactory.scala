@@ -18,9 +18,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package org.scalamock.scalatest
+package org.scalamock.scalatest.typemacro
 
-import org.scalamock.Mock
+import org.scalamock.typemacro.Mock
+import org.scalamock.scalatest.ScalaTestAdapter
 import org.scalatest.Suite
 
 /** Trait that can be mixed into a [[http://www.scalatest.org/ ScalaTest]] suite to provide
