@@ -18,27 +18,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package org.scalamock.typemacro
+package com.paulbutcher.test.typemacro
 
-trait Mock {
-  import language.experimental.macros
+import org.scalatest.FreeSpec
 
-  type mock[T] = macro MockImpl.mock[T]
-}
-
-object MockImpl {
-  import reflect.macros.Context
-
-  def mock[T: c.WeakTypeTag](c: Context): c.Tree = {
-    import c.universe._
-
-    val typeToMock = weakTypeOf[T]
-    val Expr(Block(List(ClassDef(_, _, _, template)), _)) = reify {
-      class Dummy {
-      }
-    }
-    val name = c.freshName(typeToMock.typeSymbol.name).toTypeName
-    c.introduceTopLevel(ClassDef(NoMods, name, Nil, template))
-    Ident(name)
-  }
+class MockTest extends FreeSpec {
 }
