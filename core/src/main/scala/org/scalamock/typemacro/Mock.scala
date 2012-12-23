@@ -33,12 +33,19 @@ object MockImpl {
     import c.universe._
 
     val typeToMock = weakTypeOf[T]
-    val Expr(Block(List(ClassDef(_, _, _, template)), _)) = reify {
-      class Dummy {
-      }
-    }
-    val name = c.freshName(typeToMock.typeSymbol.name).toTypeName
-    c.introduceTopLevel(ClassDef(NoMods, name, Nil, template))
-    Ident(name)
+    val sym = typeToMock.typeSymbol
+    val mockName = c.freshName(sym.name).toTypeName
+    val classDef = q"class $mockName extends ${sym.fullName} {}"
+
+    def getPackage(sym: Symbol): RefTree = 
+      if (sym.owner.name.toString == "<root>")
+        Ident(sym.name.toTermName)
+      else
+        Select(getPackage(sym.owner), sym.name.toTermName)
+
+    val mockPackage = getPackage(sym.owner)
+
+    c.introduceTopLevel(PackageDef(mockPackage, List(classDef)))
+    Select(mockPackage, mockName)
   }
 }
