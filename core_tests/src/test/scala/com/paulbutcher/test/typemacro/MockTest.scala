@@ -31,8 +31,7 @@ class MockTest extends FreeSpec with MockFactory {
   "Typemacro Mocks should" - {
     "fail if an unexpected method call is made" in {
       withExpectations {
-        // val m = new mock[TestTrait]
-        // m.oneParam(42)
+        val m = new mock[TestTrait]
       }
     }
   }
