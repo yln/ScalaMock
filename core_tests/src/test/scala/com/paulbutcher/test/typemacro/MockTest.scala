@@ -24,6 +24,10 @@ import com.paulbutcher.test._
 import org.scalatest.FreeSpec
 import org.scalamock.scalatest.typemacro.MockFactory
 
+trait SimpleTrait {
+  def oneParam(x: Int): String
+}
+
 class MockTest extends FreeSpec with MockFactory {
 
   autoVerify = false
@@ -31,7 +35,8 @@ class MockTest extends FreeSpec with MockFactory {
   "Typemacro Mocks should" - {
     "fail if an unexpected method call is made" in {
       withExpectations {
-        val m = new mock[TestTrait]
+        val m = new mock[SimpleTrait](_factory)
+        m.oneParam(42)
       }
     }
   }
