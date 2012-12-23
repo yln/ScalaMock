@@ -35,7 +35,8 @@ object MockImpl {
     val typeToMock = weakTypeOf[T]
     val sym = typeToMock.typeSymbol
     val mockName = c.freshName(sym.name).toTypeName
-    val classDef = q"class $mockName extends ${sym.fullName} {}"
+    // val classDef = q"class $mockName extends ${sym.name} { def oneParam(x: Int) = x.toString }"
+    val classDef = q"class $mockName { def oneParam(x: Int) = x.toString }"
 
     def getPackage(sym: Symbol): RefTree = 
       if (sym.owner.name.toString == "<root>")
