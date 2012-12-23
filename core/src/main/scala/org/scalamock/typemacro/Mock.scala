@@ -36,17 +36,17 @@ object MockImpl {
     val sym = typeToMock.typeSymbol
     val mockName = c.freshName(sym.name).toTypeName
     // val classDef = q"class $mockName extends ${sym.name} { def oneParam(x: Int) = x.toString }"
-    val classDef = q"class $mockName { def oneParam(x: Int) = x.toString }"
+    val classDef = q"class $mockName extends ${sym.name} { }"
 
     def getPackage(sym: Symbol): RefTree = 
-      if (sym.owner.name.toString == "<root>")
+      if (sym.owner == c.mirror.RootClass)
         Ident(sym.name.toTermName)
       else
         Select(getPackage(sym.owner), sym.name.toTermName)
 
     val mockPackage = getPackage(sym.owner)
 
-    c.introduceTopLevel(PackageDef(mockPackage, List(classDef)))
+    c.introduceTopLevel(mockPackage.toString, classDef)
     Select(mockPackage, mockName)
   }
 }
