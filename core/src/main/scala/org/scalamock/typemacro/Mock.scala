@@ -154,27 +154,46 @@ object MockImpl {
       q"val ${mockFunctionName(i)} = new $clazz[..$types](factory, Symbol(${m.name.toString}))"
     }
 
+    // Add DummyImplicit sentinel parameters to overloaded methods to avoid problems with
+    // ambiguity in the face of type erasure. See:
+    // http://groups.google.com/group/scala-user/browse_thread/thread/95acee0572cfa407/95d41ac32d36f743#95d41ac32d36f743
+    def overloadDisambiguation(m: MethodSymbol): List[List[ValDef]] = {
+      val index = m.owner.typeSignature.member(m.name).asTerm.alternatives.indexOf(m)
+      assert(index >= 0)
+      if (index > 0)
+        List(
+          List.range(1, index) map { i =>
+            ValDef(
+              Modifiers(PARAM | IMPLICIT),
+              TermName(s"sentinel$i"),
+              TypeTree(typeOf[DummyImplicit]),
+              EmptyTree)
+          })
+      else
+        Nil
+    }
+
     def expectationForwarder(m: MethodSymbol, i: Int) = {
       val mt = resolvedType(m)
       val pss = paramss(mt)
       val ps = pss.flatten map { p => Ident(TermName(p.name.toString)) }
       val body = q"${mockFunctionName(i)}.expects(..$ps)"
-      // val body = q"???"
+      val args = (pss map { ps =>
+          ps map { p =>
+            ValDef(
+              Modifiers(PARAM | (if (p.isImplicit) IMPLICIT else NoFlags)),
+              TermName(p.name.toString),
+              AppliedTypeTree(
+                Select(Select(Ident(TermName("org")), TermName("scalamock")), TypeName("MockParameter")),
+                List(paramType(p.typeSignature))),
+              EmptyTree)
+          }
+        }) ++ overloadDisambiguation(m)
       DefDef(
         Modifiers(),
         m.name, 
         m.typeParams map { p => TypeDef(p) }, 
-        pss map { ps =>
-            ps map { p =>
-              ValDef(
-                Modifiers(PARAM | (if (p.isImplicit) IMPLICIT else NoFlags)),
-                TermName(p.name.toString),
-                AppliedTypeTree(
-                  Select(Select(Ident(TermName("org")), TermName("scalamock")), TypeName("MockParameter")),
-                  List(paramType(p.typeSignature))),
-                EmptyTree)
-            }
-          },
+        args,
         AppliedTypeTree(
           Select(Select(Ident(TermName("org")), TermName("scalamock")), TypeName("CallHandler")),
           List(paramType(finalResultType(mt)))),

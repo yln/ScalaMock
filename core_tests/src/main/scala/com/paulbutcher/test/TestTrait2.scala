@@ -28,9 +28,9 @@ trait TestTrait2 {
   def oneParam(x: Int): String
   def twoParams(x: Int, y: Double): String
   
-  // def overloaded(x: Int): String
-  // def overloaded(x: String): String
-  // def overloaded(x: Int, y: Double): String
+  def overloaded(x: Int): String
+  def overloaded(x: String): String
+  def overloaded(x: Int, y: Double): String
   // def overloaded[T](x: T): String
   
   def +(x: TestTrait2): TestTrait2
