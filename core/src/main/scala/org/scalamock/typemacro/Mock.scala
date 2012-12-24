@@ -142,7 +142,7 @@ object MockImpl {
       val mt = resolvedType(m)
       val clazz = mockFunctionClass(paramCount(mt))
       val types = (paramTypes(mt) map { p => paramType(p) }) :+ paramType(finalResultType(mt))
-      q"new $clazz[..$types](factory, '${m.name})"
+      q"new $clazz[..$types](factory, Symbol(${m.name.toString}))"
     }
 
     def getPackage(sym: Symbol): RefTree = 
