@@ -21,19 +21,21 @@
 import sbt._
 import Keys._
 import sbt.inc.Analysis
+import util.Properties
 
 object BuildSettings {
   val buildVersion = "3.0"
   val buildScalaVersion = "2.10.0"
+  val macroParadise =  Properties.envOrElse("MACRO_PARADISE", "/Users/paul/personal/kepler/build/pack")
 
   val buildSettings = Defaults.defaultSettings ++ Seq(
     organization := "org.scalamock",
     version := buildVersion,
     scalaVersion := buildScalaVersion,
-    scalaHome := Some(file("/Users/paul/personal/kepler/build/pack")),
+    scalaHome := Some(file(macroParadise)),
     scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature"),
     scalacOptions in (Compile, doc) ++= Opts.doc.title("ScalaMock") ++ Opts.doc.version(buildVersion) ++ Seq("-doc-root-content", "rootdoc.txt", "-version"),
-    unmanagedBase := file("/Users/paul/personal/kepler/build/pack/lib"),
+    unmanagedBase := file(macroParadise +"/lib"),
     resolvers += Resolver.sonatypeRepo("releases"),
     resolvers += Resolver.sonatypeRepo("snapshots"),
 
