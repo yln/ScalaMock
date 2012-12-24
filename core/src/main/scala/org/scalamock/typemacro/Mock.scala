@@ -48,20 +48,11 @@ object MockImpl {
       case _ => methodType
     }
 
-    def mockFunctionClass(paramCount: Int) = paramCount match {
-      case 0 => tq"org.scalamock.MockFunction0"
-      case 1 => tq"org.scalamock.MockFunction1"
-      case 2 => tq"org.scalamock.MockFunction2"
-      case 3 => tq"org.scalamock.MockFunction3"
-      case 4 => tq"org.scalamock.MockFunction4"
-      case 5 => tq"org.scalamock.MockFunction5"
-      case 6 => tq"org.scalamock.MockFunction6"
-      case 7 => tq"org.scalamock.MockFunction7"
-      case 8 => tq"org.scalamock.MockFunction8"
-      case 9 => tq"org.scalamock.MockFunction9"
-      case _ => c.abort(c.enclosingPosition, "ScalaMock: Can't handle methods with more than 9 parameters (yet)")
-    }
-    
+    def mockFunctionClass(paramCount: Int) = {
+      val name = TypeName(s"MockFunction$paramCount")
+      tq"org.scalamock.$name"
+    }    
+
     def isPathDependentThis(t: Type): Boolean = t match {
       case TypeRef(pre, _, _) => isPathDependentThis(pre)
       case ThisType(tpe) => tpe == typeToMock.typeSymbol
