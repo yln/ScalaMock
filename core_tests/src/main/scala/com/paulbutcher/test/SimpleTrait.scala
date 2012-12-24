@@ -18,22 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package com.paulbutcher.test.typemacro
+package com.paulbutcher.test
 
-import com.paulbutcher.test._
-import org.scalatest.FreeSpec
-import org.scalamock.scalatest.typemacro.MockFactory
-
-class MockTest extends FreeSpec with MockFactory {
-
-  autoVerify = false
-  
-  "Typemacro Mocks should" - {
-    "fail if an unexpected method call is made" in {
-      withExpectations {
-        val m = new mock[SimpleTrait]
-        m.oneParam(42)
-      }
-    }
-  }
+trait SimpleTrait {
+  def oneParam(x: Int): String
 }

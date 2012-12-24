@@ -25,13 +25,13 @@ import org.scalamock._
 trait Mock {
   import language.experimental.macros
 
-  type mock[T](implicit factory: MockFactoryBase) = macro MockImpl.mock[T]
+  type mock[T] = macro MockImpl.mock[T]
 }
 
 object MockImpl {
   import reflect.macros.Context
 
-  def mock[T: c.WeakTypeTag](c: Context)(factory: c.Expr[MockFactoryBase]): c.Tree = {
+  def mock[T: c.WeakTypeTag](c: Context): c.Tree = {
     import c.universe._
     import Flag._
     import definitions._
@@ -48,36 +48,20 @@ object MockImpl {
       case _ => methodType
     }
 
-    def mockFunctionClass(paramCount: Int): Type = paramCount match {
-      case 0 => typeOf[MockFunction0[_]]
-      case 1 => typeOf[MockFunction1[_, _]]
-      case 2 => typeOf[MockFunction2[_, _, _]]
-      case 3 => typeOf[MockFunction3[_, _, _, _]]
-      case 4 => typeOf[MockFunction4[_, _, _, _, _]]
-      case 5 => typeOf[MockFunction5[_, _, _, _, _, _]]
-      case 6 => typeOf[MockFunction6[_, _, _, _, _, _, _]]
-      case 7 => typeOf[MockFunction7[_, _, _, _, _, _, _, _]]
-      case 8 => typeOf[MockFunction8[_, _, _, _, _, _, _, _, _]]
-      case 9 => typeOf[MockFunction9[_, _, _, _, _, _, _, _, _, _]]
+    def mockFunctionClass(paramCount: Int) = paramCount match {
+      case 0 => tq"org.scalamock.MockFunction0"
+      case 1 => tq"org.scalamock.MockFunction1"
+      case 2 => tq"org.scalamock.MockFunction2"
+      case 3 => tq"org.scalamock.MockFunction3"
+      case 4 => tq"org.scalamock.MockFunction4"
+      case 5 => tq"org.scalamock.MockFunction5"
+      case 6 => tq"org.scalamock.MockFunction6"
+      case 7 => tq"org.scalamock.MockFunction7"
+      case 8 => tq"org.scalamock.MockFunction8"
+      case 9 => tq"org.scalamock.MockFunction9"
       case _ => c.abort(c.enclosingPosition, "ScalaMock: Can't handle methods with more than 9 parameters (yet)")
     }
     
-    def stubFunctionClass(paramCount: Int): Type = paramCount match {
-      case 0 => typeOf[StubFunction0[_]]
-      case 1 => typeOf[StubFunction1[_, _]]
-      case 2 => typeOf[StubFunction2[_, _, _]]
-      case 3 => typeOf[StubFunction3[_, _, _, _]]
-      case 4 => typeOf[StubFunction4[_, _, _, _, _]]
-      case 5 => typeOf[StubFunction5[_, _, _, _, _, _]]
-      case 6 => typeOf[StubFunction6[_, _, _, _, _, _, _]]
-      case 7 => typeOf[StubFunction7[_, _, _, _, _, _, _, _]]
-      case 8 => typeOf[StubFunction8[_, _, _, _, _, _, _, _, _]]
-      case 9 => typeOf[StubFunction9[_, _, _, _, _, _, _, _, _, _]]
-      case _ => c.abort(c.enclosingPosition, "ScalaMock: Can't handle methods with more than 9 parameters (yet)")
-    }
-    
-    def classType(paramCount: Int) = mockFunctionClass(paramCount)
-      
     def isPathDependentThis(t: Type): Boolean = t match {
       case TypeRef(pre, _, _) => isPathDependentThis(pre)
       case ThisType(tpe) => tpe == typeToMock.typeSymbol
@@ -155,20 +139,9 @@ object MockImpl {
 
     def mockMethod(m: MethodSymbol) = {
       val mt = resolvedType(m)
-      val clazz = classType(paramCount(mt))
+      val clazz = mockFunctionClass(paramCount(mt))
       val types = (paramTypes(mt) map { p => paramType(p) }) :+ paramType(finalResultType(mt))
-      Apply(
-        Select(
-          New(
-            AppliedTypeTree(
-              Ident(clazz.typeSymbol),
-              types)),
-          TermName("<init>")),
-        List(
-          factory.tree, 
-          Apply(
-            Select(Select(Ident(TermName("scala")), TermName("Symbol")), TermName("apply")),
-            List(Literal(Constant(m.name.toString))))))
+      q"new $clazz[..$types](factory, '${m.name})"
     }
 
     def getPackage(sym: Symbol): RefTree = 
@@ -195,11 +168,16 @@ object MockImpl {
     val forwarders = methodsToMock map { m => forwarderImpl(m) }
     val mocks = methodsToMock map { m => mockMethod(m) }
 
-    val classDef = q"""class $mockName extends ${typeToMock.typeSymbol.name} {
+    val classDef = q"""class $mockName(implicit factory: org.scalamock.MockFactoryBase) extends ${typeToMock.typeSymbol.name} {
         ..$forwarders
-//        val mocks = Array(..$mocks)
+       val mocks = Array(..$mocks)
       }"""
+
+    println("================")
     println(classDef)
+    println("================")
+    println(showRaw(classDef))
+    println("================")
 
     c.introduceTopLevel(mockPackage.toString, classDef)
     Select(mockPackage, mockName)
