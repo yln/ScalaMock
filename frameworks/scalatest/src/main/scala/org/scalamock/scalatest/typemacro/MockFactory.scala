@@ -30,15 +30,4 @@ import org.scalatest.Suite
   * See [[org.scalamock]] for overview documentation.
   */
 trait MockFactory extends ScalaTestAdapter with Mock { this: Suite =>
-
-  import language.experimental.macros
-  import reflect.macros.Context
-
-	def mkMock[T] = macro mkMockImpl[T]
-
-  def mkMockImpl[T: c.WeakTypeTag](c: Context) = {
-    import c.universe._
-
-    reify { new mock[T] }
-  }
 }

@@ -25,13 +25,26 @@ import org.scalamock._
 trait Mock {
   import language.experimental.macros
 
-  type mock[T] = macro MockImpl.mock[T]
+  def mock[T] = macro MockImpl.mock[T]
+}
+
+object Mock {
+  import language.experimental.macros
+
+  type MockClass[T] = macro MockImpl.MockClass[T]
 }
 
 object MockImpl {
   import reflect.macros.Context
 
-  def mock[T: c.WeakTypeTag](c: Context): c.Tree = {
+  def mock[T: c.WeakTypeTag](c: Context) = {
+    import c.universe._
+
+    val t = weakTypeOf[T]
+    c.Expr(q"new org.scalamock.typemacro.Mock.MockClass[${t.typeSymbol.name}]")
+  }
+
+  def MockClass[T: c.WeakTypeTag](c: Context): c.Tree = {
     import c.universe._
     import Flag._
     import definitions._
