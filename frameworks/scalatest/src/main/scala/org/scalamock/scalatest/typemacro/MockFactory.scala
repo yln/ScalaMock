@@ -30,4 +30,6 @@ import org.scalatest.Suite
   * See [[org.scalamock]] for overview documentation.
   */
 trait MockFactory extends ScalaTestAdapter with Mock { this: Suite =>
+
+	def mkMock[T] = new mock[T]
 }
