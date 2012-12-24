@@ -119,7 +119,7 @@ object MockImpl {
         body)
     }
       
-    def forwarderImpl(m: MethodSymbol) = {
+    def forwarderImpl(m: MethodSymbol, i: Int) = {
       val mt = resolvedType(m)
       if (m.isStable) {
         ValDef(
@@ -132,7 +132,8 @@ object MockImpl {
               TermName("asInstanceOf")),
             List(TypeTree(mt))))
       } else {
-        val body = q"???"
+        val params = paramss(mt).flatten map { p => Ident(TermName(p.name.toString)) }
+        val body = q"mocks($i)(..$params)"
         methodDef(m, mt, body)
       }
     }
@@ -165,10 +166,11 @@ object MockImpl {
         !m.isConstructor && (!(m.isStable || m.isAccessor) ||
           m.asInstanceOf[reflect.internal.HasFlags].isDeferred) //! TODO - stop using internal if/when this gets into the API
       }.toList
-    val forwarders = methodsToMock map { m => forwarderImpl(m) }
+    val forwarders = methodsToMock.zipWithIndex map { case (m, i) => forwarderImpl(m, i) }
     val mocks = methodsToMock map { m => mockMethod(m) }
 
-    val classDef = q"""class $mockName(implicit factory: org.scalamock.MockFactoryBase) extends ${typeToMock.typeSymbol.name} {
+    val classDef = q"""
+      class $mockName(implicit factory: org.scalamock.MockFactoryBase) extends ${typeToMock.typeSymbol.name} {
         ..$forwarders
        val mocks = Array(..$mocks)
       }"""
