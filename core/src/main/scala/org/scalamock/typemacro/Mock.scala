@@ -118,6 +118,8 @@ object MockImpl {
         paramType(finalResultType(methodType)),
         body)
     }
+
+    def mockFunctionName(i: Int) = TermName(s"mock_$i")
       
     def forwarderImpl(m: MethodSymbol, i: Int) = {
       val mt = resolvedType(m)
@@ -133,16 +135,16 @@ object MockImpl {
             List(TypeTree(mt))))
       } else {
         val params = paramss(mt).flatten map { p => Ident(TermName(p.name.toString)) }
-        val body = q"mocks($i)(..$params)"
+        val body = q"${mockFunctionName(i)}(..$params)"
         methodDef(m, mt, body)
       }
     }
 
-    def mockMethod(m: MethodSymbol) = {
+    def mockMethod(m: MethodSymbol, i: Int) = {
       val mt = resolvedType(m)
       val clazz = mockFunctionClass(paramCount(mt))
       val types = (paramTypes(mt) map { p => paramType(p) }) :+ paramType(finalResultType(mt))
-      q"new $clazz[..$types](factory, Symbol(${m.name.toString}))"
+      q"val ${mockFunctionName(i)} = new $clazz[..$types](factory, Symbol(${m.name.toString}))"
     }
 
     def getPackage(sym: Symbol): RefTree = 
@@ -167,12 +169,12 @@ object MockImpl {
           m.asInstanceOf[reflect.internal.HasFlags].isDeferred) //! TODO - stop using internal if/when this gets into the API
       }.toList
     val forwarders = methodsToMock.zipWithIndex map { case (m, i) => forwarderImpl(m, i) }
-    val mocks = methodsToMock map { m => mockMethod(m) }
+    val mocks = methodsToMock.zipWithIndex map { case (m, i) => mockMethod(m, i) }
 
     val classDef = q"""
       class $mockName(implicit factory: org.scalamock.MockFactoryBase) extends ${typeToMock.typeSymbol.name} {
         ..$forwarders
-       val mocks = Array(..$mocks)
+        ..$mocks
       }"""
 
     println("================")
