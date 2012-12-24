@@ -24,6 +24,8 @@ import com.paulbutcher.test._
 import org.scalatest.FreeSpec
 import org.scalamock.scalatest.typemacro.MockFactory
 
+import scala.language.reflectiveCalls
+
 class MockTest extends FreeSpec with MockFactory {
 
   autoVerify = false
@@ -33,6 +35,14 @@ class MockTest extends FreeSpec with MockFactory {
       withExpectations {
         val m = new mock[TestTrait2]
         intercept[ExpectationException] { m.oneParam(42) }
+      }
+    }
+
+    "allow expectations to be set" in {
+      withExpectations {
+        val m = new mock[TestTrait2]
+        m.expects.twoParams(42, 1.23).returning("a return value")
+        expectResult("a return value") { m.twoParams(42, 1.23) }
       }
     }
   }

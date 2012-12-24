@@ -87,8 +87,8 @@ object MockImpl {
     def paramTypes(methodType: Type): List[Type] =
       paramss(methodType).flatten map { _.typeSignature }
 
-    def buildParams(methodType: Type) =
-      paramss(methodType) map { params =>
+    def buildParams(paramss: List[List[Symbol]]) =
+      paramss map { params =>
         params map { p =>
           ValDef(
             Modifiers(PARAM | (if (p.isImplicit) IMPLICIT else NoFlags)),
@@ -113,13 +113,22 @@ object MockImpl {
               TermName("asInstanceOf")),
             List(TypeTree(mt))))
       } else {
-        val params = paramss(mt).flatten map { p => Ident(TermName(p.name.toString)) }
-        val body = q"${mockFunctionName(i)}(..$params)"
+        val pss = paramss(mt)
+        val ps = pss.flatten map { p => Ident(TermName(p.name.toString)) }
+        val body = q"${mockFunctionName(i)}(..$ps)"
         DefDef(
           Modifiers(OVERRIDE),
           m.name, 
           m.typeParams map { p => TypeDef(p) }, 
-          buildParams(mt),
+          pss map { ps =>
+              ps map { p =>
+                ValDef(
+                  Modifiers(PARAM | (if (p.isImplicit) IMPLICIT else NoFlags)),
+                  TermName(p.name.toString),
+                  paramType(p.typeSignature),
+                  EmptyTree)
+              }
+            },
           paramType(finalResultType(mt)),
           body)
       }
@@ -134,15 +143,28 @@ object MockImpl {
 
     def expectationForwarder(m: MethodSymbol, i: Int) = {
       val mt = resolvedType(m)
-      val params = paramss(mt).flatten map { p => Ident(TermName(p.name.toString)) }
-      // val body = q"${mockFunctionName(i)}.expects(..$params)"
-      val body = q"???"
+      val pss = paramss(mt)
+      val ps = pss.flatten map { p => Ident(TermName(p.name.toString)) }
+      val body = q"${mockFunctionName(i)}.expects(..$ps)"
+      // val body = q"???"
       DefDef(
         Modifiers(),
         m.name, 
         m.typeParams map { p => TypeDef(p) }, 
-        buildParams(mt),
-        paramType(finalResultType(mt)),
+        pss map { ps =>
+            ps map { p =>
+              ValDef(
+                Modifiers(PARAM | (if (p.isImplicit) IMPLICIT else NoFlags)),
+                TermName(p.name.toString),
+                AppliedTypeTree(
+                  Select(Select(Ident(TermName("org")), TermName("scalamock")), TypeName("MockParameter")),
+                  List(paramType(p.typeSignature))),
+                EmptyTree)
+            }
+          },
+        AppliedTypeTree(
+          Select(Select(Ident(TermName("org")), TermName("scalamock")), TypeName("CallHandler")),
+          List(paramType(finalResultType(mt)))),
         body)
     }
 
@@ -180,11 +202,11 @@ object MockImpl {
         }
       }"""
 
-    println("================")
-    println(classDef)
-    println("================")
-    println(showRaw(classDef))
-    println("================")
+    // println("================")
+    // println(classDef)
+    // println("================")
+    // println(showRaw(classDef))
+    // println("================")
 
     c.introduceTopLevel(mockPackage.toString, classDef)
     Select(mockPackage, mockName)
