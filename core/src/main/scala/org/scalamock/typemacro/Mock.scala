@@ -99,10 +99,10 @@ object MockImpl {
       }
     
     // def <|name|>(p1: T1, p2: T2, ...): T = <|mockname|>(p1, p2, ...)
-    def methodDef(m: MethodSymbol, methodType: Type, body: Tree): DefDef = {
+    def methodDef(m: MethodSymbol, methodType: Type, body: Tree, mods: Modifiers): DefDef = {
       val params = buildParams(methodType)
       DefDef(
-        Modifiers(OVERRIDE),
+        mods,
         m.name, 
         m.typeParams map { p => TypeDef(p) }, 
         params,
@@ -127,7 +127,7 @@ object MockImpl {
       } else {
         val params = paramss(mt).flatten map { p => Ident(TermName(p.name.toString)) }
         val body = q"${mockFunctionName(i)}(..$params)"
-        methodDef(m, mt, body)
+        methodDef(m, mt, body, Modifiers(OVERRIDE))
       }
     }
 
@@ -136,6 +136,12 @@ object MockImpl {
       val clazz = mockFunctionClass(paramCount(mt))
       val types = (paramTypes(mt) map { p => paramType(p) }) :+ paramType(finalResultType(mt))
       q"val ${mockFunctionName(i)} = new $clazz[..$types](factory, Symbol(${m.name.toString}))"
+    }
+
+    def expectationForwarder(m: MethodSymbol, i: Int) = {
+      val mt = resolvedType(m)
+      val body = q"???"
+      methodDef(m, mt, body, Modifiers())
     }
 
     def getPackage(sym: Symbol): RefTree = 
@@ -158,14 +164,18 @@ object MockImpl {
     val methodsToMock = methodsNotInObject.filter { m =>
         !m.isConstructor && (!(m.isStable || m.isAccessor) ||
           m.asInstanceOf[reflect.internal.HasFlags].isDeferred) //! TODO - stop using internal if/when this gets into the API
-      }.toList
-    val forwarders = methodsToMock.zipWithIndex map { case (m, i) => forwarderImpl(m, i) }
-    val mocks = methodsToMock.zipWithIndex map { case (m, i) => mockMethod(m, i) }
+      }.zipWithIndex.toList
+    val forwarders = methodsToMock map { case (m, i) => forwarderImpl(m, i) }
+    val mocks = methodsToMock map { case (m, i) => mockMethod(m, i) }
+    val expectationForwarders = methodsToMock map { case (m, i) => expectationForwarder(m, i) }
 
     val classDef = q"""
       class $mockName(implicit factory: org.scalamock.MockFactoryBase) extends ${typeToMock.typeSymbol.name} {
         ..$forwarders
         ..$mocks
+        val expects = new {
+          ..$expectationForwarders
+        }
       }"""
 
     println("================")
