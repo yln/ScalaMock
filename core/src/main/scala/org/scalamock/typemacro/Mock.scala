@@ -98,18 +98,6 @@ object MockImpl {
         }
       }
     
-    // def <|name|>(p1: T1, p2: T2, ...): T = <|mockname|>(p1, p2, ...)
-    def methodDef(m: MethodSymbol, methodType: Type, body: Tree, mods: Modifiers): DefDef = {
-      val params = buildParams(methodType)
-      DefDef(
-        mods,
-        m.name, 
-        m.typeParams map { p => TypeDef(p) }, 
-        params,
-        paramType(finalResultType(methodType)),
-        body)
-    }
-
     def mockFunctionName(i: Int) = TermName(s"mock_$i")
       
     def forwarderImpl(m: MethodSymbol, i: Int) = {
@@ -127,7 +115,13 @@ object MockImpl {
       } else {
         val params = paramss(mt).flatten map { p => Ident(TermName(p.name.toString)) }
         val body = q"${mockFunctionName(i)}(..$params)"
-        methodDef(m, mt, body, Modifiers(OVERRIDE))
+        DefDef(
+          Modifiers(OVERRIDE),
+          m.name, 
+          m.typeParams map { p => TypeDef(p) }, 
+          buildParams(mt),
+          paramType(finalResultType(mt)),
+          body)
       }
     }
 
@@ -140,8 +134,16 @@ object MockImpl {
 
     def expectationForwarder(m: MethodSymbol, i: Int) = {
       val mt = resolvedType(m)
+      val params = paramss(mt).flatten map { p => Ident(TermName(p.name.toString)) }
+      // val body = q"${mockFunctionName(i)}.expects(..$params)"
       val body = q"???"
-      methodDef(m, mt, body, Modifiers())
+      DefDef(
+        Modifiers(),
+        m.name, 
+        m.typeParams map { p => TypeDef(p) }, 
+        buildParams(mt),
+        paramType(finalResultType(mt)),
+        body)
     }
 
     def getPackage(sym: Symbol): RefTree = 
