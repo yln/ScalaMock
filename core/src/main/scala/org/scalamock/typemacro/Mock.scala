@@ -65,21 +65,6 @@ object MockImpl {
       val name = TypeName(s"MockFunction$paramCount")
       tq"org.scalamock.$name"
     }    
-
-    def isPathDependentThis(t: Type): Boolean = t match {
-      case TypeRef(pre, _, _) => isPathDependentThis(pre)
-      case ThisType(tpe) => tpe == typeToMock.typeSymbol
-      case _ => false
-    }
-      
-    def paramType(t: Type) = t match {
-      case TypeRef(pre, sym, args) if sym == JavaRepeatedParamClass =>
-        TypeTree(TypeRef(pre, RepeatedParamClass, args))
-      case TypeRef(pre, sym, args) if isPathDependentThis(t) =>
-        AppliedTypeTree(Ident(TypeName(sym.name.toString)), args map { a => TypeTree(a) })
-      case _ =>
-        TypeTree(t)
-    }
     
     // Convert a methodType into a list of lists of params:
     // UnaryMethodType => Nil
@@ -127,11 +112,11 @@ object MockImpl {
                 ValDef(
                   Modifiers(PARAM | (if (p.isImplicit) IMPLICIT else NoFlags)),
                   TermName(p.name.toString),
-                  paramType(p.typeSignature),
+                  TypeTree(p.typeSignature),
                   EmptyTree)
               }
             },
-          paramType(finalResultType(mt)),
+          TypeTree(finalResultType(mt)),
           body)
       }
     }
@@ -139,7 +124,7 @@ object MockImpl {
     def mockMethod(m: MethodSymbol, i: Int) = {
       val mt = m.typeSignature
       val clazz = mockFunctionClass(paramCount(mt))
-      val types = (paramTypes(mt) map { p => paramType(p) }) :+ paramType(finalResultType(mt))
+      val types = (paramTypes(mt) map { p => TypeTree(p) }) :+ TypeTree(finalResultType(mt))
       q"val ${mockFunctionName(i)} = new $clazz[..$types](factory, Symbol(${m.name.toString}))"
     }
 
@@ -174,7 +159,7 @@ object MockImpl {
               TermName(p.name.toString),
               AppliedTypeTree(
                 Select(Select(Ident(TermName("org")), TermName("scalamock")), TypeName("MockParameter")),
-                List(paramType(p.typeSignature))),
+                List(TypeTree(p.typeSignature))),
               EmptyTree)
           }
         }) ++ overloadDisambiguation(m)
@@ -185,7 +170,7 @@ object MockImpl {
         args,
         AppliedTypeTree(
           Select(Select(Ident(TermName("org")), TermName("scalamock")), TypeName("CallHandler")),
-          List(paramType(finalResultType(mt)))),
+          List(TypeTree(finalResultType(mt)))),
         body)
     }
 

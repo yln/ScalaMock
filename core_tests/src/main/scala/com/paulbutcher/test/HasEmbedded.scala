@@ -22,38 +22,18 @@ package com.paulbutcher.test
 
 import reflect.runtime.universe.TypeTag
 
-trait TestTrait {
-  def nullary: String
-  def noParams(): String
-  def oneParam(x: Int): String
-  def twoParams(x: Int, y: Double): String
-  
-  def overloaded(x: Int): String
-  def overloaded(x: String): String
-  def overloaded(x: Int, y: Double): String
-  def overloaded[T](x: T): String
-  
-  def +(x: TestTrait): TestTrait
-  
-  def curried(x: Int)(y: Double): String
-  def polymorphic[T](x: List[T]): String
-  def polycurried[T1, T2](x: T1)(y: T2): (T1, T2)
-  def polymorphicParam(x: (Int, Double)): String
-  def repeatedParam(x: Int, ys: String*): String
-  def byNameParam(x: => Int): String
-  def implicitParam(x: Int)(implicit y: Double): String
-  
-  def upperBound[T <: Product](x: T): Int
-  def lowerBound[T >: U, U](x: T, y: List[U]): String
-  def contextBound[T: TypeTag](x: T): String
-  def viewBound[T <% Ordered[T]](x: T, y: T): Boolean
-  
-  def withImplementation(x: Int) = x * x
-  
-  var aVar: String
-  var concreteVar = "foo"
+trait HasEmbedded {
+  trait Embedded {
+    def m(x: Int, y: Double): String
 
-  val aVal: String
-  val concreteVal = "foo"
-  val fnVal: String => Int
+    trait ATrait
+    def innerTrait(): ATrait
+    def outerTrait(): HasEmbedded.this.ATrait
+    def innerTraitProjected(): HasEmbedded#Embedded#ATrait
+    def outerTraitProjected(): HasEmbedded#ATrait
+  }
+  
+  trait ATrait
+  
+  def referencesEmbedded(): Embedded
 }

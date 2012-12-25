@@ -215,7 +215,7 @@ class MockTest extends FreeSpec with MockFactory {
     
     "mock an embeddded trait" in {
       withExpectations {
-        val m = mock[TestTrait]
+        val m = mock[HasEmbedded]
         val e = mock[m.Embedded]
         (m.referencesEmbedded _).expects().returning(e)
         expectResult(e) { m.referencesEmbedded }
@@ -224,7 +224,7 @@ class MockTest extends FreeSpec with MockFactory {
     
     "handle projected types correctly" in {
       withExpectations {
-        val m = mock[TestTrait]
+        val m = mock[HasEmbedded]
         val e = mock[m.Embedded]
         val o = mock[m.ATrait]
         val i = mock[e.ATrait]
@@ -237,7 +237,7 @@ class MockTest extends FreeSpec with MockFactory {
     
     "handle path-dependent types correctly" in {
       withExpectations {
-        val m = mock[TestTrait]
+        val m = mock[HasEmbedded]
         val e = mock[m.Embedded]
         val o = mock[m.ATrait]
         val i = mock[e.ATrait]

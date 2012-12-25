@@ -301,13 +301,13 @@ class MockTest extends FreeSpec with MockFactory {
     //   }
     // }
     
-    "mock a Java interface" in {
-      withExpectations {
-        val m = mock[JavaInterface]
-        m.expects.m(42, "foo").returning("a return value")
-        expectResult("a return value") { m.m(42, "foo") }
-      }
-    }
+    // "mock a Java interface" in {
+    //   withExpectations {
+    //     val m = mock[JavaInterface]
+    //     m.expects.m(42, "foo").returning("a return value")
+    //     expectResult("a return value") { m.m(42, "foo") }
+    //   }
+    // }
 
     //! TODO - this is going to have to wait for macro types for a proper solution
 //    "cope with Java methods with repeated parameters" in {
