@@ -97,9 +97,10 @@ object MockImpl {
         q"val ${TermName(m.name.toString)} = null.asInstanceOf[${TypeTree(mt)}]"
       } else {
         val pss = paramss(mt)
-        val ps = pss.flatten map { p => Ident(TermName(p.name.toString)) }
+        val ps = pss.flatten map { p => q"${p.name}" }
         val args = pss map { ps =>
             ps map { p =>
+              //! TODO - find a way to quasiquotify this
               ValDef(
                 Modifiers(PARAM | (if (p.isImplicit) IMPLICIT else NoFlags)),
                 TermName(p.name.toString),
@@ -129,6 +130,7 @@ object MockImpl {
       if (index > 0)
         List(
           List.range(1, index) map { i =>
+            //! TODO - find a way to quasiquotify this
             ValDef(
               Modifiers(PARAM | IMPLICIT),
               TermName(s"sentinel$i"),
@@ -151,7 +153,7 @@ object MockImpl {
 
     def mockParameterType(t: Type) = getRepeatedParam(t) match {
       case Some(tt) => 
-        //! TODO - this gives "malformed input"
+        //! TODO - find a way to quasiquotify this - this gives "malformed input"
         // tq"org.scalamock.MockParameter[${TypeTree(tt)}]*"
         AppliedTypeTree(
           Select(Select(Ident(nme.ROOTPKG), TermName("scala")), TypeName("<repeated>")), 
@@ -173,6 +175,7 @@ object MockImpl {
       val ps = pss.flatten map { p => mockParameter(p) }
       val args = (pss map { ps =>
           ps map { p =>
+            //! TODO - find a way to quasiquotify this
             ValDef(
               Modifiers(PARAM | (if (p.isImplicit) IMPLICIT else NoFlags)),
               TermName(p.name.toString),
@@ -187,9 +190,9 @@ object MockImpl {
 
     def getPackage(sym: Symbol): RefTree = 
       if (sym.owner == c.mirror.RootClass)
-        Ident(sym.name.toTermName)
+        q"${sym.name.toTermName}"
       else
-        Select(getPackage(sym.owner), sym.name.toTermName)
+        q"${getPackage(sym.owner)}.${sym.name.toTermName}"
 
     def isMemberOfObject(m: Symbol) = TypeTag.Object.tpe.member(m.name) != NoSymbol
 
@@ -222,6 +225,6 @@ object MockImpl {
     // println("================")
 
     c.introduceTopLevel(mockPackage.toString, classDef)
-    Select(mockPackage, mockName)
+    q"$mockPackage.$mockName"
   }
 }
