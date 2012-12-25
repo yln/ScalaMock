@@ -27,7 +27,7 @@ package org.scalamock
 // [error] constructor MockParameter:(value: AnyRef)org.scalamock.MockParameter[T]
 // [error] have same type after erasure: (v: java.lang.Object)org.scalamock.MockParameter
 
-class MockParameter[T] protected (private[scalamock] val value: AnyRef, dummy: Boolean = false) {
+class MockParameter[+T] protected (private[scalamock] val value: AnyRef, dummy: Boolean = false) {
   
   def this(v: T) = this(v.asInstanceOf[AnyRef])
   
