@@ -32,14 +32,14 @@ class MockTest extends FreeSpec with MockFactory {
   "Typemacro Mocks should" - {
     "fail if an unexpected method call is made" in {
       withExpectations {
-        val m = mock[TestTrait2]
+        val m = mock[TestTrait]
         intercept[ExpectationException] { m.oneParam(42) }
       }
     }
 
     "allow expectations to be set" in {
       withExpectations {
-        val m = mock[TestTrait2]
+        val m = mock[TestTrait]
         m.expects.twoParams(42, 1.23).returning("a return value")
         expectResult("a return value") { m.twoParams(42, 1.23) }
       }
@@ -47,7 +47,7 @@ class MockTest extends FreeSpec with MockFactory {
     
     "cope with nullary methods" in {
       withExpectations {
-        val m = mock[TestTrait2]
+        val m = mock[TestTrait]
         m.expects.nullary.returning("a return value")
         expectResult("a return value") { m.nullary }
       }
@@ -55,7 +55,7 @@ class MockTest extends FreeSpec with MockFactory {
 
     "cope with overloaded methods" in {
       withExpectations {
-        val m = mock[TestTrait2]
+        val m = mock[TestTrait]
         m.expects.overloaded(10).returning("got an integer")
         m.expects.overloaded(10, 1.23).returning("got two parameters")
         expectResult("got an integer") { m.overloaded(10) }
@@ -65,7 +65,7 @@ class MockTest extends FreeSpec with MockFactory {
     
     "cope with polymorphic overloaded methods" in {
       withExpectations {
-        val m = mock[TestTrait2]
+        val m = mock[TestTrait]
         m.expects.overloaded(1.23).returning("polymorphic method called")
         expectResult("polymorphic method called") { m.overloaded(1.23) }
       }
@@ -73,7 +73,7 @@ class MockTest extends FreeSpec with MockFactory {
 
     "choose between polymorphic and non-polymorphic overloaded methods correctly" in {
       withExpectations {
-        val m = mock[TestTrait2]
+        val m = mock[TestTrait]
         m.expects.overloaded(42).returning("non-polymorphic called")
         m.expects.overloaded[Int](42).returning("polymorphic called")
         expectResult("non-polymorphic called") { m.overloaded(42) }
@@ -83,9 +83,9 @@ class MockTest extends FreeSpec with MockFactory {
     
     "cope with infix operators" in {
       withExpectations {
-        val m1 = mock[TestTrait2]
-        val m2 = mock[TestTrait2]
-        val m3 = mock[TestTrait2]
+        val m1 = mock[TestTrait]
+        val m2 = mock[TestTrait]
+        val m3 = mock[TestTrait]
         m1.expects.+(m2).returning(m3)
         expectResult(m3) { m1 + m2 }
       }
@@ -93,7 +93,7 @@ class MockTest extends FreeSpec with MockFactory {
     
     "cope with curried methods" in {
       withExpectations {
-        val m = mock[TestTrait2]
+        val m = mock[TestTrait]
         m.expects.curried(10)(1.23).returning("curried method called")
         val partial = m.curried(10) _
         expectResult("curried method called") { partial(1.23) }
@@ -102,7 +102,7 @@ class MockTest extends FreeSpec with MockFactory {
 
     "cope with polymorphic methods" in {
       withExpectations {
-        val m = mock[TestTrait2]
+        val m = mock[TestTrait]
         m.expects.polymorphic(List(1, 2)).returning("called with integers")
         m.expects.polymorphic(List("foo", "bar")).returning("called with strings")
         expectResult("called with integers") { m.polymorphic(List(1, 2)) }
@@ -112,7 +112,7 @@ class MockTest extends FreeSpec with MockFactory {
     
     "cope with curried polymorphic methods" in {
       withExpectations {
-        val m = mock[TestTrait2]
+        val m = mock[TestTrait]
         m.expects.polycurried(42)("foo").returning((123, "bar"))
         val partial = m.polycurried(42)(_: String)
         expectResult((123, "bar")) { partial("foo") }
@@ -121,7 +121,7 @@ class MockTest extends FreeSpec with MockFactory {
     
     "cope with parameters of polymorphic type" in {
       withExpectations {
-        val m = mock[TestTrait2]
+        val m = mock[TestTrait]
         m.expects.polymorphicParam((42, 1.23)).returning("it works")
         expectResult("it works") { m.polymorphicParam((42, 1.23)) }
       }
@@ -129,7 +129,7 @@ class MockTest extends FreeSpec with MockFactory {
 
     // "cope with methods with repeated parameters" in {
     //   withExpectations {
-    //     val m = mock[TestTrait2]
+    //     val m = mock[TestTrait]
     //     m.expects.repeatedParam(42, "foo", "bar")
     //     m.repeatedParam(42, "foo", "bar")
     //   }
@@ -137,7 +137,7 @@ class MockTest extends FreeSpec with MockFactory {
     
     "cope with methods with by name parameters" in {
       withExpectations {
-        val m = mock[TestTrait2]
+        val m = mock[TestTrait]
         m.expects.byNameParam(*).returning("it worked")
         expectResult("it worked") { m.byNameParam(42) }
       }
@@ -146,7 +146,7 @@ class MockTest extends FreeSpec with MockFactory {
     //! TODO - find a way to make this less ugly
     // "match methods with by name parameters" in {
     //   withExpectations {
-    //     val m = mock[TestTrait2]
+    //     val m = mock[TestTrait]
     //     val f: (=> Int) => Boolean = { x => x == 1 && x == 2  }
     //     ((m.byNameParam _): (=> Int) => String).expects(new FunctionAdapter1(f)).returning("it works")
     //     var y = 0
@@ -157,7 +157,7 @@ class MockTest extends FreeSpec with MockFactory {
     "cope with methods with implicit parameters" in {
       withExpectations {
         implicit val y: Double = 1.23
-        val m = mock[TestTrait2]
+        val m = mock[TestTrait]
         m.expects.implicitParam(42)(1.23).returning("it works")
         expectResult("it works") { m.implicitParam(42) }
       }
@@ -165,7 +165,7 @@ class MockTest extends FreeSpec with MockFactory {
     
     "cope with a var" in {
       withExpectations {
-        val m = mock[TestTrait2]
+        val m = mock[TestTrait]
         m.expects.aVar_=("foo")
         m.expects.aVar.returning("bar")
         m.aVar = "foo"
@@ -175,7 +175,7 @@ class MockTest extends FreeSpec with MockFactory {
     //! TODO - currently doesn't work because we can't override concrete vars
     // "cope with a non-abstract var" ignore {
     //   withExpectations {
-    //     val m = mock[TestTrait2]
+    //     val m = mock[TestTrait]
     //     (m.concreteVar_= _).expects("foo")
     //     (m.concreteVar _).expects().returning("bar")
     //     m.concreteVar = "foo"
@@ -185,28 +185,28 @@ class MockTest extends FreeSpec with MockFactory {
     
     "cope with a val" in {
       withExpectations {
-        val m = mock[TestTrait2]
+        val m = mock[TestTrait]
         expectResult(null) { m.aVal }
       }
     }
     
     "cope with a non-abstract val" in {
       withExpectations {
-        val m = mock[TestTrait2]
+        val m = mock[TestTrait]
         expectResult("foo") { m.concreteVal }
       }
     }
     
     "cope with a function val" in {
       withExpectations {
-        val m = mock[TestTrait2]
+        val m = mock[TestTrait]
         expectResult(null) { m.fnVal }
       }
     }
     
     "cope with non-abstract methods" in {
       withExpectations {
-        val m = mock[TestTrait2]
+        val m = mock[TestTrait]
         m.expects.withImplementation(42).returning(1234)
         expectResult(1234) { m.withImplementation(42) }
       }
@@ -215,7 +215,7 @@ class MockTest extends FreeSpec with MockFactory {
     //! TODO
     // "mock an embeddded trait" in {
     //   withExpectations {
-    //     val m = mock[TestTrait2]
+    //     val m = mock[TestTrait]
     //     val e = mock[m.Embedded]
     //     m.expects.referencesEmbedded().returning(e)
     //     expectResult(e) { m.referencesEmbedded }
@@ -224,7 +224,7 @@ class MockTest extends FreeSpec with MockFactory {
     
     // "handle projected types correctly" in {
     //   withExpectations {
-    //     val m = mock[TestTrait2]
+    //     val m = mock[TestTrait]
     //     val e = mock[m.Embedded]
     //     val o = mock[m.ATrait]
     //     val i = mock[e.ATrait]
@@ -237,7 +237,7 @@ class MockTest extends FreeSpec with MockFactory {
     
     // "handle path-dependent types correctly" in {
     //   withExpectations {
-    //     val m = mock[TestTrait2]
+    //     val m = mock[TestTrait]
     //     val e = mock[m.Embedded]
     //     val o = mock[m.ATrait]
     //     val i = mock[e.ATrait]
@@ -250,7 +250,7 @@ class MockTest extends FreeSpec with MockFactory {
     
     "cope with upper bounds" in {
       withExpectations {
-        val m = mock[TestTrait2]
+        val m = mock[TestTrait]
         m.expects.upperBound((42, "foo")).returning(2)
         expectResult(2) { m.upperBound((42, "foo")) }
       }
@@ -258,7 +258,7 @@ class MockTest extends FreeSpec with MockFactory {
     
     "cope with lower bounds" in {
       withExpectations {
-        val m = mock[TestTrait2]
+        val m = mock[TestTrait]
         m.expects.lowerBound((1, 2), List[Product]()).returning("it works")
         expectResult("it works") { m.lowerBound((1, 2), List[Product]()) }
       }
@@ -266,7 +266,7 @@ class MockTest extends FreeSpec with MockFactory {
     
     "cope with context bounds" in {
       withExpectations {
-        val m = mock[TestTrait2]
+        val m = mock[TestTrait]
         m.expects.contextBound("foo")(typeTag[java.lang.String]).returning("it works")
         expectResult("it works") { m.contextBound("foo") }
       }
@@ -274,7 +274,7 @@ class MockTest extends FreeSpec with MockFactory {
     
     "cope with view bounds" in {
       withExpectations {
-        val m = mock[TestTrait2]
+        val m = mock[TestTrait]
         m.expects.viewBound(1, 2)(*).returning(true)
         expectResult(true) { m.viewBound(1, 2) }
       }
