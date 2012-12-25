@@ -25,7 +25,7 @@ import util.Properties
 
 object BuildSettings {
   val buildVersion = "3.0"
-  val buildScalaVersion = "2.10.1-SNAPSHOT"
+  val buildScalaVersion = "2.11.0-SNAPSHOT"
   val buildScalaOrganization = "org.scala-lang.macro-paradise"
 
   val buildSettings = Defaults.defaultSettings ++ Seq(
@@ -95,7 +95,6 @@ object ShellPrompt {
 
 object Dependencies {
   val scalatest =  "org.scalatest" % "scalatest_2.10.0" % "2.0.M5"
-  val specs2 = "org.specs2" %% "specs2" % "1.13"
   val reflect = BuildSettings.buildScalaOrganization % "scala-reflect" % BuildSettings.buildScalaVersion
 }
 
@@ -110,9 +109,9 @@ object ScalaMockBuild extends Build {
       compile in Compile := Analysis.Empty,
       publishArtifact in (Compile, packageBin) := false,
       publishArtifact in (Compile, packageSrc) := false,
-      sources in Compile <<= (Seq(core, scalatestSupport, specs2Support).map(sources in Compile in _).join).map(_.flatten),
-      libraryDependencies ++= Seq(scalatest, specs2)
-    )) aggregate(core, core_tests, scalatestSupport, specs2Support, examples)
+      sources in Compile <<= (Seq(core, scalatestSupport).map(sources in Compile in _).join).map(_.flatten),
+      libraryDependencies ++= Seq(scalatest)
+    )) aggregate(core, core_tests, scalatestSupport, examples)
 
   lazy val core = Project(
     "core", 
@@ -128,14 +127,6 @@ object ScalaMockBuild extends Build {
     settings = buildSettings ++ Seq(
       name := "ScalaMock ScalaTest Support",
       libraryDependencies += scalatest
-    )) dependsOn(core)
-
-  lazy val specs2Support = Project(
-    "specs2", 
-    file("frameworks/specs2"),
-    settings = buildSettings ++ Seq(
-      name := "ScalaMock Specs2 Support",
-      libraryDependencies += specs2
     )) dependsOn(core)
 
   lazy val core_tests = Project(
@@ -154,5 +145,5 @@ object ScalaMockBuild extends Build {
       name := "ScalaMock Examples",
       publish := (),
       publishLocal := ()
-    )) dependsOn(scalatestSupport, specs2Support)
+    )) dependsOn(scalatestSupport)
 }
