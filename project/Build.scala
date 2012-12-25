@@ -25,17 +25,16 @@ import util.Properties
 
 object BuildSettings {
   val buildVersion = "3.0"
-  val buildScalaVersion = "2.10.0"
-  val macroParadise =  Properties.envOrElse("MACRO_PARADISE", "/Users/paul/personal/kepler/build/pack")
+  val buildScalaVersion = "2.10.1-SNAPSHOT"
+  val buildScalaOrganization = "org.scala-lang.macro-paradise"
 
   val buildSettings = Defaults.defaultSettings ++ Seq(
     organization := "org.scalamock",
     version := buildVersion,
     scalaVersion := buildScalaVersion,
-    scalaHome := Some(file(macroParadise)),
+    scalaOrganization := buildScalaOrganization,
     scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature"),
     scalacOptions in (Compile, doc) ++= Opts.doc.title("ScalaMock") ++ Opts.doc.version(buildVersion) ++ Seq("-doc-root-content", "rootdoc.txt", "-version"),
-    unmanagedBase := file(macroParadise +"/lib"),
     resolvers += Resolver.sonatypeRepo("releases"),
     resolvers += Resolver.sonatypeRepo("snapshots"),
 
@@ -97,6 +96,7 @@ object ShellPrompt {
 object Dependencies {
   val scalatest =  "org.scalatest" % "scalatest_2.10.0" % "2.0.M5"
   val specs2 = "org.specs2" %% "specs2" % "1.13"
+  val reflect = BuildSettings.buildScalaOrganization % "scala-reflect" % BuildSettings.buildScalaVersion
 }
 
 object ScalaMockBuild extends Build {
@@ -118,7 +118,8 @@ object ScalaMockBuild extends Build {
     "core", 
     file("core"),
     settings = buildSettings ++ Seq(
-      name := "ScalaMock Core"
+      name := "ScalaMock Core",
+      libraryDependencies += reflect
     ))
 
   lazy val scalatestSupport = Project(
@@ -126,7 +127,7 @@ object ScalaMockBuild extends Build {
     file("frameworks/scalatest"),
     settings = buildSettings ++ Seq(
       name := "ScalaMock ScalaTest Support",
-      libraryDependencies ++= Seq(scalatest)
+      libraryDependencies += scalatest
     )) dependsOn(core)
 
   lazy val specs2Support = Project(
