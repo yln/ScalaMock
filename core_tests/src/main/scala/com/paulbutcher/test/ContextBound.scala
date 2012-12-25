@@ -20,38 +20,14 @@
 
 package com.paulbutcher.test
 
-trait TestTrait {
-  def nullary: String
-  def noParams(): String
-  def oneParam(x: Int): String
-  def twoParams(x: Int, y: Double): String
-  
-  def overloaded(x: Int): String
-  def overloaded(x: String): String
-  def overloaded(x: Int, y: Double): String
-  def overloaded[T](x: T): String
-  
-  def +(x: TestTrait): TestTrait
-  
-  def curried(x: Int)(y: Double): String
-  def polymorphic[T](x: List[T]): String
-  def polycurried[T1, T2](x: T1)(y: T2): (T1, T2)
-  def polymorphicParam(x: (Int, Double)): String
-  def repeatedParam(x: Int, ys: String*): String
-  def byNameParam(x: => Int): String
-  def implicitParam(x: Int)(implicit y: Double): String
-  
-  def upperBound[T <: Product](x: T): Int
-  def lowerBound[T >: U, U](x: T, y: List[U]): String
-  def contextBound[T: ContextBound](x: T): String
-  def viewBound[T <% Ordered[T]](x: T, y: T): Boolean
-  
-  def withImplementation(x: Int) = x * x
-  
-  var aVar: String
-  var concreteVar = "foo"
+trait ContextBound[T]
 
-  val aVal: String
-  val concreteVal = "foo"
-  val fnVal: String => Int
+trait LowPriorityContextBound {
+  
+  implicit def defaultContextBound[T] = new ContextBound[T] {}
+}
+
+object ContextBound {
+  implicit object stringContextBound extends ContextBound[String]
+  implicit object intContextBound extends ContextBound[Int]
 }

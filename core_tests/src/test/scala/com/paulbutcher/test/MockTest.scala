@@ -267,7 +267,7 @@ class MockTest extends FreeSpec with MockFactory {
     "cope with context bounds" in {
       withExpectations {
         val m = mock[TestTrait]
-        (m.contextBound(_: String)(_: TypeTag[String])).expects("foo", typeTag[java.lang.String]).returning("it works")
+        (m.contextBound(_: String)(_: ContextBound[String])).expects("foo", ContextBound.stringContextBound).returning("it works")
         expectResult("it works") { m.contextBound("foo") }
       }
     }
