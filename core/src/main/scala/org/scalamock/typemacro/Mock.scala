@@ -102,22 +102,26 @@ object MockImpl {
       } else {
         val pss = paramss(mt)
         val ps = pss.flatten map { p => Ident(TermName(p.name.toString)) }
-        val body = q"${mockFunctionName(i)}(..$ps)"
+        val args = pss map { ps =>
+            ps map { p =>
+              ValDef(
+                Modifiers(PARAM | (if (p.isImplicit) IMPLICIT else NoFlags)),
+                TermName(p.name.toString),
+                TypeTree(p.typeSignature),
+                EmptyTree)
+            }
+          }
+        val tparams = m.typeParams map { p => TypeDef(p) }
+        
+        //! TODO for some reason the following quasiquote generates non-working code
+        // q"override def ${m.name}[..$tparams](...$args) = ${mockFunctionName(i)}(..$ps)"
         DefDef(
           Modifiers(OVERRIDE),
           m.name, 
           m.typeParams map { p => TypeDef(p) }, 
-          pss map { ps =>
-              ps map { p =>
-                ValDef(
-                  Modifiers(PARAM | (if (p.isImplicit) IMPLICIT else NoFlags)),
-                  TermName(p.name.toString),
-                  TypeTree(p.typeSignature),
-                  EmptyTree)
-              }
-            },
+          args,
           TypeTree(finalResultType(mt)),
-          body)
+          q"${mockFunctionName(i)}(..$ps)")
       }
     }
 
@@ -151,7 +155,6 @@ object MockImpl {
       val mt = m.typeSignature
       val pss = paramss(mt)
       val ps = pss.flatten map { p => Ident(TermName(p.name.toString)) }
-      val body = q"${mockFunctionName(i)}.expects(..$ps)"
       val args = (pss map { ps =>
           ps map { p =>
             ValDef(
@@ -163,15 +166,9 @@ object MockImpl {
               EmptyTree)
           }
         }) ++ overloadDisambiguation(m)
-      DefDef(
-        Modifiers(),
-        m.name, 
-        m.typeParams map { p => TypeDef(p) }, 
-        args,
-        AppliedTypeTree(
-          Select(Select(Ident(TermName("org")), TermName("scalamock")), TypeName("CallHandler")),
-          List(TypeTree(finalResultType(mt)))),
-        body)
+      val tparams = m.typeParams map { p => TypeDef(p) }
+
+      q"def ${m.name}[..$tparams](...$args) = ${mockFunctionName(i)}.expects(..$ps)"
     }
 
     def getPackage(sym: Symbol): RefTree = 
