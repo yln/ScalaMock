@@ -303,13 +303,13 @@ class MockTest extends FreeSpec with MockFactory {
     //   }
     // }
     
-    // "mock a Java interface" in {
-    //   withExpectations {
-    //     val m = mock[JavaInterface]
-    //     (m.m _).expects(42, "foo").returning("a return value")
-    //     expectResult("a return value") { m.m(42, "foo") }
-    //   }
-    // }
+    "mock a Java interface" in {
+      withExpectations {
+        val m = mock[JavaInterface]
+        m.expects.m(42, "foo").returning("a return value")
+        expectResult("a return value") { m.m(42, "foo") }
+      }
+    }
 
     //! TODO - this is going to have to wait for macro types for a proper solution
 //    "cope with Java methods with repeated parameters" in {
@@ -320,22 +320,22 @@ class MockTest extends FreeSpec with MockFactory {
 //      }
 //    }
 
-    // "mock a class" in {
-    //   withExpectations {
-    //     val m = mock[TestClass]
-    //     (m.m _).expects(42, "foo").returning((123, "bar"))
-    //     expectResult((123, "bar")) { m.m(42, "foo") }
-    //   }
-    // }
+    "mock a class" in {
+      withExpectations {
+        val m = mock[TestClass]
+        m.expects.m(42, "foo").returning((123, "bar"))
+        expectResult((123, "bar")) { m.m(42, "foo") }
+      }
+    }
     
     // "mock a specialized class" in {
     //   withExpectations {
     //     val m1 = mock[SpecializedClass[Int]]
-    //     (m1.identity _).expects(42).returning(43)
+    //     m1.expects.identity(42).returning(43)
     //     expectResult(43) { m1.identity(42) }
         
     //     val m2 = mock[SpecializedClass[List[String]]]
-    //     (m2.identity _).expects(List("one", "two", "three")).returning(List("four", "five", "six"))
+    //     m2.expects.identity(List("one", "two", "three")).returning(List("four", "five", "six"))
     //     expectResult(List("four", "five", "six")) { m2.identity(List("one", "two", "three")) }
     //   }
     // }
