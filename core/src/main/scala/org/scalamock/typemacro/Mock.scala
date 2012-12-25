@@ -103,7 +103,7 @@ object MockImpl {
     def mockFunctionName(i: Int) = TermName(s"mock_$i")
       
     def forwarderImpl(m: MethodSymbol, i: Int) = {
-      val mt = resolvedType(m)
+      val mt = m.typeSignature
       if (m.isStable) {
         ValDef(
           Modifiers(), 
@@ -137,7 +137,7 @@ object MockImpl {
     }
 
     def mockMethod(m: MethodSymbol, i: Int) = {
-      val mt = resolvedType(m)
+      val mt = m.typeSignature
       val clazz = mockFunctionClass(paramCount(mt))
       val types = (paramTypes(mt) map { p => paramType(p) }) :+ paramType(finalResultType(mt))
       q"val ${mockFunctionName(i)} = new $clazz[..$types](factory, Symbol(${m.name.toString}))"
@@ -163,7 +163,7 @@ object MockImpl {
     }
 
     def expectationForwarder(m: MethodSymbol, i: Int) = {
-      val mt = resolvedType(m)
+      val mt = m.typeSignature
       val pss = paramss(mt)
       val ps = pss.flatten map { p => Ident(TermName(p.name.toString)) }
       val body = q"${mockFunctionName(i)}.expects(..$ps)"
@@ -196,11 +196,6 @@ object MockImpl {
         Select(getPackage(sym.owner), sym.name.toTermName)
 
     def isMemberOfObject(m: Symbol) = TypeTag.Object.tpe.member(m.name) != NoSymbol
-
-    //! TODO - This is a hack, but it's unclear what it should be instead. See
-    //! https://groups.google.com/d/topic/scala-user/n11V6_zI5go/discussion
-    def resolvedType(m: Symbol) =
-      m.typeSignatureIn(SuperType(ThisType(typeToMock.typeSymbol), typeToMock))
 
     val mockName = c.freshName(typeToMock.typeSymbol.name).toTypeName
     val mockPackage = getPackage(typeToMock.typeSymbol.owner)
