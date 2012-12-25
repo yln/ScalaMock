@@ -91,7 +91,7 @@ object MockImpl {
 
     def mockFunctionName(i: Int) = TermName(s"mock_$i")
       
-    def forwarderImpl(m: MethodSymbol, i: Int) = {
+    def forwarderImpl(m: MethodSymbol, i: Int): ValOrDefDef = {
       val mt = m.typeSignature
       if (m.isStable) {
         q"val ${TermName(m.name.toString)} = null.asInstanceOf[${TypeTree(mt)}]"
@@ -139,6 +139,25 @@ object MockImpl {
         Nil
     }
 
+    def getRepeatedParam(t: Type) = {
+      val TypeRef(_, sym, args) = t
+      if (sym == JavaRepeatedParamClass || sym == RepeatedParamClass)
+        Some(args.head)
+      else
+        None
+    }
+
+    def mockParameterType(t: Type) = getRepeatedParam(t) match {
+      case Some(tt) => 
+        //! TODO - this gives "malformed input"
+        // tq"org.scalamock.MockParameter[${TypeTree(tt)}]*"
+        AppliedTypeTree(
+          Select(Select(Ident(nme.ROOTPKG), TermName("scala")), TypeName("<repeated>")), 
+          List(tq"org.scalamock.MockParameter[${TypeTree(tt)}]"))
+      case _ => 
+        tq"org.scalamock.MockParameter[${TypeTree(t)}]"
+    }
+
     def expectationForwarder(m: MethodSymbol, i: Int) = {
       val mt = m.typeSignature
       val pss = paramss(mt)
@@ -151,6 +170,7 @@ object MockImpl {
               AppliedTypeTree(
                 Select(Select(Ident(TermName("org")), TermName("scalamock")), TypeName("MockParameter")),
                 List(TypeTree(p.typeSignature))),
+             // mockParameterType(p.typeSignature),
               EmptyTree)
           }
         }) ++ overloadDisambiguation(m)
