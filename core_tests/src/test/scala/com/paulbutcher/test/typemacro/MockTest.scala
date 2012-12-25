@@ -24,8 +24,6 @@ import com.paulbutcher.test._
 import org.scalatest.FreeSpec
 import org.scalamock.scalatest.typemacro.MockFactory
 
-import scala.language.reflectiveCalls
-
 class MockTest extends FreeSpec with MockFactory {
 
   autoVerify = false

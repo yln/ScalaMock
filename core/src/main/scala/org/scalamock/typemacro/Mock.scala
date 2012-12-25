@@ -229,9 +229,10 @@ object MockImpl {
       class $mockName(implicit factory: org.scalamock.MockFactoryBase) extends ${typeToMock.typeSymbol.name} {
         ..$forwarders
         ..$mocks
-        val expects = new {
+        class Expectations {
           ..$expectationForwarders
         }
+        val expects = new Expectations
       }"""
 
     // println("================")
