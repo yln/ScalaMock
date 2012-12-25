@@ -147,6 +147,8 @@ object MockImpl {
         None
     }
 
+    def isRepeatedParam(t: Type) = getRepeatedParam(t).isDefined
+
     def mockParameterType(t: Type) = getRepeatedParam(t) match {
       case Some(tt) => 
         //! TODO - this gives "malformed input"
@@ -158,19 +160,23 @@ object MockImpl {
         tq"org.scalamock.MockParameter[${TypeTree(t)}]"
     }
 
+    def mockParameter(p: Symbol) = {
+      if (isRepeatedParam(p.typeSignature))
+        q"new org.scalamock.RepeatedMockParameter(new org.scalamock.MatchRepeated(${p.name}))"
+      else
+        q"${p.name}"
+    }
+
     def expectationForwarder(m: MethodSymbol, i: Int) = {
       val mt = m.typeSignature
       val pss = paramss(mt)
-      val ps = pss.flatten map { p => Ident(TermName(p.name.toString)) }
+      val ps = pss.flatten map { p => mockParameter(p) }
       val args = (pss map { ps =>
           ps map { p =>
             ValDef(
               Modifiers(PARAM | (if (p.isImplicit) IMPLICIT else NoFlags)),
               TermName(p.name.toString),
-              AppliedTypeTree(
-                Select(Select(Ident(TermName("org")), TermName("scalamock")), TypeName("MockParameter")),
-                List(TypeTree(p.typeSignature))),
-             // mockParameterType(p.typeSignature),
+              mockParameterType(p.typeSignature),
               EmptyTree)
           }
         }) ++ overloadDisambiguation(m)

@@ -44,6 +44,14 @@ class MockTest extends FreeSpec with MockFactory {
         expectResult("a return value") { m.twoParams(42, 1.23) }
       }
     }
+
+    "fail if a non-matching method call is made" ignore {
+      withExpectations {
+        val m = mock[TestTrait]
+        m.expects.twoParams(42, 1.23)
+        m.twoParams(1, 1.0)
+      }
+    }
     
     "cope with nullary methods" in {
       withExpectations {
@@ -127,13 +135,29 @@ class MockTest extends FreeSpec with MockFactory {
       }
     }
 
-    // "cope with methods with repeated parameters" in {
-    //   withExpectations {
-    //     val m = mock[TestTrait]
-    //     m.expects.repeatedParam(42, "foo", "bar")
-    //     m.repeatedParam(42, "foo", "bar")
-    //   }
-    // }
+    "cope with methods with repeated parameters" in {
+      withExpectations {
+        val m = mock[TestTrait]
+        m.expects.repeatedParam(42, "foo", "bar")
+        m.repeatedParam(42, "foo", "bar")
+      }
+    }
+
+    "cope with methods with repeated parameters and wildcards" in {
+      withExpectations {
+        val m = mock[TestTrait]
+        m.expects.repeatedParam(42, "foo", *)
+        m.repeatedParam(42, "foo", "bar")
+      }
+    }
+
+    "fail if repeated parameters don't match" ignore {
+      withExpectations {
+        val m = mock[TestTrait]
+        m.expects.repeatedParam(42, "foo", *)
+        intercept[ExpectationException] { m.repeatedParam(42, "something else", "bar") }
+      }
+    }
     
     "cope with methods with by name parameters" in {
       withExpectations {

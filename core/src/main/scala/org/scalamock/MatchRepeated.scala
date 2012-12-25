@@ -20,30 +20,14 @@
 
 package org.scalamock
 
-// The dummy argument (eugh!) is necessary to avoid:
-//
-// [error] double definition:
-// [error] constructor MockParameter:(v: T)org.scalamock.MockParameter[T] and
-// [error] constructor MockParameter:(value: AnyRef)org.scalamock.MockParameter[T]
-// [error] have same type after erasure: (v: java.lang.Object)org.scalamock.MockParameter
+class MatchRepeated[T](values: Seq[MockParameter[T]]) extends Equals {
 
-class MockParameter[+T] protected (private[scalamock] val value: AnyRef, dummy: Boolean = false) {
+  override def canEqual(that: Any) = true
+
+  override def equals(that: Any) = that match {
+    case s: Seq[_] => values sameElements s
+    case _ => false
+  }
   
-  def this(v: T) = this(v.asInstanceOf[AnyRef])
-  
-  def this(v: MatchAny) = this(v.asInstanceOf[AnyRef])
-  
-  override def equals(that: Any) = value equals that
-
-  override def toString = value.toString
-}
-
-class EpsilonMockParameter(value: AnyRef, dummy: Boolean = false) extends MockParameter[Double](value) {
-  
-  def this(v: MatchEpsilon) = this(v.asInstanceOf[AnyRef])
-}
-
-class RepeatedMockParameter[T](value: AnyRef, dummy: Boolean = false) extends MockParameter[List[T]](value) {
-
-	def this(v: MatchRepeated[T]) = this(v.asInstanceOf[AnyRef])
+  override def toString = s"MatchRepeated(${values.mkString(", ")})"
 }

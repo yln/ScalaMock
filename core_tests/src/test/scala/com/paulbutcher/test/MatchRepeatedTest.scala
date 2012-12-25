@@ -18,32 +18,26 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package org.scalamock
+package com.paulbutcher.test
 
-// The dummy argument (eugh!) is necessary to avoid:
-//
-// [error] double definition:
-// [error] constructor MockParameter:(v: T)org.scalamock.MockParameter[T] and
-// [error] constructor MockParameter:(value: AnyRef)org.scalamock.MockParameter[T]
-// [error] have same type after erasure: (v: java.lang.Object)org.scalamock.MockParameter
+import org.scalatest.FreeSpec
+import org.scalamock._
 
-class MockParameter[+T] protected (private[scalamock] val value: AnyRef, dummy: Boolean = false) {
-  
-  def this(v: T) = this(v.asInstanceOf[AnyRef])
-  
-  def this(v: MatchAny) = this(v.asInstanceOf[AnyRef])
-  
-  override def equals(that: Any) = value equals that
+class MatchRepeatedTest extends FreeSpec {
 
-  override def toString = value.toString
-}
+  "MatchRepeated should" - {
+    "match matching lists" in {
+      new MatchRepeated[String](Seq(
+        new MockParameter("foo"), 
+        new MockParameter(new MatchAny), 
+        new MockParameter("bar"))) == Seq("foo", "anything", "bar")
+    }
 
-class EpsilonMockParameter(value: AnyRef, dummy: Boolean = false) extends MockParameter[Double](value) {
-  
-  def this(v: MatchEpsilon) = this(v.asInstanceOf[AnyRef])
-}
-
-class RepeatedMockParameter[T](value: AnyRef, dummy: Boolean = false) extends MockParameter[List[T]](value) {
-
-	def this(v: MatchRepeated[T]) = this(v.asInstanceOf[AnyRef])
+    "not match mismatching lists" in {
+      new MatchRepeated[String](Seq(
+        new MockParameter("foo"), 
+        new MockParameter(new MatchAny), 
+        new MockParameter("bar"))) == Seq("foo", "anything", "something else")
+    }
+  }
 }
