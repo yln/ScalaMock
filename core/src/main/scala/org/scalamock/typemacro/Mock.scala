@@ -51,6 +51,7 @@ object MockImpl {
 
     val typeToMock = weakTypeOf[T]
 
+    //! TODO Replace with type quasiquote destructuring
     // Convert a methodType into its ultimate result type
     // For nullary and normal methods, this is just the result type
     // For curried methods, this is the final result type of the result type
@@ -66,6 +67,7 @@ object MockImpl {
       tq"org.scalamock.$name"
     }    
     
+    //! TODO Replace with type quasiquote destructuring
     // Convert a methodType into a list of lists of params:
     // UnaryMethodType => Nil
     // Normal method => List(List(p1, p2, ...))
@@ -76,12 +78,14 @@ object MockImpl {
       case _ => Nil
     }
 
+    //! TODO Replace with type quasiquote destructuring
     def paramCount(methodType: Type): Int = methodType match {
       case MethodType(params, result) => params.length + paramCount(result)
       case PolyType(_, result) => paramCount(result)
       case _ => 0
     }
     
+    //! TODO Replace with type quasiquote destructuring
     def paramTypes(methodType: Type): List[Type] =
       paramss(methodType).flatten map { _.typeSignature }
 
@@ -90,15 +94,7 @@ object MockImpl {
     def forwarderImpl(m: MethodSymbol, i: Int) = {
       val mt = m.typeSignature
       if (m.isStable) {
-        ValDef(
-          Modifiers(), 
-          TermName(m.name.toString), 
-          TypeTree(mt), 
-          TypeApply(
-            Select(
-              Literal(Constant(null)), 
-              TermName("asInstanceOf")),
-            List(TypeTree(mt))))
+        q"val ${TermName(m.name.toString)} = null.asInstanceOf[${TypeTree(mt)}]"
       } else {
         val pss = paramss(mt)
         val ps = pss.flatten map { p => Ident(TermName(p.name.toString)) }
@@ -113,15 +109,7 @@ object MockImpl {
           }
         val tparams = m.typeParams map { p => TypeDef(p) }
         
-        //! TODO for some reason the following quasiquote generates non-working code
-        // q"override def ${m.name}[..$tparams](...$args) = ${mockFunctionName(i)}(..$ps)"
-        DefDef(
-          Modifiers(OVERRIDE),
-          m.name, 
-          m.typeParams map { p => TypeDef(p) }, 
-          args,
-          TypeTree(finalResultType(mt)),
-          q"${mockFunctionName(i)}(..$ps)")
+        q"override def ${m.name}[..$tparams](...$args): ${TypeTree(finalResultType(mt))} = ${mockFunctionName(i)}(..$ps)"
       }
     }
 
