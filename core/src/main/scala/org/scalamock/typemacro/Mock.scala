@@ -100,17 +100,6 @@ object MockImpl {
     def paramTypes(methodType: Type): List[Type] =
       paramss(methodType).flatten map { _.typeSignature }
 
-    def buildParams(paramss: List[List[Symbol]]) =
-      paramss map { params =>
-        params map { p =>
-          ValDef(
-            Modifiers(PARAM | (if (p.isImplicit) IMPLICIT else NoFlags)),
-            TermName(p.name.toString),
-            paramType(p.typeSignature),
-            EmptyTree)
-        }
-      }
-    
     def mockFunctionName(i: Int) = TermName(s"mock_$i")
       
     def forwarderImpl(m: MethodSymbol, i: Int) = {
