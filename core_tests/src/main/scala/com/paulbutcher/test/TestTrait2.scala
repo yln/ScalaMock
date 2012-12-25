@@ -31,13 +31,13 @@ trait TestTrait2 {
   def overloaded(x: Int): String
   def overloaded(x: String): String
   def overloaded(x: Int, y: Double): String
-  // def overloaded[T](x: T): String
+  def overloaded[T](x: T): String
   
   def +(x: TestTrait2): TestTrait2
   
   def curried(x: Int)(y: Double): String
-  // def polymorphic[T](x: List[T]): String
-  // def polycurried[T1, T2](x: T1)(y: T2): (T1, T2)
+  def polymorphic[T](x: List[T]): String
+  def polycurried[T1, T2](x: T1)(y: T2): (T1, T2)
   def polymorphicParam(x: (Int, Double)): String
   def repeatedParam(x: Int, ys: String*): String
   def byNameParam(x: => Int): String
