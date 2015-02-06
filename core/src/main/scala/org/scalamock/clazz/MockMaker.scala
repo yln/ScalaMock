@@ -41,10 +41,13 @@ class MockMaker[C <: Context](val ctx: C) {
       val paramss = info.paramLists.map { ps =>
           ps.map(p => s"${p.name}: ${p.infoIn(typeToImplement)}").mkString("(", ", ", ")")
         }.mkString("")
+      val mockParamss = info.paramLists.map { ps =>
+          ps.map(p => s"${p.name}: org.scalamock.matchers.MockParameter[${p.infoIn(typeToImplement)}]").mkString("(", ", ", ")")
+        }.mkString("") 
       val paramTypes = info.paramLists.flatten.map { p => p.infoIn(typeToImplement) }
-      val paramNames = info.paramLists.flatten.map { p => p.name }.mkString("(", ", ", ")")
+      val flatParams = info.paramLists.flatten.map { p => p.name }.mkString("(", ", ", ")")
       val mockTypes = (paramTypes :+ res).mkString("[", ", ", "]") 
-      val mockName = name + "$" + index
+      val mockName = "fake$" + index
       val paramCount = info.paramLists.map(_.length).sum
     }
 
@@ -56,11 +59,15 @@ class MockMaker[C <: Context](val ctx: C) {
       }.zipWithIndex.map { case (m, i) => new Method(m, i) }
 
     val methods = methodsToImplement map { m =>
-        ctx.parse(s"def ${m.name}${m.tparams}${m.paramss} = ${m.mockName}${m.paramNames}")
+        ctx.parse(s"def ${m.name}${m.tparams}${m.paramss} = ${m.mockName}${m.flatParams}")
       }
     
     val mocks = methodsToImplement.map { m =>
         ctx.parse(s"val ${m.mockName} = new org.scalamock.function.MockFunction${m.paramCount}${m.mockTypes}(mockContext, 'dummyName)")
+      }
+    
+    val expecters = methodsToImplement.map { m =>
+        ctx.parse(s"def ${m.name}${m.tparams}${m.mockParamss} = ${m.mockName}.expects${m.flatParams}")
       }
 
     def make() = {
@@ -68,6 +75,9 @@ class MockMaker[C <: Context](val ctx: C) {
           class MockThing(mockContext: org.scalamock.context.MockContext) extends $typeToImplement {
             ..$methods
             ..$mocks
+            val expects = new {
+              ..$expecters
+            }
           }
   
           new MockThing($mockContext)

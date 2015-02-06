@@ -29,6 +29,7 @@ import some.other.pkg._
 import scala.reflect.ClassTag
 import scala.reflect.runtime.universe.{ TypeTag, typeTag }
 import scala.util.{Try, Failure}
+import scala.language.reflectiveCalls
 
 class MockTest extends FreeSpec with MockFactory with ShouldMatchers {
   
@@ -42,13 +43,13 @@ class MockTest extends FreeSpec with MockFactory with ShouldMatchers {
        }
      }
     
-  //   "allow expectations to be set" in {
-  //     withExpectations {
-  //       val m = mock[TestTrait]
-  //       (m.twoParams _).expects(42, 1.23).returning("a return value")
-  //       assertResult("a return value") { m.twoParams(42, 1.23) }
-  //     }
-  //   }
+     "allow expectations to be set" in {
+       withExpectations {
+         val m = mock[TestTrait]
+         m.expects.twoParams(42, 1.23).returning("a return value")
+         assertResult("a return value") { m.twoParams(42, 1.23) }
+       }
+     }
     
   //   "fail if a non-matching method call is made" in {
   //     withExpectations {
