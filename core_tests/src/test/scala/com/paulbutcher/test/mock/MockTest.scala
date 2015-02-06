@@ -87,15 +87,15 @@ class MockTest extends FreeSpec with MockFactory with ShouldMatchers {
        }
      }
     
-//     "cope with polymorphic methods" in {
-//       withExpectations {
-//         val m = mock[TestTrait]
-//         m.expects.polymorphic(List(1, 2)).returning("called with integers")
-//         m.expects.polymorphic(List("foo", "bar")).returning("called with strings")
-//         assertResult("called with integers") { m.polymorphic(List(1, 2)) }
-//         assertResult("called with strings") { m.polymorphic(List("foo", "bar")) }
-//       }
-//     }
+     "cope with polymorphic methods" in {
+       withExpectations {
+         val m = mock[TestTrait]
+         m.expects.polymorphic(List(1, 2)).returning("called with integers")
+         m.expects.polymorphic(List("foo", "bar")).returning("called with strings")
+         assertResult("called with integers") { m.polymorphic(List(1, 2)) }
+         assertResult("called with strings") { m.polymorphic(List("foo", "bar")) }
+       }
+     }
     
   //   "cope with curried polymorphic methods" in {
   //     withExpectations {

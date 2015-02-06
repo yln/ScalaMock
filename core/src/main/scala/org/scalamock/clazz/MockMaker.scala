@@ -42,9 +42,9 @@ class MockMaker[C <: Context](val ctx: C) {
           ps.map(p => s"${p.name}: ${p.infoIn(typeToImplement)}").mkString("(", ", ", ")")
         }.mkString("")
       val mockParamss = info.paramLists.map { ps =>
-          ps.map(p => s"${p.name}: org.scalamock.matchers.MockParameter[${p.infoIn(typeToImplement)}]").mkString("(", ", ", ")")
+          ps.map(p => s"${p.name}: org.scalamock.matchers.MockParameter[${p.infoIn(typeToImplement).erasure}]").mkString("(", ", ", ")")
         }.mkString("") 
-      val paramTypes = info.paramLists.flatten.map { p => p.infoIn(typeToImplement) }
+      val paramTypes = info.paramLists.flatten.map { p => p.infoIn(typeToImplement).erasure }
       val flatParams = info.paramLists.flatten.map { p => p.name }.mkString("(", ", ", ")")
       val mockTypes = (paramTypes :+ res).mkString("[", ", ", "]") 
       val mockName = "fake$" + index
