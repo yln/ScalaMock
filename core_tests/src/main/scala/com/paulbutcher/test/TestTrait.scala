@@ -33,10 +33,10 @@ trait TestTrait {
 //  def overloaded(x: String): String
 //  def overloaded(x: Int, y: Double): String
 //  def overloaded[T](x: T): String
-//  
-//  def +(x: TestTrait): TestTrait
-//  
-//  def curried(x: Int)(y: Double): String
+  
+  def +(x: TestTrait): TestTrait
+  
+  def curried(x: Int)(y: Double): String
 //  def polymorphic[T](x: List[T]): String
 //  def polycurried[T1, T2](x: T1)(y: T2): (T1, T2)
 //  def polymorphicParam(x: (Int, Double)): String

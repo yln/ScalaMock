@@ -51,51 +51,51 @@ class MockTest extends FreeSpec with MockFactory with ShouldMatchers {
        }
      }
     
-  //   "fail if a non-matching method call is made" in {
-  //     withExpectations {
-  //       val m = mock[TestTrait]
-  //       (m.twoParams _).expects(42, 1.23)
-  //       intercept[ExpectationException] { m.twoParams(1, 1.0) }
-  //       m.twoParams(42, 1.23)
-  //     }
-  //   }
+     "fail if a non-matching method call is made" in {
+       withExpectations {
+         val m = mock[TestTrait]
+         m.expects.twoParams(42, 1.23)
+         intercept[ExpectationException] { m.twoParams(1, 1.0) }
+         m.twoParams(42, 1.23)
+       }
+     }
 
-  //   "cope with nullary methods" in {
-  //     withExpectations {
-  //       val m = mock[TestTrait]
-  //       (m.nullary _).expects().returning("a return value")
-  //       assertResult("a return value") { m.nullary }
-  //     }
-  //   }
+     "cope with nullary methods" in {
+       withExpectations {
+         val m = mock[TestTrait]
+         m.expects.nullary.returning("a return value")
+         assertResult("a return value") { m.nullary }
+       }
+     }
 
-  //   "cope with infix operators" in {
-  //     withExpectations {
-  //       val m1 = mock[TestTrait]
-  //       val m2 = mock[TestTrait]
-  //       val m3 = mock[TestTrait]
-  //       (m1.+ _).expects(m2).returning(m3)
-  //       assertResult(m3) { m1 + m2 }
-  //     }
-  //   }
+     "cope with infix operators" in {
+       withExpectations {
+         val m1 = mock[TestTrait]
+         val m2 = mock[TestTrait]
+         val m3 = mock[TestTrait]
+         m1.expects.+(m2).returning(m3)
+         assertResult(m3) { m1 + m2 }
+       }
+     }
     
-  //   "cope with curried methods" in {
-  //     withExpectations {
-  //       val m = mock[TestTrait]
-  //       (m.curried(_: Int)(_: Double)).expects(10, 1.23).returning("curried method called")
-  //       val partial = m.curried(10) _
-  //       assertResult("curried method called") { partial(1.23) }
-  //     }
-  //   }
+     "cope with curried methods" in {
+       withExpectations {
+         val m = mock[TestTrait]
+         m.expects.curried(10)(1.23).returning("curried method called")
+         val partial = m.curried(10) _
+         assertResult("curried method called") { partial(1.23) }
+       }
+     }
     
-  //   "cope with polymorphic methods" in {
-  //     withExpectations {
-  //       val m = mock[TestTrait]
-  //       (m.polymorphic(_: List[Int])).expects(List(1, 2)).returning("called with integers")
-  //       (m.polymorphic(_: List[String])).expects(List("foo", "bar")).returning("called with strings")
-  //       assertResult("called with integers") { m.polymorphic(List(1, 2)) }
-  //       assertResult("called with strings") { m.polymorphic(List("foo", "bar")) }
-  //     }
-  //   }
+//     "cope with polymorphic methods" in {
+//       withExpectations {
+//         val m = mock[TestTrait]
+//         m.expects.polymorphic(List(1, 2)).returning("called with integers")
+//         m.expects.polymorphic(List("foo", "bar")).returning("called with strings")
+//         assertResult("called with integers") { m.polymorphic(List(1, 2)) }
+//         assertResult("called with strings") { m.polymorphic(List("foo", "bar")) }
+//       }
+//     }
     
   //   "cope with curried polymorphic methods" in {
   //     withExpectations {
