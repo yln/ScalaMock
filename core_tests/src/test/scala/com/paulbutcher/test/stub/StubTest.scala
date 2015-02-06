@@ -24,7 +24,7 @@ import com.paulbutcher.test.{ IsolatedSpec, TestTrait }
 
 class StubTest extends IsolatedSpec {
   autoVerify = false
-  val m = stub[TestTrait]
+//  val m = stub[TestTrait]
 
   // behavior of "Stub"
 

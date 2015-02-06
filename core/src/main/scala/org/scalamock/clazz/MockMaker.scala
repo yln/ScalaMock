@@ -29,9 +29,34 @@ import scala.reflect.macros.whitebox.Context
 class MockMaker[C <: Context](val ctx: C) {
   class MockMakerInner[T: ctx.WeakTypeTag](mockContext: ctx.Expr[MockContext], stub: Boolean, mockName: Option[ctx.Expr[String]]) {
     import ctx.universe._
-    
+
+    def isMemberOfObject(m: Symbol) = TypeTag.Object.tpe.member(m.name) != NoSymbol
+
+    val typeToImplement = weakTypeOf[T]
+    val methodsToImplement = typeToImplement.members filter { m =>
+      m.isMethod && !isMemberOfObject(m)
+    }
+
+    val methods = methodsToImplement map { m =>
+      val info = m.infoIn(typeToImplement)
+      val name = m.name
+      val tparams = info.typeParams match {
+        case Nil => ""
+        case tps => tps.map(_.name).mkString("[", ", ", "]")
+      }
+      val res = info.finalResultType
+      val paramss = info.paramLists.map { ps =>
+        ps.map(p => s"${p.name}: ${p.infoIn(typeToImplement)}").mkString("(", ", ", ")")
+      }.mkString("")
+      val method = s"def $name$tparams$paramss = null.asInstanceOf[$res]"
+
+      ctx.parse(method)
+    }
+
     def make() = {
-      ctx.Expr(q"null")
+      ctx.Expr(q"""new $typeToImplement {
+          ..$methods
+        }""")
     }
   }
 }

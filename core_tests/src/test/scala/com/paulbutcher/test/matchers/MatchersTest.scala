@@ -38,8 +38,8 @@ class MatchersTest extends IsolatedSpec {
   autoVerify = false
 
   val mockedMultiplication = mockFunction[Double, Double, Double]
-  val testMock = mock[TestTrait]
-  val userDatabaseMock = mock[UserDatabase]
+//  val testMock = mock[TestTrait]
+//  val userDatabaseMock = mock[UserDatabase]
 
   behavior of "MatchEpsilon"
 
