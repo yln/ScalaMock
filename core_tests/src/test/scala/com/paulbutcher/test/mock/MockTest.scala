@@ -247,13 +247,13 @@ class MockTest extends FreeSpec with MockFactory with ShouldMatchers {
   //     }
   //   }
     
-  //   "cope with non-abstract methods" in {
-  //     withExpectations {
-  //       val m = mock[TestTrait]
-  //       (m.withImplementation _).expects(42).returning(1234)
-  //       assertResult(1234) { m.withImplementation(42) }
-  //     }
-  //   }
+     "cope with non-abstract methods" in {
+       withExpectations {
+         val m = mock[TestTrait]
+         m.expects.withImplementation(42).returning(1234)
+         assertResult(1234) { m.withImplementation(42) }
+       }
+     }
     
   //   "mock an embeddded trait" in {
   //     withExpectations {

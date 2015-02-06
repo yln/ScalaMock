@@ -48,8 +48,8 @@ trait TestTrait {
 //  def lowerBound[T >: U, U](x: T, y: List[U]): String
 //  def contextBound[T: TypeTag](x: T): String
 //  def viewBound[T <% Ordered[T]](x: T, y: T): Boolean
-//  
-//  def withImplementation(x: Int) = x * x
+  
+  def withImplementation(x: Int) = x * x
 
   def referencesSomeOtherPackage(x: SomeClass): SomeClass
   def otherPackageUpperBound[T <: SomeClass](x: T): T

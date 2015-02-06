@@ -67,11 +67,11 @@ class MockMaker[C <: Context](val ctx: C) {
 
     val typeToImplement = weakTypeOf[T]
     val methodsToImplement = typeToImplement.members.filter { m =>
-        m.isMethod && !isMemberOfObject(m)
+        m.isMethod && !m.isConstructor && !isMemberOfObject(m)
       }.zipWithIndex.map { case (m, i) => new Method(m, i) }
 
     val methods = methodsToImplement map { m =>
-        ctx.parse(s"def ${m.name}${m.tparams}${m.paramss} = ${m.mockName}${m.flatParams}.asInstanceOf[${m.res}]")
+        ctx.parse(s"override def ${m.name}${m.tparams}${m.paramss} = ${m.mockName}${m.flatParams}.asInstanceOf[${m.res}]")
       }
     
     val mocks = methodsToImplement.map { m =>
