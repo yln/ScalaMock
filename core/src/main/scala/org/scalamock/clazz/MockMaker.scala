@@ -32,7 +32,7 @@ class MockMaker[C <: Context](val ctx: C) {
     
     class Method(val m: Symbol, val index: Int) {
       val info = m.infoIn(typeToImplement)
-      val name = m.name.toString
+      val name = m.name
       val tparams = info.typeParams match {
           case Nil => ""
           case tps => tps.map(_.name).mkString("[", ", ", "]")
@@ -51,6 +51,13 @@ class MockMaker[C <: Context](val ctx: C) {
       val paramCount = info.paramLists.map(_.length).sum
       val fakeType = s"org.scalamock.function.MockFunction${paramCount}"
       val fake = fakeType + List.fill(paramCount + 1)("Any").mkString("[", ", ", "]")
+      val overloads = members.filter { m => m.name == name }
+      val overloadIndex = overloads.indexOf(m)
+      val overloadDisambiguation =
+        if (overloadIndex > 0) 
+          (1 to overloadIndex).map(i => s"x$i: scala.Predef.DummyImplicit").mkString("(implicit ", ", ", ")")
+        else
+          ""
       
       def toMockParam(paramType: Type) = {
         val Repeated = "(.*)\\*".r
@@ -66,7 +73,8 @@ class MockMaker[C <: Context](val ctx: C) {
     def isMemberOfObject(m: Symbol) = TypeTag.Object.tpe.member(m.name) != NoSymbol
 
     val typeToImplement = weakTypeOf[T]
-    val methodsToImplement = typeToImplement.members.filter { m =>
+    val members = typeToImplement.members.toIndexedSeq
+    val methodsToImplement = members.filter { m =>
         m.isMethod && !m.isConstructor && !isMemberOfObject(m)
       }.zipWithIndex.map { case (m, i) => new Method(m, i) }
 
@@ -79,7 +87,7 @@ class MockMaker[C <: Context](val ctx: C) {
       }
     
     val expecters = methodsToImplement.map { m =>
-        ctx.parse(s"def ${m.name}${m.tparams}${m.mockParamss} = ${m.mockName}.expects${m.flatParams}")
+        ctx.parse(s"def ${m.name}${m.tparams}${m.mockParamss}${m.overloadDisambiguation} = ${m.mockName}.expects${m.flatParams}")
       }
 
     def make() = {

@@ -21,24 +21,25 @@
 package com.paulbutcher.test.mock
 
 import com.paulbutcher.test._
+import scala.language.reflectiveCalls
 
 class OverloadedMethodsTest extends IsolatedSpec {
 
-  // behavior of "Mocks"
+  behavior of "Mocks"
 
-  // they should "mock traits with overloaded methods which have different number of type params" in { // test for issue #85
-  //   trait Foo {
-  //     def overloaded[T](x: T): String
-  //     def overloaded(x: String): String
-  //   }
+  they should "mock traits with overloaded methods which have different number of type params" in { // test for issue #85
+    trait Foo {
+      def overloaded[T](x: T): String
+      def overloaded(x: String): String
+    }
 
-  //   val fooMock = mock[Foo]
-  //   (fooMock.overloaded[Double] _) expects (1.0) returning "one"
-  //   fooMock.overloaded(1.0) shouldBe "one"
+    val fooMock = mock[Foo]
+    fooMock.expects.overloaded(1.0) returning "one"
+    fooMock.overloaded(1.0) shouldBe "one"
 
-  //   (fooMock.overloaded(_: String)) expects ("2") returning "two"
-  //   fooMock.overloaded("2") shouldBe "two"
-  // }
+    fooMock.expects.overloaded("2") returning "two"
+    fooMock.overloaded("2") shouldBe "two"
+  }
 
   // they should "mock traits with overloaded methods which have different number of type params (2)" in {
   //   trait Foo {
