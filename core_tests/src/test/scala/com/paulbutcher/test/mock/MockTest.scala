@@ -97,22 +97,22 @@ class MockTest extends FreeSpec with MockFactory with ShouldMatchers {
        }
      }
     
-  //   "cope with curried polymorphic methods" in {
-  //     withExpectations {
-  //       val m = mock[TestTrait]
-  //       (m.polycurried(_: Int)(_: String)).expects(42, "foo").returning((123, "bar"))
-  //       val partial = m.polycurried(42)(_: String)
-  //       assertResult((123, "bar")) { partial("foo") }
-  //     }
-  //   }
+     "cope with curried polymorphic methods" in {
+       withExpectations {
+         val m = mock[TestTrait]
+         m.expects.polycurried(42)("foo").returning((123, "bar"))
+         val partial = m.polycurried(42)(_: String)
+         assertResult((123, "bar")) { partial("foo") }
+       }
+     }
     
-  //   "cope with parameters of polymorphic type" in {
-  //     withExpectations {
-  //       val m = mock[TestTrait]
-  //       (m.polymorphicParam _).expects((42, 1.23)).returning("it works")
-  //       assertResult("it works") { m.polymorphicParam((42, 1.23)) }
-  //     }
-  //   }
+     "cope with parameters of polymorphic type" in {
+       withExpectations {
+         val m = mock[TestTrait]
+         m.expects.polymorphicParam(42, 1.23).returning("it works")
+         assertResult("it works") { m.polymorphicParam((42, 1.23)) }
+       }
+     }
 
   //   "cope with methods with repeated parameters" in {
   //     withExpectations {
