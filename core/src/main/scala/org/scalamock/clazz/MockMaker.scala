@@ -42,13 +42,21 @@ class MockMaker[C <: Context](val ctx: C) {
           ps.map(p => s"${p.name}: ${p.infoIn(typeToImplement)}").mkString("(", ", ", ")")
         }.mkString("")
       val mockParamss = info.paramLists.map { ps =>
-          ps.map(p => s"${p.name}: org.scalamock.matchers.MockParameter[${p.infoIn(typeToImplement)}]").mkString("(", ", ", ")")
+          ps.map(p => s"${p.name}: ${toMockParam(p.infoIn(typeToImplement))}").mkString("(", ", ", ")")
         }.mkString("") 
       val flatParams = info.paramLists.flatten.map { p => p.name }.mkString("(", ", ", ")")
       val mockName = "fake$" + index
       val paramCount = info.paramLists.map(_.length).sum
       val fakeType = s"org.scalamock.function.MockFunction${paramCount}"
       val fake = fakeType + List.fill(paramCount + 1)("Any").mkString("[", ", ", "]")
+      
+      def toMockParam(paramType: Type) = {
+        val Repeated = "(.*)\\*".r
+        paramType.toString match {
+          case Repeated(t) => s"org.scalamock.matchers.MockParameter[$t]*"
+          case t => s"org.scalamock.matchers.MockParameter[$t]"
+        }
+      }
     }
 
     def isMemberOfObject(m: Symbol) = TypeTag.Object.tpe.member(m.name) != NoSymbol
