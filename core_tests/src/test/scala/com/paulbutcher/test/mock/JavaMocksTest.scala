@@ -21,16 +21,17 @@
 package com.paulbutcher.test.mock
 
 import com.paulbutcher.test._
+import scala.language.reflectiveCalls
 
 class JavaMocksTest extends IsolatedSpec {
   behavior of "ScalaMock while mocking Java classes and interfaces"
 
-  // it should "mock Java generics" in {
-  //   val m = mock[JavaGenericInterface[Int]]
-  //   (m.simpleMethod _) expects ("two") returning 42
+  it should "mock Java generics" in {
+    val m = mock[JavaGenericInterface[Int]]
+    m.expects.simpleMethod("two") returning 42
 
-  //   m.simpleMethod("two") shouldBe 42
-  // }
+    m.simpleMethod("two") shouldBe 42
+  }
 
   // it should "mock classes with bridged methods" in {
   //   val m = mock[JavaClassWithBridgeMethod]
@@ -55,59 +56,59 @@ class JavaMocksTest extends IsolatedSpec {
   // //      }
   // //    }
 
-  // it should "mock a Java interface" in {
-  //   val m = mock[JavaInterface]
-  //   (m.m _).expects(42, "foo").returning("a return value")
-  //   assertResult("a return value") { m.m(42, "foo") }
-  // }
+  it should "mock a Java interface" in {
+    val m = mock[JavaInterface]
+    m.expects.m(42, "foo").returning("a return value")
+    assertResult("a return value") { m.m(42, "foo") }
+  }
 
-  // it should "mock a Polymorhpic Java interface" in { // test for issue #24
-  //   val m = mock[PolymorphicJavaInterface]
-  //   (m.simplePolymorphicMethod _).expects("foo").returning(44)
-  //   assertResult(44) { m.simplePolymorphicMethod("foo") }
-  // }
+  it should "mock a Polymorhpic Java interface" in { // test for issue #24
+    val m = mock[PolymorphicJavaInterface]
+    m.expects.simplePolymorphicMethod("foo").returning(44)
+    assertResult(44) { m.simplePolymorphicMethod("foo") }
+  }
 
-  // it should "mock a Polymorhpic Java interface (type parametrized method parameter)" in {
-  //   val m = mock[PolymorphicJavaInterface]
-  //   val arg = new java.util.ArrayList[String]
-  //   (m.polymorphicMethod[String] _).expects(arg).returning("foo")
+  it should "mock a Polymorhpic Java interface (type parametrized method parameter)" in {
+    val m = mock[PolymorphicJavaInterface]
+    val arg = new java.util.ArrayList[String]
+    m.expects.polymorphicMethod[String](arg).returning("foo")
 
-  //   m.polymorphicMethod(arg) shouldBe "foo"
-  // }
+    m.polymorphicMethod(arg) shouldBe "foo"
+  }
 
-  // it should "mock a Java class with an overloaded method (different param count)" in { // test for issue #34
-  //   val m = mock[JavaClassWithOverloadedMethod]
-  //   (m.overloadedMethod(_: String)).expects("a").returning("first")
-  //   (m.overloadedMethod(_: String, _: String)).expects("a", "b").returning("second")
+  it should "mock a Java class with an overloaded method (different param count)" in { // test for issue #34
+    val m = mock[JavaClassWithOverloadedMethod]
+    m.expects.overloadedMethod("a").returning("first")
+    m.expects.overloadedMethod("a", "b").returning("second")
 
-  //   m.overloadedMethod("a") shouldBe "first"
-  //   m.overloadedMethod("a", "b") shouldBe "second"
-  // }
+    m.overloadedMethod("a") shouldBe "first"
+    m.overloadedMethod("a", "b") shouldBe "second"
+  }
 
-  // it should "mock a Java class with an overloaded method (the same param count)" in { // test for issue #73
-  //   val m = mock[JavaClassWithOverloadedMethod]
-  //   (m.overloadedSameParamCount(_: String)).expects("one").returning("first")
-  //   (m.overloadedSameParamCount(_: Integer)).expects(new Integer(2)).returning(2)
+  it should "mock a Java class with an overloaded method (the same param count)" in { // test for issue #73
+    val m = mock[JavaClassWithOverloadedMethod]
+    m.expects.overloadedSameParamCount("one").returning("first")
+    m.expects.overloadedSameParamCount(new Integer(2)).returning(2)
 
-  //   m.overloadedSameParamCount("one") shouldBe "first"
-  //   m.overloadedSameParamCount(2) shouldBe 2
-  // }
+    m.overloadedSameParamCount("one") shouldBe "first"
+    m.overloadedSameParamCount(2) shouldBe 2
+  }
 
-  // it should "mock a Java class with an overloaded method (with primitive param)" in { // test for issue #73
-  //   val m = mock[JavaClassWithOverloadedMethod]
-  //   (m.overloadedWithPrimitiveParam(_: String)).expects("one").returning("first")
-  //   (m.overloadedWithPrimitiveParam(_: Int)).expects(2).returning("second")
+  it should "mock a Java class with an overloaded method (with primitive param)" in { // test for issue #73
+    val m = mock[JavaClassWithOverloadedMethod]
+    m.expects.overloadedWithPrimitiveParam("one").returning("first")
+    m.expects.overloadedWithPrimitiveParam(2).returning("second")
 
-  //   m.overloadedWithPrimitiveParam("one") shouldBe "first"
-  //   m.overloadedWithPrimitiveParam(2) shouldBe "second"
-  // }
+    m.overloadedWithPrimitiveParam("one") shouldBe "first"
+    m.overloadedWithPrimitiveParam(2) shouldBe "second"
+  }
 
-  // it should "mock a Java class with an overloaded method (with type params)" in {
-  //   val m = mock[JavaClassWithOverloadedMethod]
-  //   (m.overloadedGeneric(_: String)).expects("one").returning("first")
-  //   (m.overloadedGeneric(_: Int)).expects(2).returning("second")
+  it should "mock a Java class with an overloaded method (with type params)" in {
+    val m = mock[JavaClassWithOverloadedMethod]
+    m.expects.overloadedGeneric("one").returning("first")
+    m.expects.overloadedGeneric(2).returning("second")
 
-  //   m.overloadedGeneric("one") shouldBe "first"
-  //   m.overloadedGeneric(2) shouldBe "second"
-  // }
+    m.overloadedGeneric("one") shouldBe "first"
+    m.overloadedGeneric(2) shouldBe "second"
+  }
 }
