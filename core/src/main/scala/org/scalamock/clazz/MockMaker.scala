@@ -22,33 +22,16 @@ package org.scalamock.clazz
 
 import org.scalamock.context.MockContext
 import org.scalamock.function._
-import org.scalamock.util.Defaultable
 
-object MockImpl {
-  import scala.reflect.macros.whitebox.Context
+import scala.reflect.macros.whitebox.Context
 
-  def mock[T: c.WeakTypeTag](c: Context)(mockContext: c.Expr[MockContext]): c.Expr[Any] = {
-    val maker = MockMaker[T](c)(mockContext, stub = false, mockName = None)
-    maker.make
-  }
-
-  def stub[T: c.WeakTypeTag](c: Context)(mockContext: c.Expr[MockContext]): c.Expr[Any] = {
-    val maker = MockMaker[T](c)(mockContext, stub = true, mockName = None)
-    maker.make
-  }
-
-  def mockWithName[T: c.WeakTypeTag](c: Context)(mockName: c.Expr[String])(mockContext: c.Expr[MockContext]): c.Expr[Any] = {
-    val maker = MockMaker[T](c)(mockContext, stub = false, mockName = Some(mockName))
-    maker.make
-  }
-
-  def stubWithName[T: c.WeakTypeTag](c: Context)(mockName: c.Expr[String])(mockContext: c.Expr[MockContext]): c.Expr[Any] = {
-    val maker = MockMaker[T](c)(mockContext, stub = true, mockName = Some(mockName))
-    maker.make
-  }
-
-  def MockMaker[T: c.WeakTypeTag](c: Context)(mockContext: c.Expr[MockContext], stub: Boolean, mockName: Option[c.Expr[String]]) = {
-    val m = new MockMaker[c.type](c)
-    new m.MockMakerInner[T](mockContext, stub, mockName)
+//! TODO - get rid of this nasty two-stage construction when https://issues.scala-lang.org/browse/SI-5712 is fixed
+class MockMaker[C <: Context](val ctx: C) {
+  class MockMakerInner[T: ctx.WeakTypeTag](mockContext: ctx.Expr[MockContext], stub: Boolean, mockName: Option[ctx.Expr[String]]) {
+    import ctx.universe._
+    
+    def make() = {
+      ctx.Expr(q"null")
+    }
   }
 }
