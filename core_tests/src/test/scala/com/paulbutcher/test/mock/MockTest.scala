@@ -160,14 +160,14 @@ class MockTest extends FreeSpec with MockFactory with ShouldMatchers {
   //     }
   //   }
     
-  //   "cope with methods with implicit parameters" in {
-  //     withExpectations {
-  //       implicit val y: Double = 1.23
-  //       val m = mock[TestTrait]
-  //       (m.implicitParam(_: Int)(_: Double)).expects(42, 1.23).returning("it works")
-  //       assertResult("it works") { m.implicitParam(42) }
-  //     }
-  //   }
+     "cope with methods with implicit parameters" in {
+       withExpectations {
+         implicit val y: Double = 1.23
+         val m = mock[TestTrait]
+         m.expects.implicitParam(42)(1.23).returning("it works")
+         assertResult("it works") { m.implicitParam(42) }
+       }
+     }
 
   //   "cope with references to another package" in {
   //     withExpectations {

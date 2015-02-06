@@ -39,7 +39,9 @@ class MockMaker[C <: Context](val ctx: C) {
         }
       val res = info.finalResultType
       val paramss = info.paramLists.map { ps =>
-          ps.map(p => s"${p.name}: ${p.infoIn(typeToImplement)}").mkString("(", ", ", ")")
+          ps.map {p => 
+            s"${if(p.isImplicit) "implicit" else ""} ${p.name}: ${p.infoIn(typeToImplement)}"
+          }.mkString("(", ", ", ")")
         }.mkString("")
       val mockParamss = info.paramLists.map { ps =>
           ps.map(p => s"${p.name}: ${toMockParam(p.infoIn(typeToImplement))}").mkString("(", ", ", ")")
@@ -82,7 +84,7 @@ class MockMaker[C <: Context](val ctx: C) {
 
     def make() = {
       val mock = q"""
-          class MockThing(mockContext: org.scalamock.context.MockContext) extends $typeToImplement {
+          class Mock(mockContext: org.scalamock.context.MockContext) extends $typeToImplement {
             ..$methods
             ..$mocks
             val expects = new {
@@ -90,7 +92,7 @@ class MockMaker[C <: Context](val ctx: C) {
             }
           }
   
-          new MockThing($mockContext)
+          new Mock($mockContext)
         """
 
 //      println(show(mock))
