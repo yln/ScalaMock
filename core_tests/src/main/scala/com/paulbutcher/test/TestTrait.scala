@@ -44,10 +44,10 @@ trait TestTrait {
   def byNameParam(x: => Int): String
   def implicitParam(x: Int)(implicit y: Double): String
   
-//  def upperBound[T <: Product](x: T): Int
-//  def lowerBound[T >: U, U](x: T, y: List[U]): String
-//  def contextBound[T: TypeTag](x: T): String
-//  def viewBound[T <% Ordered[T]](x: T, y: T): Boolean
+  def upperBound[T <: Product](x: T): Int
+  def lowerBound[T >: U, U](x: T, y: List[U]): String
+  def contextBound[T: TypeTag](x: T): String
+  def viewBound[T <% Ordered[T]](x: T, y: T): Boolean
   
   def withImplementation(x: Int) = x * x
 
