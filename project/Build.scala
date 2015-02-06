@@ -114,7 +114,7 @@ object ScalaMockBuild extends Build {
       publishArtifact in (Compile, packageSrc) := false,
       sources in Compile <<= (Seq(core, scalatestSupport, specs2Support).map(sources in Compile in _).join).map(_.flatten),
       libraryDependencies ++= Seq(reflect, scalatest, specs2)
-    )) aggregate(core, core_tests, scalatestSupport, specs2Support, examples)
+    )) aggregate(core, core_tests, scalatestSupport, specs2Support)
 
   lazy val core = Project(
     "core", 
@@ -148,13 +148,4 @@ object ScalaMockBuild extends Build {
       publish := (),
       publishLocal := ()
     )) dependsOn(scalatestSupport)
-    
-  lazy val examples = Project(
-    "examples",
-    file("examples"),
-    settings = buildSettings ++ Seq(
-      name := "ScalaMock Examples",
-      publish := (),
-      publishLocal := ()
-    )) dependsOn(scalatestSupport, specs2Support)
 }
