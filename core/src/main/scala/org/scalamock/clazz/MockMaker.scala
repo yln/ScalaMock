@@ -42,13 +42,13 @@ class MockMaker[C <: Context](val ctx: C) {
           ps.map(p => s"${p.name}: ${p.infoIn(typeToImplement)}").mkString("(", ", ", ")")
         }.mkString("")
       val mockParamss = info.paramLists.map { ps =>
-          ps.map(p => s"${p.name}: org.scalamock.matchers.MockParameter[${p.infoIn(typeToImplement).erasure}]").mkString("(", ", ", ")")
+          ps.map(p => s"${p.name}: org.scalamock.matchers.MockParameter[${p.infoIn(typeToImplement)}]").mkString("(", ", ", ")")
         }.mkString("") 
-      val paramTypes = info.paramLists.flatten.map { p => p.infoIn(typeToImplement).erasure }
       val flatParams = info.paramLists.flatten.map { p => p.name }.mkString("(", ", ", ")")
-      val mockTypes = (paramTypes :+ res).mkString("[", ", ", "]") 
       val mockName = "fake$" + index
       val paramCount = info.paramLists.map(_.length).sum
+      val fakeType = s"org.scalamock.function.MockFunction${paramCount}"
+      val fake = fakeType + List.fill(paramCount + 1)("Any").mkString("[", ", ", "]")
     }
 
     def isMemberOfObject(m: Symbol) = TypeTag.Object.tpe.member(m.name) != NoSymbol
@@ -59,11 +59,11 @@ class MockMaker[C <: Context](val ctx: C) {
       }.zipWithIndex.map { case (m, i) => new Method(m, i) }
 
     val methods = methodsToImplement map { m =>
-        ctx.parse(s"def ${m.name}${m.tparams}${m.paramss} = ${m.mockName}${m.flatParams}")
+        ctx.parse(s"def ${m.name}${m.tparams}${m.paramss} = ${m.mockName}${m.flatParams}.asInstanceOf[${m.res}]")
       }
     
     val mocks = methodsToImplement.map { m =>
-        ctx.parse(s"val ${m.mockName} = new org.scalamock.function.MockFunction${m.paramCount}${m.mockTypes}(mockContext, 'dummyName)")
+        ctx.parse(s"val ${m.mockName} = new ${m.fake}(mockContext, 'dummyName)")
       }
     
     val expecters = methodsToImplement.map { m =>
