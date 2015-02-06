@@ -41,7 +41,7 @@ trait TestTrait {
   def polycurried[T1, T2](x: T1)(y: T2): (T1, T2)
   def polymorphicParam(x: (Int, Double)): String
   def repeatedParam(x: Int, ys: String*): String
-//  def byNameParam(x: => Int): String
+  def byNameParam(x: => Int): String
 //  def implicitParam(x: Int)(implicit y: Double): String
 //  
 //  def upperBound[T <: Product](x: T): Int

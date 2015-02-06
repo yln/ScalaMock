@@ -141,13 +141,13 @@ class MockTest extends FreeSpec with MockFactory with ShouldMatchers {
   //     }
   //   }
     
-  //   "cope with methods with by name parameters" in {
-  //     withExpectations {
-  //       val m = mock[TestTrait]
-  //       (m.byNameParam _).expects(*).returning("it worked")
-  //       assertResult("it worked") { m.byNameParam(42) }
-  //     }
-  //   }
+     "cope with methods with by name parameters" in {
+       withExpectations {
+         val m = mock[TestTrait]
+         m.expects.byNameParam(*).returning("it worked")
+         assertResult("it worked") { m.byNameParam(42) }
+       }
+     }
     
   //   //! TODO - find a way to make this less ugly
   //   "match methods with by name parameters" in {

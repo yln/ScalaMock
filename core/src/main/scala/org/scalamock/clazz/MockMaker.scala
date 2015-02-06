@@ -52,8 +52,10 @@ class MockMaker[C <: Context](val ctx: C) {
       
       def toMockParam(paramType: Type) = {
         val Repeated = "(.*)\\*".r
+        val ByName = "=> (.*)".r
         paramType.toString match {
           case Repeated(t) => s"org.scalamock.matchers.MockParameter[$t]*"
+          case ByName(t) => s"org.scalamock.matchers.MockParameter[$t]"
           case t => s"org.scalamock.matchers.MockParameter[$t]"
         }
       }
