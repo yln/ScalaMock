@@ -22,7 +22,7 @@ package org.scalamock.context
 
 import org.scalamock.handlers.{ CallHandler, Handlers }
 
-private[scalamock] trait MockContext {
+trait MockContext {
   type ExpectationException <: Throwable
 
   private[scalamock] var callLog: CallLog = _

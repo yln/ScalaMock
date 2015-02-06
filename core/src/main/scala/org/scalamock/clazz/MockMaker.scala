@@ -29,34 +29,52 @@ import scala.reflect.macros.whitebox.Context
 class MockMaker[C <: Context](val ctx: C) {
   class MockMakerInner[T: ctx.WeakTypeTag](mockContext: ctx.Expr[MockContext], stub: Boolean, mockName: Option[ctx.Expr[String]]) {
     import ctx.universe._
+    
+    class Method(val m: Symbol, val index: Int) {
+      val info = m.infoIn(typeToImplement)
+      val name = m.name.toString
+      val tparams = info.typeParams match {
+          case Nil => ""
+          case tps => tps.map(_.name).mkString("[", ", ", "]")
+        }
+      val res = info.finalResultType
+      val paramss = info.paramLists.map { ps =>
+          ps.map(p => s"${p.name}: ${p.infoIn(typeToImplement)}").mkString("(", ", ", ")")
+        }.mkString("")
+      val paramTypes = info.paramLists.flatten.map { p => p.infoIn(typeToImplement) }
+      val paramNames = info.paramLists.flatten.map { p => p.name }.mkString("(", ", ", ")")
+      val mockTypes = (paramTypes :+ res).mkString("[", ", ", "]") 
+      val mockName = name + "$" + index
+      val paramCount = info.paramLists.map(_.length).sum
+    }
 
     def isMemberOfObject(m: Symbol) = TypeTag.Object.tpe.member(m.name) != NoSymbol
 
     val typeToImplement = weakTypeOf[T]
-    val methodsToImplement = typeToImplement.members filter { m =>
-      m.isMethod && !isMemberOfObject(m)
-    }
+    val methodsToImplement = typeToImplement.members.filter { m =>
+        m.isMethod && !isMemberOfObject(m)
+      }.zipWithIndex.map { case (m, i) => new Method(m, i) }
 
     val methods = methodsToImplement map { m =>
-      val info = m.infoIn(typeToImplement)
-      val name = m.name
-      val tparams = info.typeParams match {
-        case Nil => ""
-        case tps => tps.map(_.name).mkString("[", ", ", "]")
+        ctx.parse(s"def ${m.name}${m.tparams}${m.paramss} = ${m.mockName}${m.paramNames}")
       }
-      val res = info.finalResultType
-      val paramss = info.paramLists.map { ps =>
-        ps.map(p => s"${p.name}: ${p.infoIn(typeToImplement)}").mkString("(", ", ", ")")
-      }.mkString("")
-      val method = s"def $name$tparams$paramss = null.asInstanceOf[$res]"
-
-      ctx.parse(method)
-    }
+    
+    val mocks = methodsToImplement.map { m =>
+        ctx.parse(s"val ${m.mockName} = new org.scalamock.function.MockFunction${m.paramCount}${m.mockTypes}(mockContext, 'dummyName)")
+      }
 
     def make() = {
-      ctx.Expr(q"""new $typeToImplement {
-          ..$methods
-        }""")
+      val mock = q"""
+          class MockThing(mockContext: org.scalamock.context.MockContext) extends $typeToImplement {
+            ..$methods
+            ..$mocks
+          }
+  
+          new MockThing($mockContext)
+        """
+
+//      println(show(mock))
+      ctx.Expr(mock)
     }
   }
 }

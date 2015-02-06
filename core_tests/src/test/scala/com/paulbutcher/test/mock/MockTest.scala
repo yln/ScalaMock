@@ -34,13 +34,13 @@ class MockTest extends FreeSpec with MockFactory with ShouldMatchers {
   
   autoVerify = false
   
-  // "Mocks should" - {
-  //   "fail if an unexpected method call is made" in {
-  //     withExpectations {
-  //       val m = mock[TestTrait]
-  //       intercept[ExpectationException] { m.oneParam(42) }
-  //     }
-  //   }
+   "Mocks should" - {
+     "fail if an unexpected method call is made" in {
+       withExpectations {
+         val m = mock[TestTrait]
+         intercept[ExpectationException] { m.oneParam(42) }
+       }
+     }
     
   //   "allow expectations to be set" in {
   //     withExpectations {
@@ -397,5 +397,5 @@ class MockTest extends FreeSpec with MockFactory with ShouldMatchers {
   //     (provider.find[User](_: Int)(_: ClassTag[User])) expects (13, *) returning (Failure[User](new Exception()))
   //     provider.find[User](13) shouldBe a[Failure[_]]
   //   }
-  // }
+   }
 }
