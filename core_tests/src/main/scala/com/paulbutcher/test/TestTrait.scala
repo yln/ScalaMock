@@ -50,12 +50,12 @@ trait TestTrait {
 //  def viewBound[T <% Ordered[T]](x: T, y: T): Boolean
 //  
 //  def withImplementation(x: Int) = x * x
-//
-//  def referencesSomeOtherPackage(x: SomeClass): SomeClass
-//  def otherPackageUpperBound[T <: SomeClass](x: T): T
-//  def explicitPackageReference(x: yet.another.pkg.YetAnotherClass): yet.another.pkg.YetAnotherClass
-//  def explicitPackageUpperBound[T <: yet.another.pkg.YetAnotherClass](x: T): T
-//  
+
+  def referencesSomeOtherPackage(x: SomeClass): SomeClass
+  def otherPackageUpperBound[T <: SomeClass](x: T): T
+  def explicitPackageReference(x: yet.another.pkg.YetAnotherClass): yet.another.pkg.YetAnotherClass
+  def explicitPackageUpperBound[T <: yet.another.pkg.YetAnotherClass](x: T): T
+  
 //  var aVar: String
 //  var concreteVar = "foo"
 //
