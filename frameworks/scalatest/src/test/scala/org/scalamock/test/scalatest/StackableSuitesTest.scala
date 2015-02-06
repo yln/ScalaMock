@@ -24,42 +24,43 @@ import org.scalamock.scalatest.MockFactory
 import org.scalamock.test.mockable.TestTrait
 import org.scalatest._
 import org.scalatest.events.TestSucceeded
+import scala.language.reflectiveCalls
 
 class StackableSuitesTest extends FlatSpec with ShouldMatchers with TestSuiteRunner {
 
-  // object EventLogger {
-  //   var events: List[String] = List.empty
-  //   def logEvent(event: String) = { events = events :+ event }
-  // }
+  object EventLogger {
+    var events: List[String] = List.empty
+    def logEvent(event: String) = { events = events :+ event }
+  }
 
-  // trait SuiteWrapper extends SuiteMixin { this: Suite =>
-  //   abstract override def withFixture(test: NoArgTest): Outcome = {
-  //     EventLogger.logEvent("SuiteWrapper setup")
-  //     val outcome = super.withFixture(test)
-  //     EventLogger.logEvent("SuiteWrapper cleanup")
-  //     outcome
-  //   }
-  // }
+  trait SuiteWrapper extends SuiteMixin { this: Suite =>
+    abstract override def withFixture(test: NoArgTest): Outcome = {
+      EventLogger.logEvent("SuiteWrapper setup")
+      val outcome = super.withFixture(test)
+      EventLogger.logEvent("SuiteWrapper cleanup")
+      outcome
+    }
+  }
 
-  // class TestedSuite extends FunSuite with SuiteWrapper with MockFactory with ShouldMatchers {
-  //   test("execute block of code") {
-  //     val mockedTrait = mock[TestTrait]
-  //     (mockedTrait.oneParamMethod _).expects(1).onCall { arg: Int =>
-  //       EventLogger.logEvent("mock method called")
-  //       "one"
-  //     }
-
-  //     mockedTrait.oneParamMethod(1) shouldBe "one"
-  //   }
-  // }
-
-  // "ScalaTest suite" can "be mixed together with other traits which override withFixture" in {
-  //   val outcome = runTestCase[TestedSuite](new TestedSuite)
-  //   outcome shouldBe a[TestSucceeded]
-  //   EventLogger.events shouldBe List(
-  //     "SuiteWrapper setup",
-  //     "mock method called",
-  //     "SuiteWrapper cleanup")
-  // }
+//  class TestedSuite extends FunSuite with SuiteWrapper with MockFactory with ShouldMatchers {
+//    test("execute block of code") {
+//      val mockedTrait = mock[TestTrait]
+//      mockedTrait.expects.oneParamMethod(1).onCall { arg: Int =>
+//        EventLogger.logEvent("mock method called")
+//        "one"
+//      }
+//
+//      mockedTrait.oneParamMethod(1) shouldBe "one"
+//    }
+//  }
+//
+//  "ScalaTest suite" can "be mixed together with other traits which override withFixture" in {
+//    val outcome = runTestCase[TestedSuite](new TestedSuite)
+//    outcome shouldBe a[TestSucceeded]
+//    EventLogger.events shouldBe List(
+//      "SuiteWrapper setup",
+//      "mock method called",
+//      "SuiteWrapper cleanup")
+//  }
 
 }
