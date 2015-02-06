@@ -32,19 +32,19 @@ import org.scalatest.ShouldMatchers
  */
 class BasicTest extends FlatSpec with ShouldMatchers with MockFactory {
 
-  "ScalaTest suite" should "allow to use mock defined in test case scope" in {
-    val mockedTrait = mock[TestTrait]
-    (mockedTrait.oneParamMethod _).expects(1).returning("one")
-    (mockedTrait.oneParamMethod _).expects(2).returning("two")
+  // "ScalaTest suite" should "allow to use mock defined in test case scope" in {
+  //   val mockedTrait = mock[TestTrait]
+  //   (mockedTrait.oneParamMethod _).expects(1).returning("one")
+  //   (mockedTrait.oneParamMethod _).expects(2).returning("two")
 
-    mockedTrait.oneParamMethod(1) shouldBe "one"
-    mockedTrait.oneParamMethod(2) shouldBe "two"
-  }
+  //   mockedTrait.oneParamMethod(1) shouldBe "one"
+  //   mockedTrait.oneParamMethod(2) shouldBe "two"
+  // }
 
-  it should "use separate call logs for each test case" in {
-    val mockedTrait = mock[TestTrait]
-    (mockedTrait.oneParamMethod _).expects(3).returning("three")
+  // it should "use separate call logs for each test case" in {
+  //   val mockedTrait = mock[TestTrait]
+  //   (mockedTrait.oneParamMethod _).expects(3).returning("three")
 
-    mockedTrait.oneParamMethod(3) shouldBe "three"
-  }
+  //   mockedTrait.oneParamMethod(3) shouldBe "three"
+  // }
 }

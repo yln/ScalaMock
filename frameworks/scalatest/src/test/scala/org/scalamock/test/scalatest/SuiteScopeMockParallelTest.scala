@@ -34,19 +34,19 @@ import org.scalatest.ShouldMatchers
 class SuiteScopeMockParallelTest extends FlatSpec with ShouldMatchers with ParallelTestExecution with MockFactory {
   // please note that this test suite mixes in ParallelTestExecution trait
 
-  val mockWithoutExpectationsPredefined = mock[TestTrait]
+  // val mockWithoutExpectationsPredefined = mock[TestTrait]
   
-  "ScalaTest suite" should "allow to use mock defined suite scope" in {
-    (mockWithoutExpectationsPredefined.oneParamMethod _).expects(1).returning("one")
-    (mockWithoutExpectationsPredefined.oneParamMethod _).expects(2).returning("two")
+  // "ScalaTest suite" should "allow to use mock defined suite scope" in {
+  //   (mockWithoutExpectationsPredefined.oneParamMethod _).expects(1).returning("one")
+  //   (mockWithoutExpectationsPredefined.oneParamMethod _).expects(2).returning("two")
 
-    mockWithoutExpectationsPredefined.oneParamMethod(1) shouldBe "one"
-    mockWithoutExpectationsPredefined.oneParamMethod(2) shouldBe "two"
-  }
+  //   mockWithoutExpectationsPredefined.oneParamMethod(1) shouldBe "one"
+  //   mockWithoutExpectationsPredefined.oneParamMethod(2) shouldBe "two"
+  // }
 
-  it should "allow to use mock defined suite scope in more than one test case" in {
-    (mockWithoutExpectationsPredefined.oneParamMethod _).expects(3).returning("three")
+  // it should "allow to use mock defined suite scope in more than one test case" in {
+  //   (mockWithoutExpectationsPredefined.oneParamMethod _).expects(3).returning("three")
 
-    mockWithoutExpectationsPredefined.oneParamMethod(3) shouldBe "three"
-  }
+  //   mockWithoutExpectationsPredefined.oneParamMethod(3) shouldBe "three"
+  // }
 }

@@ -32,38 +32,38 @@ import org.scalatest.ShouldMatchers
  */
 class FixtureContextTest extends FlatSpec with ShouldMatchers with MockFactory {
 
-  trait TestSetup {
-    val mockedTrait = mock[TestTrait]
-    val input = 1
-    val output = "one"
-  }
+  // trait TestSetup {
+  //   val mockedTrait = mock[TestTrait]
+  //   val input = 1
+  //   val output = "one"
+  // }
 
-  trait TestSetupWithExpectationsPredefined extends TestSetup {
-    (mockedTrait.oneParamMethod _).expects(input).returning(output)
-  }
+  // trait TestSetupWithExpectationsPredefined extends TestSetup {
+  //   (mockedTrait.oneParamMethod _).expects(input).returning(output)
+  // }
 
-  trait TestSetupWithHandlerCalledDuringInitialization extends TestSetupWithExpectationsPredefined {
-    mockedTrait.oneParamMethod(input) shouldBe output
-  }
+  // trait TestSetupWithHandlerCalledDuringInitialization extends TestSetupWithExpectationsPredefined {
+  //   mockedTrait.oneParamMethod(input) shouldBe output
+  // }
 
-  "ScalaTest suite" should "allow to use mock defined in fixture-context" in new TestSetup {
-    (mockedTrait.oneParamMethod _).expects(input).returning(output)
-    (mockedTrait.oneParamMethod _).expects(2).returning("two")
+  // "ScalaTest suite" should "allow to use mock defined in fixture-context" in new TestSetup {
+  //   (mockedTrait.oneParamMethod _).expects(input).returning(output)
+  //   (mockedTrait.oneParamMethod _).expects(2).returning("two")
 
-    mockedTrait.oneParamMethod(input) shouldBe output
-    mockedTrait.oneParamMethod(2) shouldBe "two"
-  }
+  //   mockedTrait.oneParamMethod(input) shouldBe output
+  //   mockedTrait.oneParamMethod(2) shouldBe "two"
+  // }
 
-  it should "allow to use mock defined in fixture-context with expecations predefined" in new TestSetupWithExpectationsPredefined {
-    (mockedTrait.oneParamMethod _).expects(2).returning("two")
+  // it should "allow to use mock defined in fixture-context with expecations predefined" in new TestSetupWithExpectationsPredefined {
+  //   (mockedTrait.oneParamMethod _).expects(2).returning("two")
 
-    mockedTrait.oneParamMethod(input) shouldBe output
-    mockedTrait.oneParamMethod(2) shouldBe "two"
-  }
+  //   mockedTrait.oneParamMethod(input) shouldBe output
+  //   mockedTrait.oneParamMethod(2) shouldBe "two"
+  // }
 
-  it should "allow mock defined in fixture-context to be used during context initialization" in new TestSetupWithHandlerCalledDuringInitialization {
-    (mockedTrait.oneParamMethod _).expects(2).returning("two")
+  // it should "allow mock defined in fixture-context to be used during context initialization" in new TestSetupWithHandlerCalledDuringInitialization {
+  //   (mockedTrait.oneParamMethod _).expects(2).returning("two")
 
-    mockedTrait.oneParamMethod(2) shouldBe "two"
-  }
+  //   mockedTrait.oneParamMethod(2) shouldBe "two"
+  // }
 }
