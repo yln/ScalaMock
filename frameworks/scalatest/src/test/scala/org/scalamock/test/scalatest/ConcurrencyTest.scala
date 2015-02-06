@@ -24,6 +24,7 @@ import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration.DurationInt
+import scala.language.reflectiveCalls
 
 import org.scalamock.scalatest.MockFactory
 import org.scalamock.test.mockable.TestTrait
@@ -38,14 +39,14 @@ class ConcurrencyTest extends WordSpec with MockFactory {
     s.verify().once()
   }
 
-  // "Concurrent mock access should work" in {
-  //   val m = mock[TestTrait]
-  //   (m.oneParamMethod _).expects(42).repeated(500000).returning("a")
+   "Concurrent mock access should work" in {
+     val m = mock[TestTrait]
+     m.expects.oneParamMethod(42).repeated(500000).returning("a")
 
-  //   val futures = (1 to 500000).map { _ =>
-  //     Future { m.oneParamMethod(42) }
-  //   }
+     val futures = (1 to 500000).map { _ =>
+       Future { m.oneParamMethod(42) }
+     }
 
-  //   futures.foreach(future => Await.result(future, 10.seconds))
-  // }
+     futures.foreach(future => Await.result(future, 10.seconds))
+   }
 }

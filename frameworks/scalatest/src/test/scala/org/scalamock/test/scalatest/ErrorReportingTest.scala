@@ -26,64 +26,65 @@ import org.scalatest.{ Args, FlatSpec, FunSuite, Reporter, ShouldMatchers, Suite
 import org.scalatest.events.{ Event, TestFailed }
 import org.scalatest.exceptions.TestFailedException
 import scala.language.postfixOps
+import scala.language.reflectiveCalls
 
 /**
  *  Tests that errors are reported correctly in ScalaTest suites
  */
 class ErrorReporting extends FlatSpec with ShouldMatchers with TestSuiteRunner {
 
-  // "ScalaTest suite" should "report unexpected call correctly" in {
-  //   class TestedSuite extends FunSuite with MockFactory {
-  //     test("execute block of code") {
-  //       val mockedTrait = mock[TestTrait]
-  //       mockedTrait.oneParamMethod(3)
-  //     }
-  //   }
+  "ScalaTest suite" should "report unexpected call correctly" in {
+    class TestedSuite extends FunSuite with MockFactory {
+      test("execute block of code") {
+        val mockedTrait = mock[TestTrait]
+        mockedTrait.oneParamMethod(3)
+      }
+    }
 
-  //   val outcome = runTestCase[TestedSuite](new TestedSuite)
-  //   val errorMessage = getErrorMessage[TestFailedException](outcome)
-  //   errorMessage should startWith("Unexpected call")
-  // }
+    val outcome = runTestCase[TestedSuite](new TestedSuite)
+    val errorMessage = getErrorMessage[TestFailedException](outcome)
+    errorMessage should startWith("Unexpected call")
+  }
 
-  // it should "report unexpected call correctly when expectations are set" in {
-  //   class TestedSuite extends FunSuite with MockFactory {
-  //     test("execute block of code") {
-  //       val mockedTrait = mock[TestTrait]
-  //       (mockedTrait.oneParamMethod _).expects(1).returning("one")
-  //       mockedTrait.oneParamMethod(3)
-  //     }
-  //   }
+  it should "report unexpected call correctly when expectations are set" in {
+    class TestedSuite extends FunSuite with MockFactory {
+      test("execute block of code") {
+        val mockedTrait = mock[TestTrait]
+        mockedTrait.expects.oneParamMethod(1).returning("one")
+        mockedTrait.oneParamMethod(3)
+      }
+    }
 
-  //   // Unexpected call should be reported by ScalaTest
-  //   val outcome = runTestCase[TestedSuite](new TestedSuite)
-  //   val errorMessage = getErrorMessage[TestFailedException](outcome)
-  //   errorMessage should startWith("Unexpected call")
-  // }
+    // Unexpected call should be reported by ScalaTest
+    val outcome = runTestCase[TestedSuite](new TestedSuite)
+    val errorMessage = getErrorMessage[TestFailedException](outcome)
+    errorMessage should startWith("Unexpected call")
+  }
 
-  // it should "not hide NullPointerException" in {
-  //   class TestedSuite extends FunSuite with MockFactory {
-  //     test("execute block of code") {
-  //       val mockedTrait = mock[TestTrait]
-  //       (mockedTrait.oneParamMethod _).expects(1).returning("one")
-  //       throw new NullPointerException;
-  //     }
-  //   }
+  it should "not hide NullPointerException" in {
+    class TestedSuite extends FunSuite with MockFactory {
+      test("execute block of code") {
+        val mockedTrait = mock[TestTrait]
+        mockedTrait.expects.oneParamMethod(1).returning("one")
+        throw new NullPointerException;
+      }
+    }
 
-  //   val outcome = runTestCase[TestedSuite](new TestedSuite)
-  //   // NullPointerException should be reported by ScalaTest
-  //   getThrowable[NullPointerException](outcome) shouldBe a[NullPointerException]
-  // }
+    val outcome = runTestCase[TestedSuite](new TestedSuite)
+    // NullPointerException should be reported by ScalaTest
+    getThrowable[NullPointerException](outcome) shouldBe a[NullPointerException]
+  }
 
-  // it should "report default mock names" in {
-  //   class TestedSuite extends FunSuite with MockFactory {
-  //     test("execute block of code") {
-  //       val mockA = mock[TestTrait]
-  //       val mockB = mock[TestTrait]
+  it should "report default mock names" in {
+    class TestedSuite extends FunSuite with MockFactory {
+      test("execute block of code") {
+        val mockA = mock[TestTrait]
+        val mockB = mock[TestTrait]
 
-  //       (mockA.oneParamMethod _).expects(3)
-  //       mockB.oneParamMethod(3)
-  //     }
-  //   }
+        mockA.expects.oneParamMethod(3)
+        mockB.oneParamMethod(3)
+      }
+    }
 
   //   val outcome = runTestCase[TestedSuite](new TestedSuite)
   //   val errorMessage = getErrorMessage[TestFailedException](outcome)
@@ -98,7 +99,7 @@ class ErrorReporting extends FlatSpec with ShouldMatchers with TestSuiteRunner {
   //       |Actual:
   //       |  <mock-2> TestTrait.oneParamMethod(3)
   //     """.stripMargin.trim
-  // }
+  }
 
   // it should "report unexpected calls in readable manner" in {
   //   class TestedSuite extends FunSuite with MockFactory {
@@ -129,5 +130,5 @@ class ErrorReporting extends FlatSpec with ShouldMatchers with TestSuiteRunner {
   //        |  <suite mock> TestTrait.noParamMethod()
   //        |  <mock-1> TestTrait.oneParamMethod(3)
   //     """.stripMargin.trim
-  // }
+  //  }
 }
