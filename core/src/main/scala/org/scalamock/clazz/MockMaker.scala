@@ -41,14 +41,14 @@ class MockMaker[C <: Context](val ctx: C) {
       val res = info.finalResultType
       val paramss = info.paramLists.map { ps =>
           ps.map {p => 
-            s"${if(p.isImplicit) "implicit" else ""} ${p.name}: ${p.infoIn(typeToImplement)}"
+            s"${if(p.isImplicit) "implicit" else ""} ${p.name}: ${p.info}"
           }.mkString("(", ", ", ")")
         }.mkString("")
       val mockParamss = info.paramLists.map { ps =>
-          ps.map(p => s"${p.name}: ${toMockType(p.infoIn(typeToImplement), true)}").mkString("(", ", ", ")")
+          ps.map(p => s"${p.name}: ${toMockType(p.info, true)}").mkString("(", ", ", ")")
         }.mkString("") 
       val flatParams = info.paramLists.flatten.map { p => p.name }.mkString("(", ", ", ")")
-      val paramTypes = info.paramLists.flatten.map { p => p.infoIn(typeToImplement) }
+      val paramTypes = info.paramLists.flatten.map { p => p.info }
       val mockName = "fake$" + index
       val paramCount = info.paramLists.map(_.length).sum
       val fakeType = s"org.scalamock.function.MockFunction${paramCount}"
