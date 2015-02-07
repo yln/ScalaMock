@@ -264,27 +264,27 @@ class MockTest extends FreeSpec with MockFactory with ShouldMatchers {
       }
     }
     
-//    "handle projected types correctly" in {
-//      withExpectations {
-//        val m = mock[TestTrait]
-//        val e = mock[m.Embedded]
-//        val o = mock[m.ATrait]
-//        val i = mock[e.ATrait]
-//        (e.innerTraitProjected _).expects().returning(i)
-//        (e.outerTraitProjected _).expects().returning(o)
-//        assertResult(o) { e.outerTraitProjected }
-//        assertResult(i) { e.innerTraitProjected }
-//      }
-//    }
-//    
+    "handle projected types correctly" in {
+      withExpectations {
+        val m = mock[TestTrait]
+        val e = mock[m.Embedded]
+        val o = mock[m.ATrait]
+        val i = mock[e.ATrait]
+        e.expects.innerTraitProjected().returning(i)
+        e.expects.outerTraitProjected().returning(o)
+        assertResult(o) { e.outerTraitProjected }
+        assertResult(i) { e.innerTraitProjected }
+      }
+    }
+    
 //    "handle path-dependent types correctly" in {
 //      withExpectations {
 //        val m = mock[TestTrait]
 //        val e = mock[m.Embedded]
 //        val o = mock[m.ATrait]
 //        val i = mock[e.ATrait]
-//        (e.innerTrait _).expects().returning(i)
-//        (e.outerTrait _).expects().returning(o)
+//        e.expects.innerTrait().returning(i)
+//        e.expects.outerTrait().returning(o)
 //        assertResult(o) { e.outerTrait }
 //        assertResult(i) { e.innerTrait }
 //      }

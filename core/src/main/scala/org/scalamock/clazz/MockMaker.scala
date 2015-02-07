@@ -126,7 +126,7 @@ class MockMaker[C <: Context](val ctx: C) {
           new Mock($mockContext)
         """
 
-      println(show(mock))
+//      println(show(mock))
       ctx.Expr(mock)
     }
   }
