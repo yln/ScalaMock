@@ -33,7 +33,7 @@ class MockMaker[C <: Context](val ctx: C) {
     import ctx.universe._
     
     class Method(val m: MethodSymbol, val index: Int) {
-      val info = m.infoIn(typeToImplement)
+      val info = m.infoIn(typeToMock)
       val isStable = m.isStable
       val name = m.name
       val typeParams = info.typeParams.map(_.name.toString)
@@ -77,7 +77,7 @@ class MockMaker[C <: Context](val ctx: C) {
       }
       
       def fixEmbedded(paramType: String) = {
-        val Embedded = s"${Pattern.quote(typeToImplement.toString)}#(.*)".r
+        val Embedded = s"${Pattern.quote(typeToMock.toString)}#(.*)".r
         paramType.toString match {
           case Embedded(t) => s"Mock.this.$t"
           case t => t
@@ -89,8 +89,8 @@ class MockMaker[C <: Context](val ctx: C) {
     def isBridge(m: MethodSymbol) = m.asInstanceOf[reflect.internal.HasFlags].hasFlag(reflect.internal.Flags.BRIDGE)
     def isDeferred(m: MethodSymbol) = m.asInstanceOf[reflect.internal.HasFlags].isDeferred
 
-    val typeToImplement = weakTypeOf[T]
-    val methods = typeToImplement.members.toIndexedSeq.filter(_.isMethod).map(_.asMethod)
+    val typeToMock = weakTypeOf[T]
+    val methods = typeToMock.members.toIndexedSeq.filter(_.isMethod).map(_.asMethod)
     val methodsToMock = methods.filter { m =>
         !m.isConstructor && !isMemberOfObject(m) && !m.isPrivate &&
           m.privateWithin == NoSymbol && !m.isFinal &&
@@ -115,7 +115,7 @@ class MockMaker[C <: Context](val ctx: C) {
 
     def make() = {
       val mock = q"""
-          class Mock(mockContext: org.scalamock.context.MockContext) extends $typeToImplement {
+          class Mock(mockContext: org.scalamock.context.MockContext) extends $typeToMock {
             ..$forwarders
             ..$mocks
             val expects = new {
