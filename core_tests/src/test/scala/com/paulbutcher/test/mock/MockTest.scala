@@ -363,13 +363,13 @@ class MockTest extends FreeSpec with MockFactory with ShouldMatchers {
        }
      }
 
-  //   "mock java.io.File" in {
-  //      class MyFile extends java.io.File("")
+     "mock java.io.File" in {
+        class MyFile extends java.io.File("")
 
-  //      withExpectations {
-  //        val m = mock[MyFile]
-  //      }
-  //    }
+        withExpectations {
+          val m = mock[MyFile]
+        }
+      }
     
      "allow to be declared as var" in { // test for issue #62
        withExpectations {
