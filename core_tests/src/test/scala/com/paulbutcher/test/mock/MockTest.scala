@@ -322,13 +322,13 @@ class MockTest extends FreeSpec with MockFactory with ShouldMatchers {
        }
      }
     
-  //   "mock a polymorphic trait" in {
-  //     withExpectations {
-  //       val m = mock[PolymorphicTrait[String]]
-  //       (m.method[Double] _).expects(42, "foo", 1.23).returning("a return value")
-  //       assertResult("a return value") { m.method(42, "foo", 1.23) }
-  //     }
-  //   }
+     "mock a polymorphic trait" in {
+       withExpectations {
+         val m = mock[PolymorphicTrait[String]]
+         m.expects.method(42, "foo", 1.23).returning("a return value")
+         assertResult("a return value") { m.method(42, "foo", 1.23) }
+       }
+     }
     
   //   "handle path-dependent polymorphic types correctly" in {
   //     withExpectations {
@@ -343,25 +343,25 @@ class MockTest extends FreeSpec with MockFactory with ShouldMatchers {
   //     }
   //   }
 
-  //   "mock a class" in {
-  //     withExpectations {
-  //       val m = mock[TestClass]
-  //       (m.m _).expects(42, "foo").returning((123, "bar"))
-  //       assertResult((123, "bar")) { m.m(42, "foo") }
-  //     }
-  //   }
+     "mock a class" in {
+       withExpectations {
+         val m = mock[TestClass]
+         m.expects.m(42, "foo").returning((123, "bar"))
+         assertResult((123, "bar")) { m.m(42, "foo") }
+       }
+     }
     
-  //   "mock a specialized class" in {
-  //     withExpectations {
-  //       val m1 = mock[SpecializedClass[Int]]
-  //       (m1.identity _).expects(42).returning(43)
-  //       assertResult(43) { m1.identity(42) }
+     "mock a specialized class" in {
+       withExpectations {
+         val m1 = mock[SpecializedClass[Int]]
+         m1.expects.identity(42).returning(43)
+         assertResult(43) { m1.identity(42) }
         
-  //       val m2 = mock[SpecializedClass[List[String]]]
-  //       (m2.identity _).expects(List("one", "two", "three")).returning(List("four", "five", "six"))
-  //       assertResult(List("four", "five", "six")) { m2.identity(List("one", "two", "three")) }
-  //     }
-  //   }
+         val m2 = mock[SpecializedClass[List[String]]]
+         m2.expects.identity(List("one", "two", "three")).returning(List("four", "five", "six"))
+         assertResult(List("four", "five", "six")) { m2.identity(List("one", "two", "three")) }
+       }
+     }
 
   //   "mock java.io.File" in {
   //      class MyFile extends java.io.File("")
