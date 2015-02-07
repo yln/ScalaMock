@@ -59,10 +59,10 @@ trait TestTrait {
   var aVar: String
   var concreteVar = "foo"
 
-//  val aVal: String
-//  val concreteVal = "foo"
-//  val fnVal: String => Int
-//  
+  val aVal: String
+  val concreteVal = "foo"
+  val fnVal: String => Int
+  
 //  trait Embedded {
 //    def m(x: Int, y: Double): String
 //

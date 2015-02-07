@@ -30,8 +30,9 @@ class MockMaker[C <: Context](val ctx: C) {
   class MockMakerInner[T: ctx.WeakTypeTag](mockContext: ctx.Expr[MockContext], stub: Boolean, mockName: Option[ctx.Expr[String]]) {
     import ctx.universe._
     
-    class Method(val m: Symbol, val index: Int) {
+    class Method(val m: MethodSymbol, val index: Int) {
       val info = m.infoIn(typeToImplement)
+      val isStable = m.isStable
       val name = m.name
       val typeParams = info.typeParams.map(_.name.toString)
       val tparams = if (typeParams.isEmpty) "" else typeParams.mkString("[", ", ", "]") 
@@ -85,16 +86,20 @@ class MockMaker[C <: Context](val ctx: C) {
           m.privateWithin == NoSymbol && !m.isFinal &&
           (!m.isAccessor || isDeferred(m)) && !isBridge(m)
       }.zipWithIndex.map { case (m, i) => new Method(m, i) }
+    val stableMethods = methodsToMock.filter(!_.isStable)
 
     val forwarders = methodsToMock map { m =>
-        ctx.parse(s"override def ${m.name}${m.tparams}${m.paramss} = ${m.mockName}${m.flatParams}.asInstanceOf[${m.res}]")
+        if (m.isStable)
+          ctx.parse(s"val ${m.name} = null.asInstanceOf[${m.res}]")
+        else
+          ctx.parse(s"override def ${m.name}${m.tparams}${m.paramss} = ${m.mockName}${m.flatParams}.asInstanceOf[${m.res}]")
       }
     
-    val mocks = methodsToMock.map { m =>
+    val mocks = stableMethods.map { m =>
         ctx.parse(s"val ${m.mockName} = new ${m.fake}(mockContext, 'dummyName)")
       }
     
-    val expecters = methodsToMock.map { m =>
+    val expecters = stableMethods.map { m =>
         ctx.parse(s"def ${m.name}${m.tparams}${m.mockParamss}${m.overloadDisambiguation} = ${m.mockName}.expects${m.flatParams}")
       }
 
