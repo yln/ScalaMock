@@ -33,28 +33,28 @@ class JavaMocksTest extends IsolatedSpec {
     m.simpleMethod("two") shouldBe 42
   }
 
-  // it should "mock classes with bridged methods" in {
-  //   val m = mock[JavaClassWithBridgeMethod]
+  it should "mock classes with bridged methods" in {
+    val m = mock[JavaClassWithBridgeMethod]
 
-  //   (m.compare _).expects(new Integer(5)).returning(1)
-  //   (m.compare _).expects(new Integer(6)).returning(2)
+    m.expects.compare(new Integer(5)).returning(1)
+    m.expects.compare(new Integer(6)).returning(2)
 
-  //   def useBridgeMethod[T](gen: JavaGenericInterface[T], x: T) = {
-  //     gen.compare(x)
-  //   }
+    def useBridgeMethod[T](gen: JavaGenericInterface[T], x: T) = {
+      gen.compare(x)
+    }
 
-  //   assertResult(1) { m.compare(new Integer(5)) } // calls: int compare(Integer)
-  //   assertResult(2) { useBridgeMethod(m, new Integer(6)) } // calls: int compare(Object)
-  // }
+    assertResult(1) { m.compare(new Integer(5)) } // calls: int compare(Integer)
+    assertResult(2) { useBridgeMethod(m, new Integer(6)) } // calls: int compare(Object)
+  }
 
-  // //! TODO - this is going to have to wait for macro types for a proper solution
-  // //    "cope with Java methods with repeated parameters" in {
-  // //      withExpectations {
-  // //        val m = mock[JavaInterface]
-  // //        (m.repeatedParam _).expects(42, Seq(1.23, 4.56))
-  // //        m.repeatedParam(42, 1.23, 4.56)
-  // //      }
-  // //    }
+  //! TODO - this is going to have to wait for macro types for a proper solution
+  //    "cope with Java methods with repeated parameters" in {
+  //      withExpectations {
+  //        val m = mock[JavaInterface]
+  //        (m.repeatedParam _).expects(42, Seq(1.23, 4.56))
+  //        m.repeatedParam(42, 1.23, 4.56)
+  //      }
+  //    }
 
   it should "mock a Java interface" in {
     val m = mock[JavaInterface]

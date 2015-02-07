@@ -79,7 +79,8 @@ class MockMaker[C <: Context](val ctx: C) {
     val typeToImplement = weakTypeOf[T]
     val members = typeToImplement.members.toIndexedSeq
     val methodsToImplement = members.filter { m =>
-        m.isMethod && !m.isConstructor && !isMemberOfObject(m) && !m.isPrivate
+        m.isMethod && !m.isConstructor && !isMemberOfObject(m) && !m.isPrivate &&
+          !m.asInstanceOf[reflect.internal.HasFlags].hasFlag(reflect.internal.Flags.BRIDGE)
       }.zipWithIndex.map { case (m, i) => new Method(m, i) }
 
     val methods = methodsToImplement map { m =>
