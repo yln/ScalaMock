@@ -57,7 +57,7 @@ trait TestTrait {
   def explicitPackageUpperBound[T <: yet.another.pkg.YetAnotherClass](x: T): T
   
   var aVar: String
-//  var concreteVar = "foo"
+  var concreteVar = "foo"
 
 //  val aVal: String
 //  val concreteVal = "foo"

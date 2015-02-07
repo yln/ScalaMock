@@ -50,7 +50,7 @@ class MockMaker[C <: Context](val ctx: C) {
       val paramCount = info.paramLists.map(_.length).sum
       val fakeType = s"org.scalamock.function.MockFunction${paramCount}"
       val fake = fakeType + (paramTypes :+ res).map(p => toMockType(p, false)).mkString("[", ", ", "]")
-      val overloads = members.filter { m => m.name == name }
+      val overloads = methods.filter { m => m.name == name }
       val overloadIndex = overloads.indexOf(m)
       val overloadDisambiguation =
         if (overloadIndex > 0) 
@@ -77,29 +77,30 @@ class MockMaker[C <: Context](val ctx: C) {
     def isMemberOfObject(m: Symbol) = TypeTag.Object.tpe.member(m.name) != NoSymbol
 
     val typeToImplement = weakTypeOf[T]
-    val members = typeToImplement.members.toIndexedSeq
-    val methodsToImplement = members.filter { m =>
-        m.isMethod && !m.isConstructor && !isMemberOfObject(m) && !m.isPrivate &&
+    val methods = typeToImplement.members.toIndexedSeq.filter(_.isMethod).map(_.asMethod)
+    val methodsToMock = methods.filter { m =>
+        !m.isConstructor && !isMemberOfObject(m) && !m.isPrivate &&
           m.privateWithin == NoSymbol && !m.isFinal &&
+          (!m.isAccessor || m.asInstanceOf[reflect.internal.HasFlags].isDeferred) &&
           !m.asInstanceOf[reflect.internal.HasFlags].hasFlag(reflect.internal.Flags.BRIDGE)
       }.zipWithIndex.map { case (m, i) => new Method(m, i) }
 
-    val methods = methodsToImplement map { m =>
+    val forwarders = methodsToMock map { m =>
         ctx.parse(s"override def ${m.name}${m.tparams}${m.paramss} = ${m.mockName}${m.flatParams}.asInstanceOf[${m.res}]")
       }
     
-    val mocks = methodsToImplement.map { m =>
+    val mocks = methodsToMock.map { m =>
         ctx.parse(s"val ${m.mockName} = new ${m.fake}(mockContext, 'dummyName)")
       }
     
-    val expecters = methodsToImplement.map { m =>
+    val expecters = methodsToMock.map { m =>
         ctx.parse(s"def ${m.name}${m.tparams}${m.mockParamss}${m.overloadDisambiguation} = ${m.mockName}.expects${m.flatParams}")
       }
 
     def make() = {
       val mock = q"""
           class Mock(mockContext: org.scalamock.context.MockContext) extends $typeToImplement {
-            ..$methods
+            ..$forwarders
             ..$mocks
             val expects = new {
               ..$expecters
