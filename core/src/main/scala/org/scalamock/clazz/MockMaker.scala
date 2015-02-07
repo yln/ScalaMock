@@ -108,9 +108,12 @@ class MockMaker[C <: Context](val ctx: C) {
         ctx.parse(s"val ${m.mockName} = new ${m.fake}(mockContext, 'dummyName)")
       }
     
-    val expecters = stableMethods.map { m =>
-        ctx.parse(s"def ${m.name}${m.tparams}${m.mockParamss}${m.overloadDisambiguation} = ${m.mockName}.expects${m.flatParams}")
+    def constraintSetters(constraint: String) = stableMethods.map { m =>
+        ctx.parse(s"def ${m.name}${m.tparams}${m.mockParamss}${m.overloadDisambiguation} = ${m.mockName}.$constraint${m.flatParams}")
       }
+    
+    lazy val expecters = constraintSetters("expects")
+    lazy val stubbers = constraintSetters("stubs")
 
     def make() = {
       val mock = q"""
@@ -119,6 +122,9 @@ class MockMaker[C <: Context](val ctx: C) {
             ..$mocks
             val expects = new {
               ..$expecters
+            }
+            val stubs = new {
+              ..$stubbers
             }
           }
   

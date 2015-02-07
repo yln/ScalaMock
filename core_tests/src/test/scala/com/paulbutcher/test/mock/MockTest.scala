@@ -399,5 +399,13 @@ class MockTest extends FreeSpec with MockFactory with ShouldMatchers {
        provider.expects.find[User](13)(*) returning (Failure[User](new Exception()))
        provider.find[User](13) shouldBe a[Failure[_]]
      }
+     
+     "treat stubs as syntactic sugar for anyNumberOfTimes" in withExpectations {
+       val m = mock[TestTrait]
+       m.stubs.oneParam(*).returning("foo")
+       assertResult("foo") { m.oneParam(1) }
+       assertResult("foo") { m.oneParam(2) }
+       assertResult("foo") { m.oneParam(3) }
+     }
    }
 }
