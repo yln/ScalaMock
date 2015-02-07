@@ -22,6 +22,7 @@ package com.paulbutcher.test.matchers
 
 import com.paulbutcher.test._
 import org.scalamock.matchers.Matcher
+import scala.language.reflectiveCalls
 
 /** Example Matcher */
 case class UserMatcher(name: Option[String] = None) extends Matcher[User] {
@@ -38,8 +39,8 @@ class MatchersTest extends IsolatedSpec {
   autoVerify = false
 
   val mockedMultiplication = mockFunction[Double, Double, Double]
-//  val testMock = mock[TestTrait]
-//  val userDatabaseMock = mock[UserDatabase]
+  val testMock = mock[TestTrait]
+  val userDatabaseMock = mock[UserDatabase]
 
   behavior of "MatchEpsilon"
 
@@ -56,14 +57,14 @@ class MatchersTest extends IsolatedSpec {
   }
 
   behavior of "MatchAny"
+  
+  it should "match anything" in withExpectations {
+    testMock.expects.polymorphic[Any](*).repeat(3)
 
-  // it should "match anything" in withExpectations {
-  //   (testMock.polymorphic _).expects(*).repeat(3)
-
-  //   testMock.polymorphic(List("55"))
-  //   testMock.polymorphic(List(1, 2, 3))
-  //   testMock.polymorphic(null)
-  // }
+    testMock.polymorphic(List("55"))
+    testMock.polymorphic(List(1, 2, 3))
+    testMock.polymorphic(null)
+  }
 
   behavior of "where matcher"
 
