@@ -371,31 +371,31 @@ class MockTest extends FreeSpec with MockFactory with ShouldMatchers {
   //      }
   //    }
     
-  //   "allow to be declared as var" in { // test for issue #62
-  //     withExpectations {
-  //       var m = mock[TestTrait]
-  //       (m.oneParam _).expects(42).returning("foo")
-  //       assertResult("foo") { m.oneParam(42) }
-  //     }
-  //   }
+     "allow to be declared as var" in { // test for issue #62
+       withExpectations {
+         var m = mock[TestTrait]
+         m.expects.oneParam(42).returning("foo")
+         assertResult("foo") { m.oneParam(42) }
+       }
+     }
 
-  //   "mock Function1[A, B] trait" in withExpectations { // test for issue #69
-  //     val f = mock[Function1[Any, Boolean]]
-  //     (f.apply _).expects(*).returning(true)
-  //     f("this is something") shouldBe true
-  //   }
+     "mock Function1[A, B] trait" in withExpectations { // test for issue #69
+       val f = mock[Function1[Any, Boolean]]
+       f.expects.apply(*).returning(true)
+       f("this is something") shouldBe true
+     }
 
-  //   "mock methods that need a class tag" in withExpectations {
-  //     case class User(first: String, last: String, enabled: Boolean)
+     "mock methods that need a class tag" in withExpectations {
+       case class User(first: String, last: String, enabled: Boolean)
 
-  //     trait DataProviderComponent {
-  //       def find[T: ClassTag](id: Int): Try[T]
-  //     }
+       trait DataProviderComponent {
+         def find[T: ClassTag](id: Int): Try[T]
+       }
 
-  //     val provider = mock[DataProviderComponent]
+       val provider = mock[DataProviderComponent]
 
-  //     (provider.find[User](_: Int)(_: ClassTag[User])) expects (13, *) returning (Failure[User](new Exception()))
-  //     provider.find[User](13) shouldBe a[Failure[_]]
-  //   }
+       provider.expects.find[User](13)(*) returning (Failure[User](new Exception()))
+       provider.find[User](13) shouldBe a[Failure[_]]
+     }
    }
 }
