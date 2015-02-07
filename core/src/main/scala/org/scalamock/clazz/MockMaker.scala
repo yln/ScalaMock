@@ -38,7 +38,7 @@ class MockMaker[C <: Context](val ctx: C) {
       val name = m.name
       val typeParams = info.typeParams.map(_.name.toString)
       val tparams = if (typeParams.isEmpty) "" else typeParams.mkString("[", ", ", "]") 
-      val res = fixTypePaths(info.finalResultType.toString)
+      val res = fixTypePaths(info.finalResultType)
       val paramss = info.paramLists.map { ps =>
           ps.map {p => 
             s"${if(p.isImplicit) "implicit" else ""} ${p.name}: ${p.info}"
@@ -67,20 +67,21 @@ class MockMaker[C <: Context](val ctx: C) {
         } else {
           val Repeated = "(.*)\\*".r
           val ByName = "=> (.*)".r
-          val t = paramType.toString match {
-            case Repeated(t) => s"Seq[${fixTypePaths(t)}]"
-            case ByName(t) => fixTypePaths(t)
-            case t => fixTypePaths(t)
+          val t = fixTypePaths(paramType).toString match {
+            case Repeated(t) => s"Seq[$t]"
+            case ByName(t) => t
+            case t => t
           }
           if (param) s"org.scalamock.matchers.MockParameter[$t]" else t
         }
       }
       
-      def fixTypePaths(paramType: String) = {
-        val Embedded = s"${Pattern.quote(typeToMock.toString)}#(.*)".r
-        paramType.toString match {
-          case Embedded(t) => t
-          case t => t
+      def fixTypePaths(paramType: Type) = {
+        paramType.map { x =>
+          x match {
+            case TypeRef(pre, sym, _) if pre == typeToMock => internal.typeRef(NoPrefix, sym, List())
+            case _ => x
+          }
         }
       }
     }
