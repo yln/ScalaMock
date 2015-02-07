@@ -277,18 +277,19 @@ class MockTest extends FreeSpec with MockFactory with ShouldMatchers {
       }
     }
     
-//    "handle path-dependent types correctly" in {
-//      withExpectations {
-//        val m = mock[TestTrait]
-//        val e = mock[m.Embedded]
-//        val o = mock[m.ATrait]
-//        val i = mock[e.ATrait]
-//        e.expects.innerTrait().returning(i)
+    "handle path-dependent types correctly" in {
+      withExpectations {
+        val m = mock[TestTrait]
+        val e = mock[m.Embedded]
+        val o = mock[m.ATrait]
+        val i = mock[e.ATrait]
+        e.expects.innerTrait().returning(i)
+        assertResult(i) { e.innerTrait }
+        //! TODO Outer trait references not yet working
 //        e.expects.outerTrait().returning(o)
 //        assertResult(o) { e.outerTrait }
-//        assertResult(i) { e.innerTrait }
-//      }
-//    }
+      }
+    }
     
      "cope with upper bounds" in {
        withExpectations {
@@ -329,19 +330,20 @@ class MockTest extends FreeSpec with MockFactory with ShouldMatchers {
          assertResult("a return value") { m.method(42, "foo", 1.23) }
        }
      }
-    
-  //   "handle path-dependent polymorphic types correctly" in {
-  //     withExpectations {
-  //       val m = mock[PolymorphicTrait[String]]
-  //       val e = mock[m.Embedded[Double]]
-  //       val o = mock[m.ATrait[String, Double]]
-  //       val i = mock[e.ATrait[String, Double]]
-  //       (e.innerTrait _).expects("foo", 1.23).returning(i)
-  //       (e.outerTrait _).expects("bar", 4.56).returning(o)
-  //       assertResult(o) { e.outerTrait("bar", 4.56) }
-  //       assertResult(i) { e.innerTrait("foo", 1.23) }
-  //     }
-  //   }
+
+     //! TODO
+//     "handle path-dependent polymorphic types correctly" in {
+//       withExpectations {
+//         val m = mock[PolymorphicTrait[String]]
+//         val e = mock[m.Embedded[Double]]
+//         val o = mock[m.ATrait[String, Double]]
+//         val i = mock[e.ATrait[String, Double]]
+//         e.expects.innerTrait("foo", 1.23).returning(i)
+//         e.expects.outerTrait("bar", 4.56).returning(o)
+//         assertResult(o) { e.outerTrait("bar", 4.56) }
+//         assertResult(i) { e.innerTrait("foo", 1.23) }
+//       }
+//     }
 
      "mock a class" in {
        withExpectations {
