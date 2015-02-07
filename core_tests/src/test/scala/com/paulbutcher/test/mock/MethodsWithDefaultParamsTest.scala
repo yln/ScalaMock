@@ -22,6 +22,8 @@ package com.paulbutcher.test.mock
 
 import com.paulbutcher.test._
 
+import scala.language.reflectiveCalls
+
 class MethodsWithDefaultParamsTest extends IsolatedSpec {
 
   case class CaseClass(a: Int)
@@ -36,51 +38,51 @@ class MethodsWithDefaultParamsTest extends IsolatedSpec {
     def withAllDefaultParams(a: String = "default", b: CaseClass = CaseClass(42)): String
   }
 
-  // behavior of "Mocks"
+  behavior of "Mocks"
 
-  // they should "mock class methods with one default parameter" in {
-  //   val m = mock[ClassHavingMethodsWithDefaultParams]
+  they should "mock class methods with one default parameter" in {
+    val m = mock[ClassHavingMethodsWithDefaultParams]
 
-  //   (m.withOneDefaultParam _) expects ("a", "default") returning "one"
-  //   (m.withOneDefaultParam _) expects ("a", "default") returning "two"
-  //   (m.withOneDefaultParam _) expects ("a", "other") returning "three"
+    m.expects.withOneDefaultParam("a", "default") returning "one"
+    m.expects.withOneDefaultParam("a", "default") returning "two"
+    m.expects.withOneDefaultParam("a", "other") returning "three"
 
-  //   m.withOneDefaultParam("a") shouldBe "one"
-  //   m.withOneDefaultParam("a", "default") shouldBe "two"
-  //   m.withOneDefaultParam("a", "other") shouldBe "three"
-  // }
+    m.withOneDefaultParam("a") shouldBe "one"
+    m.withOneDefaultParam("a", "default") shouldBe "two"
+    m.withOneDefaultParam("a", "other") shouldBe "three"
+  }
 
-  // they should "mock class methods with two default parameters" in {
-  //   val m = mock[ClassHavingMethodsWithDefaultParams]
+  they should "mock class methods with two default parameters" in {
+    val m = mock[ClassHavingMethodsWithDefaultParams]
 
-  //   (m.withTwoDefaultParams _) expects ("a", "default", 42) returning "one"
-  //   (m.withTwoDefaultParams _) expects ("a", "default", 42) returning "two"
-  //   (m.withTwoDefaultParams _) expects ("a", "default", 42) returning "three"
-  //   (m.withTwoDefaultParams _) expects ("a", "other", 99) returning "four"
+    m.expects.withTwoDefaultParams("a", "default", 42) returning "one"
+    m.expects.withTwoDefaultParams("a", "default", 42) returning "two"
+    m.expects.withTwoDefaultParams("a", "default", 42) returning "three"
+    m.expects.withTwoDefaultParams("a", "other", 99) returning "four"
 
-  //   m.withTwoDefaultParams("a") shouldBe "one"
-  //   m.withTwoDefaultParams("a", "default") shouldBe "two"
-  //   m.withTwoDefaultParams("a", "default", 42) shouldBe "three"
-  //   m.withTwoDefaultParams("a", "other", 99) shouldBe "four"
-  // }
+    m.withTwoDefaultParams("a") shouldBe "one"
+    m.withTwoDefaultParams("a", "default") shouldBe "two"
+    m.withTwoDefaultParams("a", "default", 42) shouldBe "three"
+    m.withTwoDefaultParams("a", "other", 99) shouldBe "four"
+  }
 
-  // they should "mock class methods with all parameters having a default value" in {
-  //   val m = mock[ClassHavingMethodsWithDefaultParams]
+  they should "mock class methods with all parameters having a default value" in {
+    val m = mock[ClassHavingMethodsWithDefaultParams]
 
-  //   (m.withAllDefaultParams _) expects ("default", CaseClass(42)) returning "one"
-  //   (m.withAllDefaultParams _) expects ("other", CaseClass(99)) returning "two"
+    m.expects.withAllDefaultParams("default", CaseClass(42)) returning "one"
+    m.expects.withAllDefaultParams("other", CaseClass(99)) returning "two"
 
-  //   m.withAllDefaultParams()
-  //   m.withAllDefaultParams("other", CaseClass(99))
-  // }
+    m.withAllDefaultParams()
+    m.withAllDefaultParams("other", CaseClass(99))
+  }
 
-  // they should "mock trait methods with all parameters having a default value" in {
-  //   val m = mock[TraitHavingMethodsWithDefaultParams]
+  they should "mock trait methods with all parameters having a default value" in {
+    val m = mock[TraitHavingMethodsWithDefaultParams]
 
-  //   (m.withAllDefaultParams _) expects ("default", CaseClass(42)) returning "one"
-  //   (m.withAllDefaultParams _) expects ("other", CaseClass(99)) returning "two"
+    m.expects.withAllDefaultParams("default", CaseClass(42)) returning "one"
+    m.expects.withAllDefaultParams("other", CaseClass(99)) returning "two"
 
-  //   m.withAllDefaultParams()
-  //   m.withAllDefaultParams("other", CaseClass(99))
-  // }
+    m.withAllDefaultParams()
+    m.withAllDefaultParams("other", CaseClass(99))
+  }
 }

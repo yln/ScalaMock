@@ -92,7 +92,8 @@ class MockMaker[C <: Context](val ctx: C) {
     val methodsToMock = methods.filter { m =>
         !m.isConstructor && !isMemberOfObject(m) && !m.isPrivate &&
           m.privateWithin == NoSymbol && !m.isFinal &&
-          (!m.isAccessor || isDeferred(m)) && !isBridge(m)
+          (!m.isAccessor || isDeferred(m)) && !isBridge(m) &&
+          !m.isParamWithDefault // see issue #43
       }.zipWithIndex.map { case (m, i) => new Method(m, i) }
     val stableMethods = methodsToMock.filter(!_.isStable)
 
