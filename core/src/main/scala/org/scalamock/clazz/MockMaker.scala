@@ -38,7 +38,7 @@ class MockMaker[C <: Context](val ctx: C) {
       val name = m.name
       val typeParams = info.typeParams.map(_.name.toString)
       val tparams = if (typeParams.isEmpty) "" else typeParams.mkString("[", ", ", "]") 
-      val res = info.finalResultType
+      val res = fixTypePaths(info.finalResultType.toString)
       val paramss = info.paramLists.map { ps =>
           ps.map {p => 
             s"${if(p.isImplicit) "implicit" else ""} ${p.name}: ${p.info}"
@@ -52,7 +52,7 @@ class MockMaker[C <: Context](val ctx: C) {
       val mockName = "fake$" + index
       val paramCount = info.paramLists.map(_.length).sum
       val fakeType = s"org.scalamock.function.MockFunction${paramCount}"
-      val fake = fakeType + (paramTypes :+ res).map(p => toMockType(p, false)).mkString("[", ", ", "]")
+      val fake = fakeType + (paramTypes :+ info.finalResultType).map(p => toMockType(p, false)).mkString("[", ", ", "]")
       val overloads = methods.filter { m => m.name == name }
       val overloadIndex = overloads.indexOf(m)
       val overloadDisambiguation =
@@ -68,15 +68,15 @@ class MockMaker[C <: Context](val ctx: C) {
           val Repeated = "(.*)\\*".r
           val ByName = "=> (.*)".r
           val t = paramType.toString match {
-            case Repeated(t) => s"Seq[${fixEmbedded(t)}]"
-            case ByName(t) => fixEmbedded(t)
-            case t => fixEmbedded(t)
+            case Repeated(t) => s"Seq[${fixTypePaths(t)}]"
+            case ByName(t) => fixTypePaths(t)
+            case t => fixTypePaths(t)
           }
           if (param) s"org.scalamock.matchers.MockParameter[$t]" else t
         }
       }
       
-      def fixEmbedded(paramType: String) = {
+      def fixTypePaths(paramType: String) = {
         val Embedded = s"${Pattern.quote(typeToMock.toString)}#(.*)".r
         paramType.toString match {
           case Embedded(t) => s"Mock.this.$t"
@@ -100,9 +100,9 @@ class MockMaker[C <: Context](val ctx: C) {
 
     val forwarders = methodsToMock map { m =>
         if (m.isStable)
-          ctx.parse(s"val ${m.name} = null.asInstanceOf[${m.fixEmbedded(m.res.toString)}]")
+          ctx.parse(s"val ${m.name} = null.asInstanceOf[${m.res}]")
         else
-          ctx.parse(s"override def ${m.name}${m.tparams}${m.paramss} = ${m.mockName}${m.flatParams}.asInstanceOf[${m.fixEmbedded(m.res.toString)}]")
+          ctx.parse(s"override def ${m.name}${m.tparams}${m.paramss} = ${m.mockName}${m.flatParams}.asInstanceOf[${m.res}]")
       }
     
     val mocks = stableMethods.map { m =>
