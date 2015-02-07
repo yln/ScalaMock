@@ -79,7 +79,7 @@ class MockMaker[C <: Context](val ctx: C) {
       def fixTypePaths(paramType: String) = {
         val Embedded = s"${Pattern.quote(typeToMock.toString)}#(.*)".r
         paramType.toString match {
-          case Embedded(t) => s"Mock.this.$t"
+          case Embedded(t) => t
           case t => t
         }
       }
