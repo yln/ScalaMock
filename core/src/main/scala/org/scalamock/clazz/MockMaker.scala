@@ -50,7 +50,7 @@ class MockMaker[C <: Context](val ctx: C) {
       val paramTypes = info.paramLists.flatten.map { p => p.info }
       val mockName = "fake$" + index
       val paramCount = info.paramLists.map(_.length).sum
-      val fakeType = s"org.scalamock.function.MockFunction${paramCount}"
+      val fakeType = s"org.scalamock.function.${if (stub) "Stub" else "Mock"}Function${paramCount}"
       val fake = fakeType + (paramTypes :+ info.finalResultType).map(p => toMockType(p, false)).mkString("[", ", ", "]")
       val overloads = methods.filter { m => m.name == name }
       val overloadIndex = overloads.indexOf(m)
@@ -112,20 +112,32 @@ class MockMaker[C <: Context](val ctx: C) {
         ctx.parse(s"def ${m.name}${m.tparams}${m.mockParamss}${m.overloadDisambiguation} = ${m.mockName}.$constraint${m.flatParams}")
       }
     
-    lazy val expecters = constraintSetters("expects")
-    lazy val stubbers = constraintSetters("stubs")
+    val constraints =
+      if (stub)
+        q"""
+          val when = new {
+            ..${constraintSetters("when")}
+          }
+          val verify = new {
+            ..${constraintSetters("verify")}
+          }
+        """
+      else
+        q"""
+          val expects = new {
+            ..${constraintSetters("expects")}
+          }
+          val stubs = new {
+            ..${constraintSetters("stubs")}
+          }
+        """
 
     def make() = {
       val mock = q"""
           class Mock(mockContext: org.scalamock.context.MockContext) extends $typeToMock {
             ..$forwarders
             ..$mocks
-            val expects = new {
-              ..$expecters
-            }
-            val stubs = new {
-              ..$stubbers
-            }
+            ..$constraints
           }
   
           new Mock($mockContext)
