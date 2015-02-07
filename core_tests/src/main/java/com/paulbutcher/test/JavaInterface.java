@@ -22,5 +22,5 @@ package com.paulbutcher.test;
 
 public interface JavaInterface {
     public String m(int x, String y);
-//    public String repeatedParam(int x, double... ys);
+    public String repeatedParam(int x, double... ys);
 }

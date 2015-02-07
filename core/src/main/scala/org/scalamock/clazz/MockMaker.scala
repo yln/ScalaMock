@@ -65,7 +65,7 @@ class MockMaker[C <: Context](val ctx: C) {
           "Any"
         } else {
           val t = fixTypePaths(paramType) match {
-            case TypeRef(_, sym, args) if sym == RepeatedParamClass => s"Seq[${args.head}]"
+            case TypeRef(_, sym, args) if sym == RepeatedParamClass || sym == JavaRepeatedParamClass => s"Seq[${args.head}]"
             case TypeRef(_, sym, args) if sym == ByNameParamClass => args.head.toString
             case t => t.toString
           }
