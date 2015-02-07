@@ -33,10 +33,8 @@ class MockMaker[C <: Context](val ctx: C) {
     class Method(val m: Symbol, val index: Int) {
       val info = m.infoIn(typeToImplement)
       val name = m.name
-      val tparams = info.typeParams match {
-          case Nil => ""
-          case tps => tps.map(_.name).mkString("[", ", ", "]")
-        }
+      val typeParams = info.typeParams.map(_.name.toString)
+      val tparams = if (typeParams.isEmpty) "" else typeParams.mkString("[", ", ", "]") 
       val res = info.finalResultType
       val paramss = info.paramLists.map { ps =>
           ps.map {p => 
@@ -44,13 +42,14 @@ class MockMaker[C <: Context](val ctx: C) {
           }.mkString("(", ", ", ")")
         }.mkString("")
       val mockParamss = info.paramLists.map { ps =>
-          ps.map(p => s"${p.name}: ${toMockParam(p.infoIn(typeToImplement))}").mkString("(", ", ", ")")
+          ps.map(p => s"${p.name}: ${toMockType(p.infoIn(typeToImplement), true)}").mkString("(", ", ", ")")
         }.mkString("") 
       val flatParams = info.paramLists.flatten.map { p => p.name }.mkString("(", ", ", ")")
+      val paramTypes = info.paramLists.flatten.map { p => p.infoIn(typeToImplement) }
       val mockName = "fake$" + index
       val paramCount = info.paramLists.map(_.length).sum
       val fakeType = s"org.scalamock.function.MockFunction${paramCount}"
-      val fake = fakeType + List.fill(paramCount + 1)("Any").mkString("[", ", ", "]")
+      val fake = fakeType + (paramTypes :+ res).map(p => toMockType(p, false)).mkString("[", ", ", "]")
       val overloads = members.filter { m => m.name == name }
       val overloadIndex = overloads.indexOf(m)
       val overloadDisambiguation =
@@ -59,13 +58,18 @@ class MockMaker[C <: Context](val ctx: C) {
         else
           ""
       
-      def toMockParam(paramType: Type) = {
-        val Repeated = "(.*)\\*".r
-        val ByName = "=> (.*)".r
-        paramType.toString match {
-          case Repeated(t) => s"org.scalamock.matchers.MockParameter[$t]*"
-          case ByName(t) => s"org.scalamock.matchers.MockParameter[$t]"
-          case t => s"org.scalamock.matchers.MockParameter[$t]"
+      def toMockType(paramType: Type, param: Boolean) = {
+        if (!param && paramType.exists(x => typeParams.contains(x.toString))) {
+          "Any"
+        } else {
+          val Repeated = "(.*)\\*".r
+          val ByName = "=> (.*)".r
+          val t = paramType.toString match {
+            case Repeated(t) => s"Seq[$t]"
+            case ByName(t) => t
+            case t => t
+          }
+          if (param) s"org.scalamock.matchers.MockParameter[$t]" else t
         }
       }
     }

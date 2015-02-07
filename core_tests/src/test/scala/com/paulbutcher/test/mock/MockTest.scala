@@ -117,7 +117,7 @@ class MockTest extends FreeSpec with MockFactory with ShouldMatchers {
      "cope with methods with repeated parameters" in {
        withExpectations {
          val m = mock[TestTrait]
-         m.expects.repeatedParam(42, "foo", "bar")
+         m.expects.repeatedParam(42, List("foo", "bar"))
          m.repeatedParam(42, "foo", "bar")
        }
      }
