@@ -75,14 +75,15 @@ class MockMaker[C <: Context](val ctx: C) {
     }
 
     def isMemberOfObject(m: Symbol) = TypeTag.Object.tpe.member(m.name) != NoSymbol
+    def isBridge(m: MethodSymbol) = m.asInstanceOf[reflect.internal.HasFlags].hasFlag(reflect.internal.Flags.BRIDGE)
+    def isDeferred(m: MethodSymbol) = m.asInstanceOf[reflect.internal.HasFlags].isDeferred
 
     val typeToImplement = weakTypeOf[T]
     val methods = typeToImplement.members.toIndexedSeq.filter(_.isMethod).map(_.asMethod)
     val methodsToMock = methods.filter { m =>
         !m.isConstructor && !isMemberOfObject(m) && !m.isPrivate &&
           m.privateWithin == NoSymbol && !m.isFinal &&
-          (!m.isAccessor || m.asInstanceOf[reflect.internal.HasFlags].isDeferred) &&
-          !m.asInstanceOf[reflect.internal.HasFlags].hasFlag(reflect.internal.Flags.BRIDGE)
+          (!m.isAccessor || isDeferred(m)) && !isBridge(m)
       }.zipWithIndex.map { case (m, i) => new Method(m, i) }
 
     val forwarders = methodsToMock map { m =>
