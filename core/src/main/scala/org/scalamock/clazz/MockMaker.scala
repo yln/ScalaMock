@@ -23,6 +23,8 @@ package org.scalamock.clazz
 import org.scalamock.context.MockContext
 import org.scalamock.function._
 
+import java.util.regex.Pattern
+
 import scala.reflect.macros.whitebox.Context
 
 //! TODO - get rid of this nasty two-stage construction when https://issues.scala-lang.org/browse/SI-5712 is fixed
@@ -66,11 +68,19 @@ class MockMaker[C <: Context](val ctx: C) {
           val Repeated = "(.*)\\*".r
           val ByName = "=> (.*)".r
           val t = paramType.toString match {
-            case Repeated(t) => s"Seq[$t]"
-            case ByName(t) => t
-            case t => t
+            case Repeated(t) => s"Seq[${fixEmbedded(t)}]"
+            case ByName(t) => fixEmbedded(t)
+            case t => fixEmbedded(t)
           }
           if (param) s"org.scalamock.matchers.MockParameter[$t]" else t
+        }
+      }
+      
+      def fixEmbedded(paramType: String) = {
+        val Embedded = s"${Pattern.quote(typeToImplement.toString)}#(.*)".r
+        paramType.toString match {
+          case Embedded(t) => s"Mock.this.$t"
+          case t => t
         }
       }
     }
@@ -90,9 +100,9 @@ class MockMaker[C <: Context](val ctx: C) {
 
     val forwarders = methodsToMock map { m =>
         if (m.isStable)
-          ctx.parse(s"val ${m.name} = null.asInstanceOf[${m.res}]")
+          ctx.parse(s"val ${m.name} = null.asInstanceOf[${m.fixEmbedded(m.res.toString)}]")
         else
-          ctx.parse(s"override def ${m.name}${m.tparams}${m.paramss} = ${m.mockName}${m.flatParams}.asInstanceOf[${m.res}]")
+          ctx.parse(s"override def ${m.name}${m.tparams}${m.paramss} = ${m.mockName}${m.flatParams}.asInstanceOf[${m.fixEmbedded(m.res.toString)}]")
       }
     
     val mocks = stableMethods.map { m =>
@@ -116,7 +126,7 @@ class MockMaker[C <: Context](val ctx: C) {
           new Mock($mockContext)
         """
 
-//      println(show(mock))
+      println(show(mock))
       ctx.Expr(mock)
     }
   }
