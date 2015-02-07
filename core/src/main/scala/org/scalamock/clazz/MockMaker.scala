@@ -23,14 +23,13 @@ package org.scalamock.clazz
 import org.scalamock.context.MockContext
 import org.scalamock.function._
 
-import java.util.regex.Pattern
-
 import scala.reflect.macros.whitebox.Context
 
 //! TODO - get rid of this nasty two-stage construction when https://issues.scala-lang.org/browse/SI-5712 is fixed
 class MockMaker[C <: Context](val ctx: C) {
   class MockMakerInner[T: ctx.WeakTypeTag](mockContext: ctx.Expr[MockContext], stub: Boolean, mockName: Option[ctx.Expr[String]]) {
     import ctx.universe._
+    import definitions._
     
     class Method(val m: MethodSymbol, val index: Int) {
       val info = m.infoIn(typeToMock)
@@ -65,12 +64,10 @@ class MockMaker[C <: Context](val ctx: C) {
         if (!param && paramType.exists(x => typeParams.contains(x.toString))) {
           "Any"
         } else {
-          val Repeated = "(.*)\\*".r
-          val ByName = "=> (.*)".r
-          val t = fixTypePaths(paramType).toString match {
-            case Repeated(t) => s"Seq[$t]"
-            case ByName(t) => t
-            case t => t
+          val t = fixTypePaths(paramType) match {
+            case TypeRef(_, sym, args) if sym == RepeatedParamClass => s"Seq[${args.head}]"
+            case TypeRef(_, sym, args) if sym == ByNameParamClass => args.head.toString
+            case t => t.toString
           }
           if (param) s"org.scalamock.matchers.MockParameter[$t]" else t
         }
