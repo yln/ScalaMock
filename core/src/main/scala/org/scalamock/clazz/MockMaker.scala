@@ -27,7 +27,7 @@ import scala.reflect.macros.whitebox.Context
 
 //! TODO - get rid of this nasty two-stage construction when https://issues.scala-lang.org/browse/SI-5712 is fixed
 class MockMaker[C <: Context](val ctx: C) {
-  class MockMakerInner[T: ctx.WeakTypeTag](mockContext: ctx.Expr[MockContext], stub: Boolean, mockName: Option[ctx.Expr[String]]) {
+  class MockMakerInner[T: ctx.WeakTypeTag](mockContext: ctx.Expr[MockContext], stub: Boolean, optionalName: Option[ctx.Expr[String]]) {
     import ctx.universe._
     import definitions._
     
@@ -106,9 +106,11 @@ class MockMaker[C <: Context](val ctx: C) {
         else
           ctx.parse(s"override def ${m.name}${m.tparams}${m.paramss} = ${m.fakeName}${m.flatParams}.asInstanceOf[${m.res}]")
       }
-    
+
+    val typeName = s"${typeToMock.typeSymbol.name}${if (typeToMock.typeArgs.isEmpty) "" else typeToMock.typeArgs.mkString("[", ", ", "]")}"
     val mocks = stableMethods.map { m =>
-        ctx.parse(s"val ${m.fakeName} = new ${m.fake}(mock$$special$$context, 'dummyName)")
+        val name = s"$typeName.${m.name}${m.tparams}"
+        ctx.parse(s"""val ${m.fakeName} = new ${m.fake}(mock$$special$$context, Symbol("<" + mock$$special$$mockName + "> $name"))""")
       }
     
     def constraintSetters(constraint: String) = stableMethods.flatMap { m =>
@@ -125,10 +127,16 @@ class MockMaker[C <: Context](val ctx: C) {
       else
         q"""val expects = new { ..${constraintSetters("expects")} }
             val stubs = new { ..${constraintSetters("stubs")} }"""
+            
+    val mockName = optionalName match {
+      case (Some(name)) => q"val mock$$special$$mockName = $name"
+      case None => q"val mock$$special$$mockName = mock$$special$$context.generateMockDefaultName(${if (stub) "stub" else "mock"}).name"
+    }
 
     def make() = {
       val mock = q"""
           class Mock(mock$$special$$context: org.scalamock.context.MockContext) extends $typeToMock {
+            $mockName
             ..$forwarders
             ..$mocks
             ..$constraints
