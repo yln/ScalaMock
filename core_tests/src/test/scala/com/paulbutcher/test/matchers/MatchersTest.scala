@@ -102,10 +102,10 @@ class MatchersTest extends IsolatedSpec {
     userDatabaseMock.addUserAddress(User("John", 23), Address("London", "Baker Street 221b")) shouldBe "matched"
   }
 
-//  it should "be displayed correctly" in withExpectations {
-//    val expectation = userDatabaseMock.expects.addUserAddress(*, argThat[Address] { _ => true }) never ()
-//    expectation.toString() should include("UserDatabase.addUserAddress(*, <matcher>)")
-//  }
+  it should "be displayed correctly" in withExpectations {
+    val expectation = userDatabaseMock.expects.addUserAddress(*, argThat[Address] { _ => true }) never ()
+    expectation.toString() should include("UserDatabase.addUserAddress(*, <matcher>)")
+  }
 
   behavior of "custom matcher"
 
@@ -119,9 +119,9 @@ class MatchersTest extends IsolatedSpec {
     userDatabaseMock.addUserAddress(User("Bob", 23), Address("London", "Baker Street 221b")) shouldBe "matched"
   }
 
-//  it should "be displayed correctly" in withExpectations {
-//    val expectation = userDatabaseMock.expects.addUserAddress(UserMatcher().withName("Alan"), *) never ()
-//    expectation.toString() should include("UserDatabase.addUserAddress(UserMatcher(name=Alan), *)")
-//  }
+  it should "be displayed correctly" in withExpectations {
+    val expectation = userDatabaseMock.expects.addUserAddress(UserMatcher().withName("Alan"), *) never ()
+    expectation.toString() should include("UserDatabase.addUserAddress(UserMatcher(name=Alan), *)")
+  }
 
 }

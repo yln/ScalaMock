@@ -86,49 +86,49 @@ class ErrorReporting extends FlatSpec with ShouldMatchers with TestSuiteRunner {
       }
     }
 
-  //   val outcome = runTestCase[TestedSuite](new TestedSuite)
-  //   val errorMessage = getErrorMessage[TestFailedException](outcome)
-  //   errorMessage shouldBe
-  //     """|Unexpected call: <mock-2> TestTrait.oneParamMethod(3)
-  //       |
-  //       |Expected:
-  //       |inAnyOrder {
-  //       |  <mock-1> TestTrait.oneParamMethod(3) once (never called - UNSATISFIED)
-  //       |}
-  //       |
-  //       |Actual:
-  //       |  <mock-2> TestTrait.oneParamMethod(3)
-  //     """.stripMargin.trim
+    val outcome = runTestCase[TestedSuite](new TestedSuite)
+    val errorMessage = getErrorMessage[TestFailedException](outcome)
+    errorMessage shouldBe
+      """|Unexpected call: <mock-2> TestTrait.oneParamMethod(3)
+        |
+        |Expected:
+        |inAnyOrder {
+        |  <mock-1> TestTrait.oneParamMethod(3) once (never called - UNSATISFIED)
+        |}
+        |
+        |Actual:
+        |  <mock-2> TestTrait.oneParamMethod(3)
+      """.stripMargin.trim
   }
 
-  // it should "report unexpected calls in readable manner" in {
-  //   class TestedSuite extends FunSuite with MockFactory {
-  //     val suiteScopeMock = mock[TestTrait]("suite mock")
-  //     (suiteScopeMock.noParamMethod _) expects () returning ("two") twice
+  it should "report unexpected calls in readable manner" in {
+    class TestedSuite extends FunSuite with MockFactory {
+      val suiteScopeMock = mock[TestTrait]("suite mock")
+      suiteScopeMock.expects.noParamMethod returning ("two") twice
 
-  //     test("execute block of code") {
-  //       val mockedTrait = mock[TestTrait]
-  //       (mockedTrait.polymorphicMethod _).expects(List(1)).returning("one")
+      test("execute block of code") {
+        val mockedTrait = mock[TestTrait]
+        mockedTrait.expects.polymorphicMethod(List(1)).returning("one")
 
-  //       suiteScopeMock.noParamMethod()
-  //       mockedTrait.oneParamMethod(3)
-  //     }
-  //   }
+        suiteScopeMock.noParamMethod()
+        mockedTrait.oneParamMethod(3)
+      }
+    }
 
-  //   val outcome = runTestCase[TestedSuite](new TestedSuite)
-  //   val errorMessage = getErrorMessage[TestFailedException](outcome)
-  //   errorMessage shouldBe
-  //     """|Unexpected call: <mock-1> TestTrait.oneParamMethod(3)
-  //        |
-  //        |Expected:
-  //        |inAnyOrder {
-  //        |  <suite mock> TestTrait.noParamMethod() twice (called once - UNSATISFIED)
-  //        |  <mock-1> TestTrait.polymorphicMethod[T](List(1)) once (never called - UNSATISFIED)
-  //        |}
-  //        |
-  //        |Actual:
-  //        |  <suite mock> TestTrait.noParamMethod()
-  //        |  <mock-1> TestTrait.oneParamMethod(3)
-  //     """.stripMargin.trim
-  //  }
+    val outcome = runTestCase[TestedSuite](new TestedSuite)
+    val errorMessage = getErrorMessage[TestFailedException](outcome)
+    errorMessage shouldBe
+      """|Unexpected call: <mock-1> TestTrait.oneParamMethod(3)
+         |
+         |Expected:
+         |inAnyOrder {
+         |  <suite mock> TestTrait.noParamMethod() twice (called once - UNSATISFIED)
+         |  <mock-1> TestTrait.polymorphicMethod[T](List(1)) once (never called - UNSATISFIED)
+         |}
+         |
+         |Actual:
+         |  <suite mock> TestTrait.noParamMethod()
+         |  <mock-1> TestTrait.oneParamMethod(3)
+      """.stripMargin.trim
+   }
 }
