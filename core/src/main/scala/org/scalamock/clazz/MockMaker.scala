@@ -48,7 +48,7 @@ class MockMaker[C <: Context](val ctx: C) {
         }.mkString("") 
       val flatParams = info.paramLists.flatten.map { p => p.name }.mkString("(", ", ", ")")
       val paramTypes = info.paramLists.flatten.map { p => p.info }
-      val mockName = "fake$" + index
+      val mockName = s"fake$$$name$$$index"
       val paramCount = info.paramLists.map(_.length).sum
       val fakeType = s"org.scalamock.function.${if (stub) "Stub" else "Mock"}Function${paramCount}"
       val fake = fakeType + (paramTypes :+ info.finalResultType).map(p => toMockType(p, false)).mkString("[", ", ", "]")
