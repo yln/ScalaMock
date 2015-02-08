@@ -31,7 +31,7 @@ class MockMaker[C <: Context](val ctx: C) {
     import ctx.universe._
     import definitions._
     
-    class Method(val m: MethodSymbol, val index: Int) {
+    class Method(val m: MethodSymbol) {
       val info = m.infoIn(typeToMock)
       val isStable = m.isStable
       val name = m.name
@@ -48,7 +48,6 @@ class MockMaker[C <: Context](val ctx: C) {
         }.mkString("") 
       val flatParams = info.paramLists.flatten.map { p => p.name }.mkString("(", ", ", ")")
       val paramTypes = info.paramLists.flatten.map { p => p.info }
-      val mockName = s"fake$$$name$$$index"
       val paramCount = info.paramLists.map(_.length).sum
       val fakeType = s"org.scalamock.function.${if (stub) "Stub" else "Mock"}Function${paramCount}"
       val fake = fakeType + (paramTypes :+ info.finalResultType).map(p => toMockType(p, false)).mkString("[", ", ", "]")
@@ -59,6 +58,7 @@ class MockMaker[C <: Context](val ctx: C) {
           (1 to overloadIndex).map(i => s"x$i: scala.Predef.DummyImplicit").mkString("(implicit ", ", ", ")")
         else
           ""
+      val fakeName = s"fake$$$name$$$overloadIndex"
       val matcherFunction = s"org.scalamock.function.FunctionAdapter${paramCount}"
       val matcherParamTypes = info.paramLists.flatten.map { p => toMockType(p.info, false) }
       val matcherType = s"$matcherFunction${(matcherParamTypes :+ "Boolean").mkString("[", ", ", "]")}"
@@ -97,24 +97,24 @@ class MockMaker[C <: Context](val ctx: C) {
           m.privateWithin == NoSymbol && !m.isFinal &&
           (!m.isAccessor || isDeferred(m)) && !isBridge(m) &&
           !m.isParamWithDefault // see issue #43
-      }.zipWithIndex.map { case (m, i) => new Method(m, i) }
+      }.map(new Method(_))
     val stableMethods = methodsToMock.filter(!_.isStable)
 
     val forwarders = methodsToMock map { m =>
         if (m.isStable)
           ctx.parse(s"val ${m.name} = null.asInstanceOf[${m.res}]")
         else
-          ctx.parse(s"override def ${m.name}${m.tparams}${m.paramss} = ${m.mockName}${m.flatParams}.asInstanceOf[${m.res}]")
+          ctx.parse(s"override def ${m.name}${m.tparams}${m.paramss} = ${m.fakeName}${m.flatParams}.asInstanceOf[${m.res}]")
       }
     
     val mocks = stableMethods.map { m =>
-        ctx.parse(s"val ${m.mockName} = new ${m.fake}(mockContext, 'dummyName)")
+        ctx.parse(s"val ${m.fakeName} = new ${m.fake}(mockContext, 'dummyName)")
       }
     
     def constraintSetters(constraint: String) = stableMethods.flatMap { m =>
         List(
-          ctx.parse(s"def ${m.name}${m.tparams}${m.mockParamss}${m.overloadDisambiguation} = ${m.mockName}.$constraint${m.flatParams}"),
-          ctx.parse(s"def ${m.name}${m.tparams}(matcher: ${m.matcherType})${m.overloadDisambiguation} = ${m.mockName}.$constraint(matcher)")
+          ctx.parse(s"def ${m.name}${m.tparams}${m.mockParamss}${m.overloadDisambiguation} = ${m.fakeName}.$constraint${m.flatParams}"),
+          ctx.parse(s"def ${m.name}${m.tparams}(matcher: ${m.matcherType})${m.overloadDisambiguation} = ${m.fakeName}.$constraint(matcher)")
         )
       }
     
