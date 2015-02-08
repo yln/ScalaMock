@@ -117,4 +117,16 @@ class OverloadedMethodsTest extends IsolatedSpec {
     m.print("foo")
   }
 
+  // Test for issue #94
+  they should "cope with an overloaded method with a generic list" in {
+    trait Foo {
+      def overloaded(x: List[_]): String
+      def overloaded[T](x: List[T], y: String): String
+    }
+    
+    val fooMock = mock[Foo]
+    fooMock.expects.overloaded(List(1.0, 2.0)) returning "one two"
+    
+    assertResult("one two") { fooMock.overloaded(List(1.0, 2.0)) }
+  }
 }
