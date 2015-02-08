@@ -417,5 +417,13 @@ class MockTest extends FreeSpec with MockFactory with ShouldMatchers {
        assertResult("foo") { m.oneParam(2) }
        assertResult("foo") { m.oneParam(3) }
      }
+     
+     // Test for issue #76
+     "mock a trait extending PartiallyOrdered" in withExpectations {
+       trait P extends PartiallyOrdered[P] {
+         def f(x: P): P
+       }
+       val m = mock[P]
+     }
    }
 }
