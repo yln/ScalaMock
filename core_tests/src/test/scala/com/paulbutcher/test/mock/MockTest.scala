@@ -340,19 +340,18 @@ class MockTest extends FreeSpec with MockFactory with ShouldMatchers {
        }
      }
 
-     //! TODO
-//     "handle path-dependent polymorphic types correctly" in {
-//       withExpectations {
-//         val m = mock[PolymorphicTrait[String]]
-//         val e = mock[m.Embedded[Double]]
-//         val o = mock[m.ATrait[String, Double]]
-//         val i = mock[e.ATrait[String, Double]]
-//         e.expects.innerTrait("foo", 1.23).returning(i)
-//         e.expects.outerTrait("bar", 4.56).returning(o)
-//         assertResult(o) { e.outerTrait("bar", 4.56) }
-//         assertResult(i) { e.innerTrait("foo", 1.23) }
-//       }
-//     }
+     "handle path-dependent polymorphic types correctly" in {
+       withExpectations {
+         val m = mock[PolymorphicTrait[String]]
+         val e = mock[m.Embedded[Double]]
+         val o = mock[m.ATrait[String, Double]]
+         val i = mock[e.ATrait[String, Double]]
+         e.expects.innerTrait("foo", 1.23).returning(i)
+         e.expects.outerTrait("bar", 4.56).returning(o)
+         assertResult(o) { e.outerTrait("bar", 4.56) }
+         assertResult(i) { e.innerTrait("foo", 1.23) }
+       }
+     }
 
      "mock a class" in {
        withExpectations {

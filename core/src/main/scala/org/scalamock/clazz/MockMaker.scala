@@ -76,7 +76,7 @@ class MockMaker[C <: Context](val ctx: C) {
       def fixTypePaths(paramType: Type) = {
         paramType.map { x =>
           x match {
-            case TypeRef(pre, sym, _) if pre == typeToMock => internal.typeRef(NoPrefix, sym, List())
+            case TypeRef(pre, sym, args) if pre == typeToMock => internal.typeRef(NoPrefix, sym, args)
             case _ => x
           }
         }
