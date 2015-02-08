@@ -59,6 +59,9 @@ class MockMaker[C <: Context](val ctx: C) {
           (1 to overloadIndex).map(i => s"x$i: scala.Predef.DummyImplicit").mkString("(implicit ", ", ", ")")
         else
           ""
+      val matcherFunction = s"org.scalamock.function.FunctionAdapter${paramCount}"
+      val matcherParamTypes = info.paramLists.flatten.map { p => toMockType(p.info, false) }
+      val matcherType = s"$matcherFunction${(matcherParamTypes :+ "Boolean").mkString("[", ", ", "]")}"
       
       def toMockType(paramType: Type, param: Boolean) = {
         if (!param && paramType.exists(x => typeParams.contains(x.toString))) {
@@ -108,8 +111,11 @@ class MockMaker[C <: Context](val ctx: C) {
         ctx.parse(s"val ${m.mockName} = new ${m.fake}(mockContext, 'dummyName)")
       }
     
-    def constraintSetters(constraint: String) = stableMethods.map { m =>
-        ctx.parse(s"def ${m.name}${m.tparams}${m.mockParamss}${m.overloadDisambiguation} = ${m.mockName}.$constraint${m.flatParams}")
+    def constraintSetters(constraint: String) = stableMethods.flatMap { m =>
+        List(
+          ctx.parse(s"def ${m.name}${m.tparams}${m.mockParamss}${m.overloadDisambiguation} = ${m.mockName}.$constraint${m.flatParams}"),
+          ctx.parse(s"def ${m.name}${m.tparams}(matcher: ${m.matcherType})${m.overloadDisambiguation} = ${m.mockName}.$constraint(matcher)")
+        )
       }
     
     val constraints =
