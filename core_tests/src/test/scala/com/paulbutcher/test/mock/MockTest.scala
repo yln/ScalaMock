@@ -247,6 +247,11 @@ class MockTest extends FreeSpec with MockFactory with ShouldMatchers {
       }
     }
     
+    "mock a lazy val" in withExpectations {
+      val m = mock[TestTrait]
+      assertResult("foo") { m.lazyVal }
+    }
+    
     "cope with non-abstract methods" in {
       withExpectations {
         val m = mock[TestTrait]

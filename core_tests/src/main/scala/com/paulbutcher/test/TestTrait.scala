@@ -62,6 +62,7 @@ trait TestTrait {
   val aVal: String
   val concreteVal = "foo"
   val fnVal: String => Int
+  lazy val lazyVal = "foo"
   
   trait Embedded {
     def m(x: Int, y: Double): String
