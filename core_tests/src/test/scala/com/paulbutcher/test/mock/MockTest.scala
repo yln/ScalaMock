@@ -425,5 +425,17 @@ class MockTest extends FreeSpec with MockFactory with ShouldMatchers {
        }
        val m = mock[P]
      }
+     
+     // Test for issue #93
+     "mock an overloaded method with a generic parameter available to the trait" in withExpectations {
+       trait OverloadedMultiParams[A] {
+         def meth(i: Int, a: A): Int
+         def meth(): Int
+       }
+      
+       val mockTrait = mock[OverloadedMultiParams[String]]
+       mockTrait.expects.meth(1, "Hello").returns(1)
+       assertResult(1) { mockTrait.meth(1, "Hello") }
+     }
    }
 }
