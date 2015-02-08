@@ -120,23 +120,11 @@ class MockMaker[C <: Context](val ctx: C) {
     
     val constraints =
       if (stub)
-        q"""
-          val when = new {
-            ..${constraintSetters("when")}
-          }
-          val verify = new {
-            ..${constraintSetters("verify")}
-          }
-        """
+        q"""val when = new { ..${constraintSetters("when")} }
+            val verify = new { ..${constraintSetters("verify")} }"""
       else
-        q"""
-          val expects = new {
-            ..${constraintSetters("expects")}
-          }
-          val stubs = new {
-            ..${constraintSetters("stubs")}
-          }
-        """
+        q"""val expects = new { ..${constraintSetters("expects")} }
+            val stubs = new { ..${constraintSetters("stubs")} }"""
 
     def make() = {
       val mock = q"""
