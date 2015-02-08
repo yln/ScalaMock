@@ -264,6 +264,16 @@ class MockTest extends FreeSpec with MockFactory with ShouldMatchers {
       }
     }
     
+    // Test for issue #60
+    "mock a method returning an optional embedded trait" in withExpectations {
+      val m = mock[TestTrait]
+      val e = mock[m.Embedded]
+      m.expects.optionalEmbedded().returning(None)
+      m.expects.optionalEmbedded().returning(Some(e))
+      assertResult(None) { m.optionalEmbedded() }
+      assertResult(Some(e)) { m.optionalEmbedded() }
+    }
+    
     "handle projected types correctly" in {
       withExpectations {
         val m = mock[TestTrait]

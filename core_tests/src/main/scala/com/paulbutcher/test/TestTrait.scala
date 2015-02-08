@@ -76,4 +76,5 @@ trait TestTrait {
   trait ATrait
   
   def referencesEmbedded(): Embedded
+  def optionalEmbedded(): Option[Embedded]
 }
