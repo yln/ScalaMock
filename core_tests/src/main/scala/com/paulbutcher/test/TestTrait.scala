@@ -63,19 +63,4 @@ trait TestTrait {
   val concreteVal = "foo"
   val fnVal: String => Int
   lazy val lazyVal = "foo"
-  
-  trait Embedded {
-    def m(x: Int, y: Double): String
-
-    trait ATrait
-    def innerTrait(): ATrait
-    def outerTrait(): TestTrait.this.ATrait
-    def innerTraitProjected(): TestTrait#Embedded#ATrait
-    def outerTraitProjected(): TestTrait#ATrait
-  }
-  
-  trait ATrait
-  
-  def referencesEmbedded(): Embedded
-  def optionalEmbedded(): Option[Embedded]
 }

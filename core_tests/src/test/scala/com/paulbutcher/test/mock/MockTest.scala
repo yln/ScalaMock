@@ -261,51 +261,6 @@ class MockTest extends FreeSpec with MockFactory with ShouldMatchers {
       }
     }
     
-    "mock an embeddded trait" in {
-      withExpectations {
-        val t = mock[TestTrait]
-        val e = mock[t.Embedded]
-        t.expects.referencesEmbedded().returning(e)
-        assertResult(e) { t.referencesEmbedded }
-      }
-    }
-    
-    // Test for issue #60
-    "mock a method returning an optional embedded trait" in withExpectations {
-      val t = mock[TestTrait]
-      val e = mock[t.Embedded]
-      t.expects.optionalEmbedded().returning(None)
-      t.expects.optionalEmbedded().returning(Some(e))
-      assertResult(None) { t.optionalEmbedded() }
-      assertResult(Some(e)) { t.optionalEmbedded() }
-    }
-    
-    "handle projected types correctly" in {
-      withExpectations {
-        val t = mock[TestTrait]
-        val e = mock[t.Embedded]
-        val o = mock[t.ATrait]
-        val i = mock[e.ATrait]
-        e.expects.innerTraitProjected().returning(i)
-        e.expects.outerTraitProjected().returning(o)
-        assertResult(o) { e.outerTraitProjected }
-        assertResult(i) { e.innerTraitProjected }
-      }
-    }
-    
-    "handle path-dependent types correctly" in {
-      withExpectations {
-        val t = mock[TestTrait]
-        val e = mock[t.Embedded]
-        val o = mock[t.ATrait]
-        val i = mock[e.ATrait]
-        e.expects.innerTrait().returning(i)
-        assertResult(i) { e.innerTrait }
-        e.expects.outerTrait().returning(o)
-        assertResult(o) { e.outerTrait }
-      }
-    }
-    
      "cope with upper bounds" in {
        withExpectations {
          val m = mock[TestTrait]
@@ -441,14 +396,5 @@ class MockTest extends FreeSpec with MockFactory with ShouldMatchers {
        mockTrait.expects.meth(1, "Hello").returns(1)
        assertResult(1) { mockTrait.meth(1, "Hello") }
      }
-     
-     // Test for issue #63
-//     "mock a custom map" in withExpectations {
-//       class MapProxy[A, B](map: mutable.Map[A, B]) extends
-//         mutable.Map[A, B] with mutable.MapLike[A, B, mutable.Map[A, B]]
-//       class MapProxyTestable extends MapProxy(mutable.Map.empty[Int, Char])
-//       
-//       val mapStub = stub[MapProxyTestable]
-//     }
    }
 }
