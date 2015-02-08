@@ -108,4 +108,9 @@ class JavaMocksTest extends IsolatedSpec {
     m.overloadedGeneric("one") shouldBe "first"
     m.overloadedGeneric(2) shouldBe "second"
   }
+  
+  //! TODO Test for issue #86
+//  it should "mock a Java method taking an unrefined Map" in {
+//    val m = mock[Issue86]
+//  }
 }
