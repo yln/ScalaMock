@@ -93,6 +93,7 @@ object ShellPrompt {
 
 object Dependencies {
   val scalatest =  "org.scalatest" %% "scalatest" % "2.2.4"
+  val specs2 = "org.specs2" %% "specs2" % "2.4.16"
   val reflect = "org.scala-lang" % "scala-reflect" % BuildSettings.buildScalaVersion
 }
 
@@ -107,9 +108,9 @@ object ScalaMockBuild extends Build {
       compile in Compile := Analysis.Empty,
       publishArtifact in (Compile, packageBin) := false,
       publishArtifact in (Compile, packageSrc) := false,
-      sources in Compile <<= (Seq(core, scalatestSupport).map(sources in Compile in _).join).map(_.flatten),
+      sources in Compile <<= (Seq(core, scalatestSupport, specs2Support).map(sources in Compile in _).join).map(_.flatten),
       libraryDependencies ++= Seq(reflect, scalatest)
-    )) aggregate(core, core_tests, scalatestSupport)
+    )) aggregate(core, core_tests, scalatestSupport, specs2Support)
 
   lazy val core = Project(
     "core", 
@@ -125,6 +126,14 @@ object ScalaMockBuild extends Build {
     settings = buildSettings ++ Seq(
       name := "ScalaMock ScalaTest Support",
       libraryDependencies ++= Seq(scalatest)
+    )) dependsOn(core)
+
+  lazy val specs2Support = Project(
+    "specs2", 
+    file("frameworks/specs2"),
+    settings = buildSettings ++ Seq(
+      name := "ScalaMock Specs2 Support",
+      libraryDependencies += specs2
     )) dependsOn(core)
 
   lazy val core_tests = Project(

@@ -20,13 +20,14 @@
 
 package org.scalamock
 
+import org.scalamock.clazz.Mock
 import org.scalamock.context.{MockContext, CallLog}
 import org.scalamock.function._
 import org.scalamock.handlers.{ Handlers, OrderedHandlers, UnorderedHandlers }
 import org.scalamock.matchers._
 
 /** ScalaMock public interface */
-trait AbstractMockFactoryBase extends MockFunctions with Matchers { this: MockContext =>
+trait AbstractMockFactoryBase extends Mock with MockFunctions with Matchers { this: MockContext =>
 
   protected def withExpectations[T](what: => T): T
 
