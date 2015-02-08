@@ -108,7 +108,7 @@ class MockMaker[C <: Context](val ctx: C) {
       }
     
     val mocks = stableMethods.map { m =>
-        ctx.parse(s"val ${m.fakeName} = new ${m.fake}(mockContext, 'dummyName)")
+        ctx.parse(s"val ${m.fakeName} = new ${m.fake}(mock$$special$$context, 'dummyName)")
       }
     
     def constraintSetters(constraint: String) = stableMethods.flatMap { m =>
@@ -128,7 +128,7 @@ class MockMaker[C <: Context](val ctx: C) {
 
     def make() = {
       val mock = q"""
-          class Mock(mockContext: org.scalamock.context.MockContext) extends $typeToMock {
+          class Mock(mock$$special$$context: org.scalamock.context.MockContext) extends $typeToMock {
             ..$forwarders
             ..$mocks
             ..$constraints
