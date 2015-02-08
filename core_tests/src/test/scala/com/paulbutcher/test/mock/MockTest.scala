@@ -257,28 +257,28 @@ class MockTest extends FreeSpec with MockFactory with ShouldMatchers {
     
     "mock an embeddded trait" in {
       withExpectations {
-        val m = mock[TestTrait]
-        val e = mock[m.Embedded]
-        m.expects.referencesEmbedded().returning(e)
-        assertResult(e) { m.referencesEmbedded }
+        val t = mock[TestTrait]
+        val e = mock[t.Embedded]
+        t.expects.referencesEmbedded().returning(e)
+        assertResult(e) { t.referencesEmbedded }
       }
     }
     
     // Test for issue #60
     "mock a method returning an optional embedded trait" in withExpectations {
-      val m = mock[TestTrait]
-      val e = mock[m.Embedded]
-      m.expects.optionalEmbedded().returning(None)
-      m.expects.optionalEmbedded().returning(Some(e))
-      assertResult(None) { m.optionalEmbedded() }
-      assertResult(Some(e)) { m.optionalEmbedded() }
+      val t = mock[TestTrait]
+      val e = mock[t.Embedded]
+      t.expects.optionalEmbedded().returning(None)
+      t.expects.optionalEmbedded().returning(Some(e))
+      assertResult(None) { t.optionalEmbedded() }
+      assertResult(Some(e)) { t.optionalEmbedded() }
     }
     
     "handle projected types correctly" in {
       withExpectations {
-        val m = mock[TestTrait]
-        val e = mock[m.Embedded]
-        val o = mock[m.ATrait]
+        val t = mock[TestTrait]
+        val e = mock[t.Embedded]
+        val o = mock[t.ATrait]
         val i = mock[e.ATrait]
         e.expects.innerTraitProjected().returning(i)
         e.expects.outerTraitProjected().returning(o)
@@ -289,15 +289,14 @@ class MockTest extends FreeSpec with MockFactory with ShouldMatchers {
     
     "handle path-dependent types correctly" in {
       withExpectations {
-        val m = mock[TestTrait]
-        val e = mock[m.Embedded]
-        val o = mock[m.ATrait]
+        val t = mock[TestTrait]
+        val e = mock[t.Embedded]
+        val o = mock[t.ATrait]
         val i = mock[e.ATrait]
         e.expects.innerTrait().returning(i)
         assertResult(i) { e.innerTrait }
-        //! TODO Outer trait references not yet working
-//        e.expects.outerTrait().returning(o)
-//        assertResult(o) { e.outerTrait }
+        e.expects.outerTrait().returning(o)
+        assertResult(o) { e.outerTrait }
       }
     }
     

@@ -68,7 +68,7 @@ trait TestTrait {
 
     trait ATrait
     def innerTrait(): ATrait
-//    def outerTrait(): TestTrait.this.ATrait
+    def outerTrait(): TestTrait.this.ATrait
     def innerTraitProjected(): TestTrait#Embedded#ATrait
     def outerTraitProjected(): TestTrait#ATrait
   }
