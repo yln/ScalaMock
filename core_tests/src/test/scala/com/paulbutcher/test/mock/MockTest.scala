@@ -30,6 +30,7 @@ import scala.reflect.ClassTag
 import scala.reflect.runtime.universe.{ TypeTag, typeTag }
 import scala.util.{Try, Failure}
 import scala.language.reflectiveCalls
+import scala.collection.mutable
 
 class MockTest extends FreeSpec with MockFactory with ShouldMatchers {
   
@@ -440,5 +441,14 @@ class MockTest extends FreeSpec with MockFactory with ShouldMatchers {
        mockTrait.expects.meth(1, "Hello").returns(1)
        assertResult(1) { mockTrait.meth(1, "Hello") }
      }
+     
+     // Test for issue #63
+//     "mock a custom map" in withExpectations {
+//       class MapProxy[A, B](map: mutable.Map[A, B]) extends
+//         mutable.Map[A, B] with mutable.MapLike[A, B, mutable.Map[A, B]]
+//       class MapProxyTestable extends MapProxy(mutable.Map.empty[Int, Char])
+//       
+//       val mapStub = stub[MapProxyTestable]
+//     }
    }
 }
