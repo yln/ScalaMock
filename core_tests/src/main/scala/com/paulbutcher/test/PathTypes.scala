@@ -29,10 +29,19 @@ trait PathTypes {
     def outerTrait(): PathTypes.this.ATrait
     def innerTraitProjected(): PathTypes#Embedded#ATrait
     def outerTraitProjected(): PathTypes#ATrait
+
+    //! TODO - we should be able to handle arguments of these types as well as return values
+//    def innerTrait(x: ATrait): ATrait
+//    def outerTrait(x: PathTypes.this.ATrait): PathTypes.this.ATrait
+//    def innerTraitProjected(x: PathTypes#Embedded#ATrait): PathTypes#Embedded#ATrait
+//    def outerTraitProjected(x: PathTypes#ATrait): PathTypes#ATrait
   }
   
   trait ATrait
   
   def referencesEmbedded(): Embedded
   def optionalEmbedded(): Option[Embedded]
+  
+  //! TODO - handle this.type
+//  def returnsThisType(): this.type
 }
