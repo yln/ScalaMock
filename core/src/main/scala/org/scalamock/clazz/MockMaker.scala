@@ -94,7 +94,7 @@ class MockMaker[C <: Context](val ctx: C) {
     val fakes = unstableMethods.map(_.fake)
     val expecters = unstableMethods.map(_.expects)
     
-    val mock = TypeName(ctx.freshName)
+    val mock = TypeName(ctx.freshName(typeToMock.typeSymbol.name.toString))
 
     def make() = {
       val t = q"""
