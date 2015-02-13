@@ -123,89 +123,89 @@ class MockTest extends FreeSpec with MockFactory with ShouldMatchers {
        }
      }
     
-//     "cope with methods where Seq[T] is the last parameter" in { // issue #54
-//       trait ClassWithSeqTParam {
-//          def run(ints: Seq[Int]) : Int
-//       }
-//
-//       withExpectations {
-//         val m = mock[ClassWithSeqTParam]
-//
-//         m.expects.run(Seq(1, 2, 3)).returning(100)
-//         assertResult(100) { m.run(Seq(1, 2, 3)) }
-//
-//         m.expects.run(*).returning(200)
-//         assertResult(200) { m.run(Seq(5, 55)) }
-//
-//         m.expects.run(Seq()).returning(300)
-//         assertResult(300) { m.run(Seq.empty) }
-//       }
-//     }
-//    
-//     "cope with methods with by name parameters" in {
-//       withExpectations {
-//         val m = mock[TestTrait]
-//         m.expects.byNameParam(*).returning("it worked")
-//         assertResult("it worked") { m.byNameParam(42) }
-//       }
-//     }
-//    
-//  //   //! TODO - find a way to make this less ugly
-//  //   "match methods with by name parameters" in {
-//  //     withExpectations {
-//  //       val m = mock[TestTrait]
-//  //       val f: (=> Int) => Boolean = { x => x == 1 && x == 2  }
-//  //       ((m.byNameParam _): (=> Int) => String).expects(new FunctionAdapter1(f)).returning("it works")
-//  //       var y = 0
-//  //       assertResult("it works") { m.byNameParam { y += 1; y } }
-//  //     }
-//  //   }
-//    
-//     "cope with methods with implicit parameters" in {
-//       withExpectations {
-//         implicit val y: Double = 1.23
-//         val m = mock[TestTrait]
-//         m.expects.implicitParam(42)(1.23).returning("it works")
-//         assertResult("it works") { m.implicitParam(42) }
-//       }
-//     }
-//
-//     "cope with references to another package" in {
+     "cope with methods where Seq[T] is the last parameter" in { // issue #54
+       trait ClassWithSeqTParam {
+          def run(ints: Seq[Int]) : Int
+       }
+
+       withExpectations {
+         val m = mock[ClassWithSeqTParam]
+
+         m.expects.run(Seq(1, 2, 3)).returning(100)
+         assertResult(100) { m.run(Seq(1, 2, 3)) }
+
+         m.expects.run(*).returning(200)
+         assertResult(200) { m.run(Seq(5, 55)) }
+
+         m.expects.run(Seq()).returning(300)
+         assertResult(300) { m.run(Seq.empty) }
+       }
+     }
+    
+     "cope with methods with by name parameters" in {
+       withExpectations {
+         val m = mock[TestTrait]
+         m.expects.byNameParam(*).returning("it worked")
+         assertResult("it worked") { m.byNameParam(42) }
+       }
+     }
+    
+//     //! TODO - find a way to make this less ugly
+//     "match methods with by name parameters" in {
 //       withExpectations {
 //         val m = mock[TestTrait]
-//         val x = new SomeOtherClass
-//         m.expects.referencesSomeOtherPackage(x).returning(x)
-//         assertResult(x) { m.referencesSomeOtherPackage(x) }
+//         val f: (=> Int) => Boolean = { x => x == 1 && x == 2  }
+//         ((m.byNameParam _): (=> Int) => String).expects(new FunctionAdapter1(f)).returning("it works")
+//         var y = 0
+//         assertResult("it works") { m.byNameParam { y += 1; y } }
 //       }
 //     }
-//
-//     "cope with upper bound in another package" in {
-//       withExpectations {
-//         val m = mock[TestTrait]
-//         val x = new SomeOtherClass
-//         m.expects.otherPackageUpperBound(x).returning(x)
-//         assertResult(x) { m.otherPackageUpperBound(x) }
-//       }
-//     }
-//    
-//     "cope with explicit references to another package" in {
-//       withExpectations {
-//         val m = mock[TestTrait]
-//         val x = new yet.another.pkg.YetAnotherClass
-//         m.expects.explicitPackageReference(x).returning(x)
-//         assertResult(x) { m.explicitPackageReference(x) }
-//       }
-//     }
-//
-//     "cope with upper bound in an explictly referenced package" in {
-//       withExpectations {
-//         val m = mock[TestTrait]
-//         val x = new yet.another.pkg.YetAnotherClass
-//         m.expects.explicitPackageUpperBound(x).returning(x)
-//         assertResult(x) { m.explicitPackageUpperBound(x) }
-//       }
-//     }
-//
+    
+     "cope with methods with implicit parameters" in {
+       withExpectations {
+         implicit val y: Double = 1.23
+         val m = mock[TestTrait]
+         m.expects.implicitParam(42)(1.23).returning("it works")
+         assertResult("it works") { m.implicitParam(42) }
+       }
+     }
+
+     "cope with references to another package" in {
+       withExpectations {
+         val m = mock[TestTrait]
+         val x = new SomeOtherClass
+         m.expects.referencesSomeOtherPackage(x).returning(x)
+         assertResult(x) { m.referencesSomeOtherPackage(x) }
+       }
+     }
+
+     "cope with upper bound in another package" in {
+       withExpectations {
+         val m = mock[TestTrait]
+         val x = new SomeOtherClass
+         m.expects.otherPackageUpperBound(x).returning(x)
+         assertResult(x) { m.otherPackageUpperBound(x) }
+       }
+     }
+    
+     "cope with explicit references to another package" in {
+       withExpectations {
+         val m = mock[TestTrait]
+         val x = new yet.another.pkg.YetAnotherClass
+         m.expects.explicitPackageReference(x).returning(x)
+         assertResult(x) { m.explicitPackageReference(x) }
+       }
+     }
+
+     "cope with upper bound in an explictly referenced package" in {
+       withExpectations {
+         val m = mock[TestTrait]
+         val x = new yet.another.pkg.YetAnotherClass
+         m.expects.explicitPackageUpperBound(x).returning(x)
+         assertResult(x) { m.explicitPackageUpperBound(x) }
+       }
+     }
+
 //     "cope with a var" in {
 //       withExpectations {
 //         val m = mock[TestTrait]
