@@ -161,14 +161,14 @@ class MockTest extends FreeSpec with MockFactory with ShouldMatchers {
 //       }
 //     }
     
-     "cope with methods with implicit parameters" in {
-       withExpectations {
-         implicit val y: Double = 1.23
-         val m = mock[TestTrait]
-         m.expects.implicitParam(42)(1.23).returning("it works")
-         assertResult("it works") { m.implicitParam(42) }
-       }
-     }
+//     "cope with methods with implicit parameters" in {
+//       withExpectations {
+//         implicit val y: Double = 1.23
+//         val m = mock[TestTrait]
+//         m.expects.implicitParam(42)(1.23).returning("it works")
+//         assertResult("it works") { m.implicitParam(42) }
+//       }
+//     }
 
      "cope with references to another package" in {
        withExpectations {
@@ -277,30 +277,30 @@ class MockTest extends FreeSpec with MockFactory with ShouldMatchers {
        }
      }
     
-     "cope with context bounds" in {
-       withExpectations {
-         val m = mock[TestTrait]
-         m.expects.contextBound("foo")(typeTag[java.lang.String]).returning("it works")
-         assertResult("it works") { m.contextBound("foo") }
-       }
-     }
-    
-     "cope with view bounds" in {
-       withExpectations {
-         val m = mock[TestTrait]
-         m.expects.viewBound(1, 2)(*).returning(true)
-         assertResult(true) { m.viewBound(1, 2) }
-       }
-     }
-    
-//     "mock a polymorphic trait" in {
+//     "cope with context bounds" in {
 //       withExpectations {
-//         val m = mock[PolymorphicTrait[String]]
-//         m.expects.method(42, "foo", 1.23).returning("a return value")
-//         assertResult("a return value") { m.method(42, "foo", 1.23) }
+//         val m = mock[TestTrait]
+//         m.expects.contextBound("foo")(typeTag[java.lang.String]).returning("it works")
+//         assertResult("it works") { m.contextBound("foo") }
 //       }
 //     }
-//
+//    
+//     "cope with view bounds" in {
+//       withExpectations {
+//         val m = mock[TestTrait]
+//         m.expects.viewBound(1, 2)(*).returning(true)
+//         assertResult(true) { m.viewBound(1, 2) }
+//       }
+//     }
+    
+     "mock a polymorphic trait" in {
+       withExpectations {
+         val m = mock[PolymorphicTrait[String]]
+         m.expects.method(42, "foo", 1.23).returning("a return value")
+         assertResult("a return value") { m.method(42, "foo", 1.23) }
+       }
+     }
+
 //     "handle path-dependent polymorphic types correctly" in {
 //       withExpectations {
 //         val m = mock[PolymorphicTrait[String]]
