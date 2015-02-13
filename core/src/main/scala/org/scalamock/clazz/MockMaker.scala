@@ -56,7 +56,13 @@ class MockMaker[C <: Context](val ctx: C) {
       val fakeTypeParams = paramTypes :+ resultType
       val fakeFn = mockFn(paramCount).typeConstructor.typeSymbol
       val constraintParams = m.paramLists.map { ps =>
-          ps.map { p => q"val ${p.name.toTermName}: org.scalamock.matchers.MockParameter[${p.info}]" }
+          ps.map { p => 
+            val paramType = p.info match {
+              case TypeRef(_, sym, args) if sym == RepeatedParamClass || sym == JavaRepeatedParamClass => tq"Seq[${args.head}]"
+              case t => tq"$t"
+            }
+            q"val ${p.name.toTermName}: org.scalamock.matchers.MockParameter[$paramType]"
+          }
         }
       
       def forwarder = q"def $name[..$tparams](...$paramss): $resultType = $fakeName(..$params).asInstanceOf[$resultType]"

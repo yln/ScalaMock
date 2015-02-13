@@ -115,14 +115,14 @@ class MockTest extends FreeSpec with MockFactory with ShouldMatchers {
        }
      }
 
-//     "cope with methods with repeated parameters" in {
-//       withExpectations {
-//         val m = mock[TestTrait]
-//         m.expects.repeatedParam(42, List("foo", "bar"))
-//         m.repeatedParam(42, "foo", "bar")
-//       }
-//     }
-//    
+     "cope with methods with repeated parameters" in {
+       withExpectations {
+         val m = mock[TestTrait]
+         m.expects.repeatedParam(42, List("foo", "bar"))
+         m.repeatedParam(42, "foo", "bar")
+       }
+     }
+    
 //     "cope with methods where Seq[T] is the last parameter" in { // issue #54
 //       trait ClassWithSeqTParam {
 //          def run(ints: Seq[Int]) : Int
