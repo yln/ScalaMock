@@ -55,9 +55,13 @@ class MockMaker[C <: Context](val ctx: C) {
       val paramCount = m.paramLists.map(_.length).sum
       val fakeTypeParams = paramTypes :+ resultType
       val fakeFn = mockFn(paramCount).typeConstructor.typeSymbol
+      val constraintParams = m.paramLists.map { ps =>
+          ps.map { p => q"val ${p.name.toTermName}: org.scalamock.matchers.MockParameter[${p.info}]" }
+        }
       
       def forwarder = q"def $name[..$tparams](...$paramss): $resultType = $fakeName(..$params).asInstanceOf[$resultType]"
       def fake = q"val $fakeName = new ${fakeFn}[..$fakeTypeParams]($mockContext, 'dummyName)"
+      def expects = q"def $name[..$tparams](...$constraintParams) = $fakeName.expects(..$params)"
     }
     
     val typeToMock = weakTypeOf[T]
@@ -72,6 +76,7 @@ class MockMaker[C <: Context](val ctx: C) {
     
     val forwarders = methods.map(_.forwarder)
     val fakes = methods.map(_.fake)
+    val expecters = methods.map(_.expects)
     
     val mock = TypeName(ctx.freshName)
 
@@ -80,6 +85,9 @@ class MockMaker[C <: Context](val ctx: C) {
           class $mock extends $typeToMock {
             ..$forwarders
             ..$fakes
+            val expects = new {
+              ..$expecters
+            }
           }
   
           new $mock
