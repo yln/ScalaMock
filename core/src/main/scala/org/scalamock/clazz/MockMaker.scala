@@ -69,7 +69,7 @@ class MockMaker[C <: Context](val ctx: C) {
         if (m.isStable)
           q"val $name = null.asInstanceOf[$resultType]"
         else
-          q"def $name[..$tparams](...$paramss): $resultType = $fakeName(..$params).asInstanceOf[$resultType]"
+          q"override def $name[..$tparams](...$paramss): $resultType = $fakeName(..$params).asInstanceOf[$resultType]"
       }
       def fake = q"val $fakeName = new ${fakeFn}[..$fakeTypeParams]($mockContext, 'dummyName)"
       def expects = q"def $name[..$tparams](...$constraintParams) = $fakeName.expects(..$params)"
