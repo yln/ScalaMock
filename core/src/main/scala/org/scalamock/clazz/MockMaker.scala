@@ -31,122 +31,60 @@ class MockMaker[C <: Context](val ctx: C) {
     import ctx.universe._
     import definitions._
     
-    class Method(val m: MethodSymbol) {
-      val info = m.infoIn(typeToMock)
-      val isStable = m.isStable
-      val name = m.name
-      val typeParams = info.typeParams.map(_.name.toString)
-      val tparams = if (typeParams.isEmpty) "" else typeParams.mkString("[", ", ", "]") 
-      val res = fixTypePaths(info.finalResultType)
-      val paramss = info.paramLists.map { ps =>
-          ps.map {p => 
-            s"${if(p.isImplicit) "implicit" else ""} ${p.name}: ${p.info}"
-          }.mkString("(", ", ", ")")
-        }.mkString("")
-      val mockParamss = info.paramLists.map { ps =>
-          ps.map(p => s"${p.name}: ${toMockType(p.info, true)}").mkString("(", ", ", ")")
-        }.mkString("") 
-      val flatParams = info.paramLists.flatten.map { p => p.name }.mkString("(", ", ", ")")
-      val paramTypes = info.paramLists.flatten.map { p => p.info }
-      val paramCount = info.paramLists.map(_.length).sum
-      val fakeType = s"org.scalamock.function.${if (stub) "Stub" else "Mock"}Function${paramCount}"
-      val fake = fakeType + (paramTypes :+ info.finalResultType).map(p => toMockType(p, false)).mkString("[", ", ", "]")
-      val overloads = methods.filter { m => m.name == name }
-      val overloadIndex = overloads.indexOf(m)
-      val overloadDisambiguation =
-        if (overloadIndex > 0) 
-          (1 to overloadIndex).map(i => s"x$i: scala.Predef.DummyImplicit").mkString("(implicit ", ", ", ")")
-        else
-          ""
-      val fakeName = s"fake$$$name$$$overloadIndex"
-      val matcherFunction = s"org.scalamock.function.FunctionAdapter${paramCount}"
-      val matcherParamTypes = info.paramLists.flatten.map { p => toMockType(p.info, false) }
-      val matcherType = s"$matcherFunction${(matcherParamTypes :+ "Boolean").mkString("[", ", ", "]")}"
-      
-      def toMockType(paramType: Type, param: Boolean) = {
-        if (!param && paramType.exists(x => typeParams.contains(x.toString))) {
-          "Any"
-        } else {
-          val t = fixTypePaths(paramType) match {
-            case TypeRef(_, sym, args) if sym == RepeatedParamClass || sym == JavaRepeatedParamClass => s"Seq[${args.head}]"
-            case TypeRef(_, sym, args) if sym == ByNameParamClass => args.head.toString
-            case t => t.toString
-          }
-          if (param) s"org.scalamock.matchers.MockParameter[$t]" else t
-        }
-      }
-      
-      def fixTypePaths(paramType: Type) = {
-        paramType.map { x =>
-          x match {
-            case TypeRef(pre, sym, args) if pre == typeToMock => internal.typeRef(NoPrefix, sym, args)
-            case _ => x
-          }
-        }
-      }
+    def mockFn(arity: Int) = arity match {
+      case 0 => typeOf[org.scalamock.function.MockFunction0[_]]
+      case 1 => typeOf[org.scalamock.function.MockFunction1[_, _]]
+      case 2 => typeOf[org.scalamock.function.MockFunction2[_, _, _]]
+      case 3 => typeOf[org.scalamock.function.MockFunction3[_, _, _, _]]
+      case 4 => typeOf[org.scalamock.function.MockFunction4[_, _, _, _, _]]
+      case 5 => typeOf[org.scalamock.function.MockFunction5[_, _, _, _, _, _]]
+      case 6 => typeOf[org.scalamock.function.MockFunction6[_, _, _, _, _, _, _]]
+      case 7 => typeOf[org.scalamock.function.MockFunction7[_, _, _, _, _, _, _, _]]
+      case 8 => typeOf[org.scalamock.function.MockFunction8[_, _, _, _, _, _, _, _, _]]
+      case 9 => typeOf[org.scalamock.function.MockFunction9[_, _, _, _, _, _, _, _, _, _]]
     }
-
-    def isMemberOfObject(m: Symbol) = TypeTag.Object.tpe.member(m.name) != NoSymbol
-    def isBridge(m: MethodSymbol) = m.asInstanceOf[reflect.internal.HasFlags].hasFlag(reflect.internal.Flags.BRIDGE)
-    def isDeferred(m: MethodSymbol) = m.asInstanceOf[reflect.internal.HasFlags].isDeferred
-
+    
+    class Method(m: MethodSymbol) {
+      val name = m.name.toTermName
+      val tparams = m.typeParams.map(ctx.internal.typeDef(_))
+      val paramss = m.paramLists.map(_.map(ctx.internal.valDef(_)))
+      val params = m.paramLists.flatten.map(_.name)
+      val paramTypes = m.paramLists.flatten.map(_.info)
+      val resultType = m.returnType
+      val fakeName = ctx.freshName(name)
+      val paramCount = m.paramLists.map(_.length).sum
+      val fakeTypeParams = paramTypes :+ resultType
+      val fakeFn = mockFn(paramCount).typeConstructor.typeSymbol
+      
+      def forwarder = q"def $name[..$tparams](...$paramss): $resultType = $fakeName(..$params).asInstanceOf[$resultType]"
+      def fake = q"val $fakeName = new ${fakeFn}[..$fakeTypeParams]($mockContext, 'dummyName)"
+    }
+    
     val typeToMock = weakTypeOf[T]
-    val methods = typeToMock.members.toIndexedSeq.filter(_.isMethod).map(_.asMethod)
-    val methodsToMock = methods.filter { m =>
-        !m.isConstructor && !isMemberOfObject(m) && !m.isPrivate &&
-          m.privateWithin == NoSymbol && !m.isFinal &&
-          (!m.isAccessor || isDeferred(m)) && !isBridge(m) &&
-          !m.isParamWithDefault // see issue #43
-      }.map(new Method(_))
-    val stableMethods = methodsToMock.filter(!_.isStable)
-
-    val forwarders = methodsToMock map { m =>
-        if (m.isStable)
-          ctx.parse(s"val ${m.name} = null.asInstanceOf[${m.res}]")
-        else
-          ctx.parse(s"override def ${m.name}${m.tparams}${m.paramss} = ${m.fakeName}${m.flatParams}.asInstanceOf[${m.res}]")
-      }
-
-    val typeName = s"${typeToMock.typeSymbol.name}${if (typeToMock.typeArgs.isEmpty) "" else typeToMock.typeArgs.mkString("[", ", ", "]")}"
-    val mocks = stableMethods.map { m =>
-        val name = s"$typeName.${m.name}${m.tparams}"
-        ctx.parse(s"""val ${m.fakeName} = new ${m.fake}(mock$$special$$context, Symbol("<" + mock$$special$$mockName + "> $name"))""")
-      }
+    val typeArgs = typeToMock.typeArgs.map(_.typeSymbol)
+    val typeParams = typeToMock.typeConstructor.typeSymbol.asType.typeParams
     
-    def constraintSetters(constraint: String) = stableMethods.flatMap { m =>
-        List(
-          ctx.parse(s"def ${m.name}${m.tparams}${m.mockParamss}${m.overloadDisambiguation} = ${m.fakeName}.$constraint${m.flatParams}"),
-          ctx.parse(s"def ${m.name}${m.tparams}(matcher: ${m.matcherType})${m.overloadDisambiguation} = ${m.fakeName}.$constraint(matcher)")
-        )
-      }
+    def isMemberOfObject(m: Symbol) = typeOf[Object].member(m.name) != NoSymbol
     
-    val constraints =
-      if (stub)
-        q"""val when = new { ..${constraintSetters("when")} }
-            val verify = new { ..${constraintSetters("verify")} }"""
-      else
-        q"""val expects = new { ..${constraintSetters("expects")} }
-            val stubs = new { ..${constraintSetters("stubs")} }"""
-            
-    val mockName = optionalName match {
-      case (Some(name)) => q"val mock$$special$$mockName = $name"
-      case None => q"val mock$$special$$mockName = mock$$special$$context.generateMockDefaultName(${if (stub) "stub" else "mock"}).name"
+    val methods = typeToMock.members.collect {
+      case m if m.isMethod && !isMemberOfObject(m) => new Method(m.asMethod)
     }
+    
+    val forwarders = methods.map(_.forwarder)
+    val fakes = methods.map(_.fake)
+    
+    val mock = TypeName(ctx.freshName)
 
     def make() = {
-      val mock = q"""
-          class Mock(mock$$special$$context: org.scalamock.context.MockContext) extends $typeToMock {
-            $mockName
+      val t = q"""
+          class $mock extends $typeToMock {
             ..$forwarders
-            ..$mocks
-            ..$constraints
+            ..$fakes
           }
   
-          new Mock($mockContext)
+          new $mock
         """
-
-//      println(show(mock))
-      ctx.Expr(mock)
+      ctx.internal.substituteSymbols(t, typeParams, typeArgs)
     }
   }
 }

@@ -30,55 +30,55 @@ import scala.collection.mutable
 class PathTypesTest extends FreeSpec with MockFactory with ShouldMatchers {
     
   "Mocks should" - {
-    "mock an embeddded trait" in {
-      val t = mock[PathTypes]
-      val e = mock[t.Embedded]
-      t.expects.referencesEmbedded().returning(e)
-      assertResult(e) { t.referencesEmbedded }
-    }
-    
-    // Test for issue #60
-    "mock a method returning an optional embedded trait" in {
-      val t = mock[PathTypes]
-      val e = mock[t.Embedded]
-      t.expects.optionalEmbedded().returning(None)
-      t.expects.optionalEmbedded().returning(Some(e))
-      assertResult(None) { t.optionalEmbedded() }
-      assertResult(Some(e)) { t.optionalEmbedded() }
-    }
-    
-    "handle projected types correctly" in {
-      val t = mock[PathTypes]
-      val e = mock[t.Embedded]
-      val o = mock[t.ATrait]
-      val i = mock[e.ATrait]
-      e.expects.innerTraitProjected().returning(i)
-      e.expects.outerTraitProjected().returning(o)
-      assertResult(o) { e.outerTraitProjected }
-      assertResult(i) { e.innerTraitProjected }
-    }
-    
-    "handle path-dependent types correctly" in {
-      val t = mock[PathTypes]
-      val e = mock[t.Embedded]
-      val o = mock[t.ATrait]
-      val i = mock[e.ATrait]
-      e.expects.innerTrait().returning(i)
-      assertResult(i) { e.innerTrait }
-      e.expects.outerTrait().returning(o)
-      assertResult(o) { e.outerTrait }
-    }
-
-     "handle path-dependent polymorphic types correctly" in {
-       val m = mock[PolymorphicTrait[String]]
-       val e = mock[m.Embedded[Double]]
-       val o = mock[m.ATrait[String, Double]]
-       val i = mock[e.ATrait[String, Double]]
-       e.expects.innerTrait("foo", 1.23).returning(i)
-       e.expects.outerTrait("bar", 4.56).returning(o)
-       assertResult(o) { e.outerTrait("bar", 4.56) }
-       assertResult(i) { e.innerTrait("foo", 1.23) }
-     }
+//    "mock an embeddded trait" in {
+//      val t = mock[PathTypes]
+//      val e = mock[t.Embedded]
+//      t.expects.referencesEmbedded().returning(e)
+//      assertResult(e) { t.referencesEmbedded }
+//    }
+//    
+//    // Test for issue #60
+//    "mock a method returning an optional embedded trait" in {
+//      val t = mock[PathTypes]
+//      val e = mock[t.Embedded]
+//      t.expects.optionalEmbedded().returning(None)
+//      t.expects.optionalEmbedded().returning(Some(e))
+//      assertResult(None) { t.optionalEmbedded() }
+//      assertResult(Some(e)) { t.optionalEmbedded() }
+//    }
+//    
+//    "handle projected types correctly" in {
+//      val t = mock[PathTypes]
+//      val e = mock[t.Embedded]
+//      val o = mock[t.ATrait]
+//      val i = mock[e.ATrait]
+//      e.expects.innerTraitProjected().returning(i)
+//      e.expects.outerTraitProjected().returning(o)
+//      assertResult(o) { e.outerTraitProjected }
+//      assertResult(i) { e.innerTraitProjected }
+//    }
+//    
+//    "handle path-dependent types correctly" in {
+//      val t = mock[PathTypes]
+//      val e = mock[t.Embedded]
+//      val o = mock[t.ATrait]
+//      val i = mock[e.ATrait]
+//      e.expects.innerTrait().returning(i)
+//      assertResult(i) { e.innerTrait }
+//      e.expects.outerTrait().returning(o)
+//      assertResult(o) { e.outerTrait }
+//    }
+//
+//     "handle path-dependent polymorphic types correctly" in {
+//       val m = mock[PolymorphicTrait[String]]
+//       val e = mock[m.Embedded[Double]]
+//       val o = mock[m.ATrait[String, Double]]
+//       val i = mock[e.ATrait[String, Double]]
+//       e.expects.innerTrait("foo", 1.23).returning(i)
+//       e.expects.outerTrait("bar", 4.56).returning(o)
+//       assertResult(o) { e.outerTrait("bar", 4.56) }
+//       assertResult(i) { e.innerTrait("foo", 1.23) }
+//     }
 
      // Test for issue #63
 //     "mock a custom map" in withExpectations {

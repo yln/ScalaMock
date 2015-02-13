@@ -40,49 +40,49 @@ class MethodsWithDefaultParamsTest extends IsolatedSpec {
 
   behavior of "Mocks"
 
-  they should "mock class methods with one default parameter" in {
-    val m = mock[ClassHavingMethodsWithDefaultParams]
-
-    m.expects.withOneDefaultParam("a", "default") returning "one"
-    m.expects.withOneDefaultParam("a", "default") returning "two"
-    m.expects.withOneDefaultParam("a", "other") returning "three"
-
-    m.withOneDefaultParam("a") shouldBe "one"
-    m.withOneDefaultParam("a", "default") shouldBe "two"
-    m.withOneDefaultParam("a", "other") shouldBe "three"
-  }
-
-  they should "mock class methods with two default parameters" in {
-    val m = mock[ClassHavingMethodsWithDefaultParams]
-
-    m.expects.withTwoDefaultParams("a", "default", 42) returning "one"
-    m.expects.withTwoDefaultParams("a", "default", 42) returning "two"
-    m.expects.withTwoDefaultParams("a", "default", 42) returning "three"
-    m.expects.withTwoDefaultParams("a", "other", 99) returning "four"
-
-    m.withTwoDefaultParams("a") shouldBe "one"
-    m.withTwoDefaultParams("a", "default") shouldBe "two"
-    m.withTwoDefaultParams("a", "default", 42) shouldBe "three"
-    m.withTwoDefaultParams("a", "other", 99) shouldBe "four"
-  }
-
-  they should "mock class methods with all parameters having a default value" in {
-    val m = mock[ClassHavingMethodsWithDefaultParams]
-
-    m.expects.withAllDefaultParams("default", CaseClass(42)) returning "one"
-    m.expects.withAllDefaultParams("other", CaseClass(99)) returning "two"
-
-    m.withAllDefaultParams()
-    m.withAllDefaultParams("other", CaseClass(99))
-  }
-
-  they should "mock trait methods with all parameters having a default value" in {
-    val m = mock[TraitHavingMethodsWithDefaultParams]
-
-    m.expects.withAllDefaultParams("default", CaseClass(42)) returning "one"
-    m.expects.withAllDefaultParams("other", CaseClass(99)) returning "two"
-
-    m.withAllDefaultParams()
-    m.withAllDefaultParams("other", CaseClass(99))
-  }
+//  they should "mock class methods with one default parameter" in {
+//    val m = mock[ClassHavingMethodsWithDefaultParams]
+//
+//    m.expects.withOneDefaultParam("a", "default") returning "one"
+//    m.expects.withOneDefaultParam("a", "default") returning "two"
+//    m.expects.withOneDefaultParam("a", "other") returning "three"
+//
+//    m.withOneDefaultParam("a") shouldBe "one"
+//    m.withOneDefaultParam("a", "default") shouldBe "two"
+//    m.withOneDefaultParam("a", "other") shouldBe "three"
+//  }
+//
+//  they should "mock class methods with two default parameters" in {
+//    val m = mock[ClassHavingMethodsWithDefaultParams]
+//
+//    m.expects.withTwoDefaultParams("a", "default", 42) returning "one"
+//    m.expects.withTwoDefaultParams("a", "default", 42) returning "two"
+//    m.expects.withTwoDefaultParams("a", "default", 42) returning "three"
+//    m.expects.withTwoDefaultParams("a", "other", 99) returning "four"
+//
+//    m.withTwoDefaultParams("a") shouldBe "one"
+//    m.withTwoDefaultParams("a", "default") shouldBe "two"
+//    m.withTwoDefaultParams("a", "default", 42) shouldBe "three"
+//    m.withTwoDefaultParams("a", "other", 99) shouldBe "four"
+//  }
+//
+//  they should "mock class methods with all parameters having a default value" in {
+//    val m = mock[ClassHavingMethodsWithDefaultParams]
+//
+//    m.expects.withAllDefaultParams("default", CaseClass(42)) returning "one"
+//    m.expects.withAllDefaultParams("other", CaseClass(99)) returning "two"
+//
+//    m.withAllDefaultParams()
+//    m.withAllDefaultParams("other", CaseClass(99))
+//  }
+//
+//  they should "mock trait methods with all parameters having a default value" in {
+//    val m = mock[TraitHavingMethodsWithDefaultParams]
+//
+//    m.expects.withAllDefaultParams("default", CaseClass(42)) returning "one"
+//    m.expects.withAllDefaultParams("other", CaseClass(99)) returning "two"
+//
+//    m.withAllDefaultParams()
+//    m.withAllDefaultParams("other", CaseClass(99))
+//  }
 }

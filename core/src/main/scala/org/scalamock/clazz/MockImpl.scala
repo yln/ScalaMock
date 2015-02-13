@@ -27,22 +27,22 @@ import org.scalamock.util.Defaultable
 object MockImpl {
   import scala.reflect.macros.whitebox.Context
 
-  def mock[T: c.WeakTypeTag](c: Context)(mockContext: c.Expr[MockContext]): c.Expr[Any] = {
+  def mock[T: c.WeakTypeTag](c: Context)(mockContext: c.Expr[MockContext]): c.Tree = {
     val maker = MockMaker[T](c)(mockContext, stub = false, mockName = None)
     maker.make
   }
 
-  def stub[T: c.WeakTypeTag](c: Context)(mockContext: c.Expr[MockContext]): c.Expr[Any] = {
+  def stub[T: c.WeakTypeTag](c: Context)(mockContext: c.Expr[MockContext]): c.Tree = {
     val maker = MockMaker[T](c)(mockContext, stub = true, mockName = None)
     maker.make
   }
 
-  def mockWithName[T: c.WeakTypeTag](c: Context)(mockName: c.Expr[String])(mockContext: c.Expr[MockContext]): c.Expr[Any] = {
+  def mockWithName[T: c.WeakTypeTag](c: Context)(mockName: c.Expr[String])(mockContext: c.Expr[MockContext]): c.Tree = {
     val maker = MockMaker[T](c)(mockContext, stub = false, mockName = Some(mockName))
     maker.make
   }
 
-  def stubWithName[T: c.WeakTypeTag](c: Context)(mockName: c.Expr[String])(mockContext: c.Expr[MockContext]): c.Expr[Any] = {
+  def stubWithName[T: c.WeakTypeTag](c: Context)(mockName: c.Expr[String])(mockContext: c.Expr[MockContext]): c.Tree = {
     val maker = MockMaker[T](c)(mockContext, stub = true, mockName = Some(mockName))
     maker.make
   }

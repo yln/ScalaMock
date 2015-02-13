@@ -44,84 +44,84 @@ class MatchersTest extends IsolatedSpec {
 
   behavior of "MatchEpsilon"
 
-  it should "match anything that's close to the given value" in withExpectations {
-    mockedMultiplication.expects(~5.0, ~10.0)
-    mockedMultiplication(5.0001, 9.9999)
-  }
-
-  it should "not match anything that's not close enough" in {
-    demandExpectationException {
-      mockedMultiplication.expects(~5.0, ~10.0)
-      mockedMultiplication(5.1, 9.9)
-    }
-  }
-
-  behavior of "MatchAny"
-  
-  it should "match anything" in withExpectations {
-    testMock.expects.polymorphic[Any](*).repeat(3)
-
-    testMock.polymorphic(List("55"))
-    testMock.polymorphic(List(1, 2, 3))
-    testMock.polymorphic(null)
-  }
-
-  behavior of "where matcher"
-
-  it can "be used to create complex predicates (one parameter)" in withExpectations {
-    userDatabaseMock.expects.storeUser(where { user: User => user.age > 18 && user.name.startsWith("A") }).returning("matched").twice
-    userDatabaseMock.expects.storeUser(*).returning("unmatched").once
-
-    userDatabaseMock.storeUser(User("Adam", 22)) shouldBe "matched"
-    userDatabaseMock.storeUser(User("Eve", 21)) shouldBe "unmatched"
-    userDatabaseMock.storeUser(User("Anna", 21)) shouldBe "matched"
-  }
-
-  it can "be used to create complex predicates (two parameters)" in withExpectations {
-    testMock.expects.twoParams(where { (x, y) => x + y > 100 }).returning("matched").twice
-    testMock.expects.twoParams(*, *).returning("unmatched").once
-
-    testMock.twoParams(99, 2.0) shouldBe "matched"
-    testMock.twoParams(50, 49.0) shouldBe "unmatched"
-    testMock.twoParams(50, 51.0) shouldBe "matched"
-  }
-
-  behavior of "argThat matcher"
-
-  it can "be used to create complex predicates" in withExpectations {
-    userDatabaseMock.expects
-      .addUserAddress(*, argThat { address: Address => address.city == "Berlin" })
-      .returning("matched")
-    userDatabaseMock.expects
-      .addUserAddress(*, argThat[Address] { address => address.city == "London" })
-      .returning("matched")
-    userDatabaseMock.expects.addUserAddress(*, *).returning("unmatched")
-
-    userDatabaseMock.addUserAddress(User("John", 23), Address("Berlin", "Turmstrasse 12")) shouldBe "matched"
-    userDatabaseMock.addUserAddress(User("John", 23), Address("Warsaw", "Marszalkowska 123")) shouldBe "unmatched"
-    userDatabaseMock.addUserAddress(User("John", 23), Address("London", "Baker Street 221b")) shouldBe "matched"
-  }
-
-  it should "be displayed correctly" in withExpectations {
-    val expectation = userDatabaseMock.expects.addUserAddress(*, argThat[Address] { _ => true }) never ()
-    expectation.toString() should include("UserDatabase.addUserAddress(*, <matcher>)")
-  }
-
-  behavior of "custom matcher"
-
-  it can "be used to create complex predicates" in withExpectations {
-    userDatabaseMock.expects.addUserAddress(UserMatcher().withName("Alan"), *) returning "matched"
-    userDatabaseMock.expects.addUserAddress(UserMatcher().withName("Bob"), *) returning "matched"
-    userDatabaseMock.expects.addUserAddress(*, *) returning "unmatched"
-
-    userDatabaseMock.addUserAddress(User("Alan", 23), Address("Berlin", "Turmstrasse 12")) shouldBe "matched"
-    userDatabaseMock.addUserAddress(User("Craig", 23), Address("Warsaw", "Marszalkowska 123")) shouldBe "unmatched"
-    userDatabaseMock.addUserAddress(User("Bob", 23), Address("London", "Baker Street 221b")) shouldBe "matched"
-  }
-
-  it should "be displayed correctly" in withExpectations {
-    val expectation = userDatabaseMock.expects.addUserAddress(UserMatcher().withName("Alan"), *) never ()
-    expectation.toString() should include("UserDatabase.addUserAddress(UserMatcher(name=Alan), *)")
-  }
+//  it should "match anything that's close to the given value" in withExpectations {
+//    mockedMultiplication.expects(~5.0, ~10.0)
+//    mockedMultiplication(5.0001, 9.9999)
+//  }
+//
+//  it should "not match anything that's not close enough" in {
+//    demandExpectationException {
+//      mockedMultiplication.expects(~5.0, ~10.0)
+//      mockedMultiplication(5.1, 9.9)
+//    }
+//  }
+//
+//  behavior of "MatchAny"
+//  
+//  it should "match anything" in withExpectations {
+//    testMock.expects.polymorphic[Any](*).repeat(3)
+//
+//    testMock.polymorphic(List("55"))
+//    testMock.polymorphic(List(1, 2, 3))
+//    testMock.polymorphic(null)
+//  }
+//
+//  behavior of "where matcher"
+//
+//  it can "be used to create complex predicates (one parameter)" in withExpectations {
+//    userDatabaseMock.expects.storeUser(where { user: User => user.age > 18 && user.name.startsWith("A") }).returning("matched").twice
+//    userDatabaseMock.expects.storeUser(*).returning("unmatched").once
+//
+//    userDatabaseMock.storeUser(User("Adam", 22)) shouldBe "matched"
+//    userDatabaseMock.storeUser(User("Eve", 21)) shouldBe "unmatched"
+//    userDatabaseMock.storeUser(User("Anna", 21)) shouldBe "matched"
+//  }
+//
+//  it can "be used to create complex predicates (two parameters)" in withExpectations {
+//    testMock.expects.twoParams(where { (x, y) => x + y > 100 }).returning("matched").twice
+//    testMock.expects.twoParams(*, *).returning("unmatched").once
+//
+//    testMock.twoParams(99, 2.0) shouldBe "matched"
+//    testMock.twoParams(50, 49.0) shouldBe "unmatched"
+//    testMock.twoParams(50, 51.0) shouldBe "matched"
+//  }
+//
+//  behavior of "argThat matcher"
+//
+//  it can "be used to create complex predicates" in withExpectations {
+//    userDatabaseMock.expects
+//      .addUserAddress(*, argThat { address: Address => address.city == "Berlin" })
+//      .returning("matched")
+//    userDatabaseMock.expects
+//      .addUserAddress(*, argThat[Address] { address => address.city == "London" })
+//      .returning("matched")
+//    userDatabaseMock.expects.addUserAddress(*, *).returning("unmatched")
+//
+//    userDatabaseMock.addUserAddress(User("John", 23), Address("Berlin", "Turmstrasse 12")) shouldBe "matched"
+//    userDatabaseMock.addUserAddress(User("John", 23), Address("Warsaw", "Marszalkowska 123")) shouldBe "unmatched"
+//    userDatabaseMock.addUserAddress(User("John", 23), Address("London", "Baker Street 221b")) shouldBe "matched"
+//  }
+//
+//  it should "be displayed correctly" in withExpectations {
+//    val expectation = userDatabaseMock.expects.addUserAddress(*, argThat[Address] { _ => true }) never ()
+//    expectation.toString() should include("UserDatabase.addUserAddress(*, <matcher>)")
+//  }
+//
+//  behavior of "custom matcher"
+//
+//  it can "be used to create complex predicates" in withExpectations {
+//    userDatabaseMock.expects.addUserAddress(UserMatcher().withName("Alan"), *) returning "matched"
+//    userDatabaseMock.expects.addUserAddress(UserMatcher().withName("Bob"), *) returning "matched"
+//    userDatabaseMock.expects.addUserAddress(*, *) returning "unmatched"
+//
+//    userDatabaseMock.addUserAddress(User("Alan", 23), Address("Berlin", "Turmstrasse 12")) shouldBe "matched"
+//    userDatabaseMock.addUserAddress(User("Craig", 23), Address("Warsaw", "Marszalkowska 123")) shouldBe "unmatched"
+//    userDatabaseMock.addUserAddress(User("Bob", 23), Address("London", "Baker Street 221b")) shouldBe "matched"
+//  }
+//
+//  it should "be displayed correctly" in withExpectations {
+//    val expectation = userDatabaseMock.expects.addUserAddress(UserMatcher().withName("Alan"), *) never ()
+//    expectation.toString() should include("UserDatabase.addUserAddress(UserMatcher(name=Alan), *)")
+//  }
 
 }
