@@ -59,8 +59,8 @@ trait TestTrait {
   var aVar: String
   var concreteVar = "foo"
 
-//  val aVal: String
-//  val concreteVal = "foo"
-//  val fnVal: String => Int
-//  lazy val lazyVal = "foo"
+  val aVal: String
+  val concreteVal = "foo"
+  val fnVal: String => Int
+  lazy val lazyVal = "foo"
 }

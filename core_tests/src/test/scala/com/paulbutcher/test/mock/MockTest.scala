@@ -227,32 +227,32 @@ class MockTest extends FreeSpec with MockFactory with ShouldMatchers {
 //       }
 //     }
     
-//    "cope with a val" in {
-//      withExpectations {
-//        val m = mock[TestTrait]
-//        assertResult(null) { m.aVal }
-//      }
-//    }
-//    
-//    "cope with a non-abstract val" in {
-//      withExpectations {
-//        val m = mock[TestTrait]
-//        assertResult("foo") { m.concreteVal }
-//      }
-//    }
-//    
-//    "cope with a function val" in {
-//      withExpectations {
-//        val m = mock[TestTrait]
-//        assertResult(null) { m.fnVal }
-//      }
-//    }
-//    
-//    "mock a lazy val" in withExpectations {
-//      val m = mock[TestTrait]
-//      assertResult("foo") { m.lazyVal }
-//    }
-//    
+    "cope with a val" in {
+      withExpectations {
+        val m = mock[TestTrait]
+        assertResult(null) { m.aVal }
+      }
+    }
+    
+    "cope with a non-abstract val" in {
+      withExpectations {
+        val m = mock[TestTrait]
+        assertResult("foo") { m.concreteVal }
+      }
+    }
+    
+    "cope with a function val" in {
+      withExpectations {
+        val m = mock[TestTrait]
+        assertResult(null) { m.fnVal }
+      }
+    }
+    
+    "mock a lazy val" in withExpectations {
+      val m = mock[TestTrait]
+      assertResult("foo") { m.lazyVal }
+    }
+    
 //    "cope with non-abstract methods" in {
 //      withExpectations {
 //        val m = mock[TestTrait]

@@ -44,7 +44,7 @@ class MockMaker[C <: Context](val ctx: C) {
       case 9 => typeOf[org.scalamock.function.MockFunction9[_, _, _, _, _, _, _, _, _, _]]
     }
     
-    class Method(m: MethodSymbol) {
+    class Method(val m: MethodSymbol) {
       val name = m.name.toTermName
       val tparams = m.typeParams.map(ctx.internal.typeDef(_))
       val paramss = m.paramLists.map(_.map(ctx.internal.valDef(_)))
@@ -65,7 +65,12 @@ class MockMaker[C <: Context](val ctx: C) {
           }
         }
       
-      def forwarder = q"def $name[..$tparams](...$paramss): $resultType = $fakeName(..$params).asInstanceOf[$resultType]"
+      def forwarder = {
+        if (m.isStable)
+          q"val $name = null.asInstanceOf[$resultType]"
+        else
+          q"def $name[..$tparams](...$paramss): $resultType = $fakeName(..$params).asInstanceOf[$resultType]"
+      }
       def fake = q"val $fakeName = new ${fakeFn}[..$fakeTypeParams]($mockContext, 'dummyName)"
       def expects = q"def $name[..$tparams](...$constraintParams) = $fakeName.expects(..$params)"
     }
@@ -80,12 +85,14 @@ class MockMaker[C <: Context](val ctx: C) {
     val methods = typeToMock.members.collect { 
       case m if m.isMethod => m.asMethod
     }.collect {
-      case m if !isMemberOfObject(m) && !m.isConstructor && (!m.isAccessor || isDeferred(m)) => new Method(m)
+      case m if !isMemberOfObject(m) && !m.isConstructor && 
+                (!m.isAccessor || isDeferred(m)) => new Method(m)
     }
+    val unstableMethods = methods.filter(!_.m.isStable)
     
     val forwarders = methods.map(_.forwarder)
-    val fakes = methods.map(_.fake)
-    val expecters = methods.map(_.expects)
+    val fakes = unstableMethods.map(_.fake)
+    val expecters = unstableMethods.map(_.expects)
     
     val mock = TypeName(ctx.freshName)
 
@@ -101,7 +108,6 @@ class MockMaker[C <: Context](val ctx: C) {
   
           new $mock
         """
-      println(t)
       ctx.internal.substituteSymbols(t, typeParams, typeArgs)
     }
   }
