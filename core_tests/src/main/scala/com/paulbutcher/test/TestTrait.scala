@@ -56,9 +56,9 @@ trait TestTrait {
   def explicitPackageReference(x: yet.another.pkg.YetAnotherClass): yet.another.pkg.YetAnotherClass
   def explicitPackageUpperBound[T <: yet.another.pkg.YetAnotherClass](x: T): T
   
-//  var aVar: String
-//  var concreteVar = "foo"
-//
+  var aVar: String
+  var concreteVar = "foo"
+
 //  val aVal: String
 //  val concreteVal = "foo"
 //  val fnVal: String => Int

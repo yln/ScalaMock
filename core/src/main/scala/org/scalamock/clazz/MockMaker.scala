@@ -75,9 +75,12 @@ class MockMaker[C <: Context](val ctx: C) {
     val typeParams = typeToMock.typeConstructor.typeSymbol.asType.typeParams
     
     def isMemberOfObject(m: Symbol) = typeOf[Object].member(m.name) != NoSymbol
+    def isDeferred(m: MethodSymbol) = m.asInstanceOf[reflect.internal.HasFlags].isDeferred
     
-    val methods = typeToMock.members.collect {
-      case m if m.isMethod && !isMemberOfObject(m) => new Method(m.asMethod)
+    val methods = typeToMock.members.collect { 
+      case m if m.isMethod => m.asMethod
+    }.collect {
+      case m if !isMemberOfObject(m) && !m.isConstructor && (!m.isAccessor || isDeferred(m)) => new Method(m)
     }
     
     val forwarders = methods.map(_.forwarder)
@@ -98,6 +101,7 @@ class MockMaker[C <: Context](val ctx: C) {
   
           new $mock
         """
+      println(t)
       ctx.internal.substituteSymbols(t, typeParams, typeArgs)
     }
   }

@@ -206,27 +206,27 @@ class MockTest extends FreeSpec with MockFactory with ShouldMatchers {
        }
      }
 
-//     "cope with a var" in {
+     "cope with a var" in {
+       withExpectations {
+         val m = mock[TestTrait]
+         m.expects.aVar_=("foo")
+         m.expects.aVar.returning("bar")
+         m.aVar = "foo"
+         assertResult("bar") { m.aVar }
+       }
+     }
+    
+//     //! TODO - currently doesn't work because we can't override concrete vars
+//     "cope with a non-abstract var" ignore {
 //       withExpectations {
 //         val m = mock[TestTrait]
-//         m.expects.aVar_=("foo")
-//         m.expects.aVar.returning("bar")
-//         m.aVar = "foo"
-//         assertResult("bar") { m.aVar }
+//         (m.concreteVar_= _).expects("foo")
+//         (m.concreteVar _).expects().returning("bar")
+//         m.concreteVar = "foo"
+//         assertResult("bar") { m.concreteVar }
 //       }
 //     }
-//    
-//  //   //! TODO - currently doesn't work because we can't override concrete vars
-//  //   "cope with a non-abstract var" ignore {
-//  //     withExpectations {
-//  //       val m = mock[TestTrait]
-//  //       (m.concreteVar_= _).expects("foo")
-//  //       (m.concreteVar _).expects().returning("bar")
-//  //       m.concreteVar = "foo"
-//  //       assertResult("bar") { m.concreteVar }
-//  //     }
-//  //   }
-//    
+    
 //    "cope with a val" in {
 //      withExpectations {
 //        val m = mock[TestTrait]
