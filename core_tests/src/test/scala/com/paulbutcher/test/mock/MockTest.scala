@@ -261,38 +261,38 @@ class MockTest extends FreeSpec with MockFactory with ShouldMatchers {
       }
     }
     
-//     "cope with upper bounds" in {
-//       withExpectations {
-//         val m = mock[TestTrait]
-//         m.expects.upperBound((42, "foo")).returning(2)
-//         assertResult(2) { m.upperBound((42, "foo")) }
-//       }
-//     }
-//    
-//     "cope with lower bounds" in {
-//       withExpectations {
-//         val m = mock[TestTrait]
-//         m.expects.lowerBound((1, 2), List[Product]()).returning("it works")
-//         assertResult("it works") { m.lowerBound((1, 2), List[Product]()) }
-//       }
-//     }
-//    
-//     "cope with context bounds" in {
-//       withExpectations {
-//         val m = mock[TestTrait]
-//         m.expects.contextBound("foo")(typeTag[java.lang.String]).returning("it works")
-//         assertResult("it works") { m.contextBound("foo") }
-//       }
-//     }
-//    
-//     "cope with view bounds" in {
-//       withExpectations {
-//         val m = mock[TestTrait]
-//         m.expects.viewBound(1, 2)(*).returning(true)
-//         assertResult(true) { m.viewBound(1, 2) }
-//       }
-//     }
-//    
+     "cope with upper bounds" in {
+       withExpectations {
+         val m = mock[TestTrait]
+         m.expects.upperBound((42, "foo")).returning(2)
+         assertResult(2) { m.upperBound((42, "foo")) }
+       }
+     }
+    
+     "cope with lower bounds" in {
+       withExpectations {
+         val m = mock[TestTrait]
+         m.expects.lowerBound((1, 2), List[Product]()).returning("it works")
+         assertResult("it works") { m.lowerBound((1, 2), List[Product]()) }
+       }
+     }
+    
+     "cope with context bounds" in {
+       withExpectations {
+         val m = mock[TestTrait]
+         m.expects.contextBound("foo")(typeTag[java.lang.String]).returning("it works")
+         assertResult("it works") { m.contextBound("foo") }
+       }
+     }
+    
+     "cope with view bounds" in {
+       withExpectations {
+         val m = mock[TestTrait]
+         m.expects.viewBound(1, 2)(*).returning(true)
+         assertResult(true) { m.viewBound(1, 2) }
+       }
+     }
+    
 //     "mock a polymorphic trait" in {
 //       withExpectations {
 //         val m = mock[PolymorphicTrait[String]]
