@@ -30,6 +30,7 @@ class MockMaker[C <: Context](val ctx: C) {
   class MockMakerInner[T: ctx.WeakTypeTag](mockContext: ctx.Expr[MockContext], stub: Boolean, optionalName: Option[ctx.Expr[String]]) {
     import ctx.universe._
     import definitions._
+    import Flag._
     
     def mockFn(arity: Int) = arity match {
       case 0 => typeOf[org.scalamock.function.MockFunction0[_]]
@@ -47,7 +48,7 @@ class MockMaker[C <: Context](val ctx: C) {
     class Method(val m: MethodSymbol) {
       val name = m.name.toTermName
       val tparams = m.typeParams.map(ctx.internal.typeDef(_))
-      val paramss = m.paramLists.map(_.map(p => q"val ${p.name.toTermName}: ${p.info}"))
+      val paramss = m.paramLists.map(_.map(p => q"${if (p.isImplicit) IMPLICIT else NoFlags} val ${p.name.toTermName}: ${p.info}"))
       val params = m.paramLists.flatten.map(_.name)
       val paramTypes = m.paramLists.flatten.map(_.info)
       val resultType = m.returnType
