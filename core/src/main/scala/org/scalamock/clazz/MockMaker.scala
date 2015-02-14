@@ -56,7 +56,8 @@ class MockMaker[C <: Context](val ctx: C) {
       val paramCount = m.paramLists.map(_.length).sum
       val fakeTypeParams = paramTypes :+ resultType
       val fakeFn = mockFn(paramCount).typeConstructor.typeSymbol
-      val constraintParams = m.paramLists.map { ps =>
+
+      def constraintParams = m.paramLists.map { ps =>
           ps.map { p => 
             val paramType = p.info match {
               case TypeRef(_, sym, args) if sym == RepeatedParamClass || sym == JavaRepeatedParamClass => tq"Seq[${args.head}]"
@@ -66,6 +67,12 @@ class MockMaker[C <: Context](val ctx: C) {
           }
         }
       
+      def overloadDisambiguation = {
+        val overloads = methods.filter(_.name == name).toList
+        val overloadIndex = overloads.indexOf(this)
+        List.fill(overloadIndex)(q"implicit val ${TermName(ctx.freshName)}: scala.Predef.DummyImplicit")
+      }
+      
       def forwarder = {
         if (m.isStable)
           q"val $name = null.asInstanceOf[$resultType]"
@@ -73,7 +80,7 @@ class MockMaker[C <: Context](val ctx: C) {
           q"override def $name[..$tparams](...$paramss): $resultType = $fakeName(..$params).asInstanceOf[$resultType]"
       }
       def fake = q"val $fakeName = new ${fakeFn}[..$fakeTypeParams]($mockContext, 'dummyName)"
-      def expects = q"def $name[..$tparams](...$constraintParams) = $fakeName.expects(..$params)"
+      def expects = q"def $name[..$tparams](...${constraintParams :+ overloadDisambiguation}) = $fakeName.expects(..$params)"
     }
     
     val typeToMock = weakTypeOf[T]
