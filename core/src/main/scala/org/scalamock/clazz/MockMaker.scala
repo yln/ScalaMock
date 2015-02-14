@@ -88,7 +88,8 @@ class MockMaker[C <: Context](val ctx: C) {
     }.collect {
       case m if !isMemberOfObject(m) && !m.isConstructor && 
                 (!m.isAccessor || isDeferred(m)) &&
-                !m.isPrivate && m.privateWithin == NoSymbol => new Method(m)
+                !m.isPrivate && m.privateWithin == NoSymbol &&
+                !m.isParamWithDefault => new Method(m)
     }
     val unstableMethods = methods.filter(!_.m.isStable)
     
