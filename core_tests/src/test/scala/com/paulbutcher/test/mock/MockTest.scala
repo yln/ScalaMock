@@ -313,15 +313,15 @@ class MockTest extends FreeSpec with MockFactory with ShouldMatchers {
 //         assertResult(i) { e.innerTrait("foo", 1.23) }
 //       }
 //     }
-//
-//     "mock a class" in {
-//       withExpectations {
-//         val m = mock[TestClass]
-//         m.expects.m(42, "foo").returning((123, "bar"))
-//         assertResult((123, "bar")) { m.m(42, "foo") }
-//       }
-//     }
-//    
+
+     "mock a class" in {
+       withExpectations {
+         val m = mock[TestClass]
+         m.expects.m(42, "foo").returning((123, "bar"))
+         assertResult((123, "bar")) { m.m(42, "foo") }
+       }
+     }
+    
 //     "mock a specialized class" in {
 //       withExpectations {
 //         val m1 = mock[SpecializedClass[Int]]
