@@ -48,14 +48,19 @@ class MockMaker[C <: Context](val ctx: C) {
     class Method(val m: MethodSymbol) {
       val name = m.name.toTermName
       val tparams = m.typeParams.map(ctx.internal.typeDef(_))
-      val paramss = m.paramLists.map(_.map(p => q"${if (p.isImplicit) IMPLICIT else NoFlags} val ${p.name.toTermName}: ${p.info}"))
+      val paramss = m.paramLists.map(_.map(p => q"${if (p.isImplicit) IMPLICIT else NoFlags} val ${p.name.toTermName}: ${fixThisType(p.info)}"))
       val params = m.paramLists.flatten.map(_.name)
-      val paramTypes = m.paramLists.flatten.map(_.info)
-      val resultType = m.returnType
+      val paramTypes = m.paramLists.flatten.map(p => fixThisType(p.info))
+      val resultType = fixThisType(m.returnType)
       val fakeName = ctx.freshName(name)
       val paramCount = m.paramLists.map(_.length).sum
       val fakeTypeParams = paramTypes :+ resultType
       val fakeFn = mockFn(paramCount).typeConstructor.typeSymbol
+      
+      def fixThisType(t: Type) = t match {
+          case TypeRef(ThisType(pre), sym, args) if pre == typeToMock.typeSymbol => Select(This(typeNames.EMPTY), sym)
+          case t => tq"$t"
+        }
 
       def constraintParams = m.paramLists.map { ps =>
           ps.map { p => 

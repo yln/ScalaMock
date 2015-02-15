@@ -22,13 +22,13 @@ package com.paulbutcher.test
 
 trait PathTypes {
   trait Embedded {
-    def m(x: Int, y: Double): String
-
-    trait ATrait
-    def innerTrait(): ATrait
-    def outerTrait(): PathTypes.this.ATrait
-    def innerTraitProjected(): PathTypes#Embedded#ATrait
-    def outerTraitProjected(): PathTypes#ATrait
+//    def m(x: Int, y: Double): String
+//
+//    trait ATrait
+//    def innerTrait(): ATrait
+//    def outerTrait(): PathTypes.this.ATrait
+//    def innerTraitProjected(): PathTypes#Embedded#ATrait
+//    def outerTraitProjected(): PathTypes#ATrait
 
     //! TODO - we should be able to handle arguments of these types as well as return values
 //    def innerTrait(x: ATrait): ATrait
@@ -37,10 +37,10 @@ trait PathTypes {
 //    def outerTraitProjected(x: PathTypes#ATrait): PathTypes#ATrait
   }
   
-  trait ATrait
+//  trait ATrait
   
   def referencesEmbedded(): Embedded
-  def optionalEmbedded(): Option[Embedded]
+//  def optionalEmbedded(): Option[Embedded]
   
   //! TODO - handle this.type
 //  def returnsThisType(): this.type

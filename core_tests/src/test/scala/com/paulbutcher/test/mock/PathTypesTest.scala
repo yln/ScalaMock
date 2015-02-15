@@ -30,13 +30,13 @@ import scala.collection.mutable
 class PathTypesTest extends FreeSpec with MockFactory with ShouldMatchers {
     
   "Mocks should" - {
-//    "mock an embeddded trait" in {
-//      val t = mock[PathTypes]
-//      val e = mock[t.Embedded]
-//      t.expects.referencesEmbedded().returning(e)
-//      assertResult(e) { t.referencesEmbedded }
-//    }
-//    
+    "mock an embeddded trait" in {
+      val t = mock[PathTypes]
+      val e = mock[t.Embedded]
+      t.expects.referencesEmbedded.returning(e)
+      assertResult(e) { t.referencesEmbedded }
+    }
+    
 //    // Test for issue #60
 //    "mock a method returning an optional embedded trait" in {
 //      val t = mock[PathTypes]
