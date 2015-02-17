@@ -396,5 +396,12 @@ class MockTest extends FreeSpec with MockFactory with ShouldMatchers {
        mockTrait.expects.meth(1, "Hello").returns(1)
        assertResult(1) { mockTrait.meth(1, "Hello") }
      }
+
+     // Test for issue #95
+     "mock a PartialFunction" in withExpectations {
+       val m = mock[PartialFunction[Int, Int]]
+       m.expects.apply(0).returning(1)
+       assertResult(1) { m(0) }
+     }
    }
 }
