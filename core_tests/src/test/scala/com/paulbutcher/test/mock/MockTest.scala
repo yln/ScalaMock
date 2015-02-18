@@ -149,18 +149,31 @@ class MockTest extends FreeSpec with MockFactory with ShouldMatchers {
          assertResult("it worked") { m.byNameParam(42) }
        }
      }
-    
-  //   //! TODO - find a way to make this less ugly
-  //   "match methods with by name parameters" in {
-  //     withExpectations {
-  //       val m = mock[TestTrait]
-  //       val f: (=> Int) => Boolean = { x => x == 1 && x == 2  }
-  //       ((m.byNameParam _): (=> Int) => String).expects(new FunctionAdapter1(f)).returning("it works")
-  //       var y = 0
-  //       assertResult("it works") { m.byNameParam { y += 1; y } }
-  //     }
-  //   }
-    
+
+     "match methods with by name parameters" in {
+       withExpectations {
+         val m = mock[TestTrait]
+         m.expects.byNameParam(2).returning("it works")
+         m.byNameParam { 1 + 1 } shouldBe "it works"
+       }
+     }
+
+     "evaluate by-name parameters lazily" in {
+       withExpectations {
+         trait ByName {
+           def lazySum(a: => Int)(b: => Int): Int
+         }
+
+         val m = mock[ByName]
+         m.expects.lazySum(1)(1).returning(2)
+
+         var x = 0
+         val partial = m.lazySum(x) _
+         x = x + 1
+         partial(1) shouldBe 2
+       }
+     }
+
      "cope with methods with implicit parameters" in {
        withExpectations {
          implicit val y: Double = 1.23
