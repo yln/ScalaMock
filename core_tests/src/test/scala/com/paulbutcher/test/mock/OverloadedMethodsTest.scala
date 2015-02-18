@@ -108,13 +108,24 @@ class OverloadedMethodsTest extends IsolatedSpec {
      assertResult("polymorphic called") { m.overloaded[Int](42) }
    }
 
-  they should "mock PrintStream.print(String)" in { // test for issue #39
+  they should "mock PrintStream.print(String)" in { // test for issue #39 (1)
     import java.io.{ OutputStream, PrintStream }
     class MockablePrintStream extends PrintStream(mock[OutputStream], false)
 
     val m = mock[MockablePrintStream]
     m.expects.print("foo")
     m.print("foo")
+  }
+
+  they should "cope with an overloaded method with by-name parameter" in { // test for issue #39 (2)
+    trait ByName {
+      def call(i: Int)(u: => Unit)
+      def call()
+    }
+
+    val byname = mock[ByName]
+    (byname.expects.call(_:Int)(_:Unit))(10, *)
+    byname.call(10)({})
   }
 
   // Test for issue #94
