@@ -11,18 +11,11 @@ trait AbstractAsyncMockFactory extends AsyncTestSuiteMixin with AsyncMockFactory
   type ExpectationException = TestFailedException
 
   abstract override def withFixture(test: NoArgAsyncTest): FutureOutcome = {
-    if (autoVerify) {
-      new FutureOutcome(withExpectations(super.withFixture(test).toFuture).recoverWith({
-        case NonFatal(ex) => Future.successful(Exceptional(ex))
-      }))
-    } else {
-      super.withFixture(test)
-    }
+    new FutureOutcome(withExpectations(super.withFixture(test).toFuture).recoverWith({
+      case NonFatal(ex) => Future.successful(Exceptional(ex))
+    }))
   }
 
   protected def newExpectationException(message: String, methodName: Option[Symbol]) =
     new TestFailedException((_: StackDepthException) => Some(message), None, failedCodeStackDepthFn(methodName))
-
-  protected var autoVerify = true
-
 }
