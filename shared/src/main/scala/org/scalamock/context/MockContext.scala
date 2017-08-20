@@ -30,7 +30,7 @@ private[scalamock] trait MockContext {
   private[scalamock] var expectationContext: Handlers = _
   private[scalamock] val mockNameGenerator: MockNameGenerator = new MockNameGenerator()
 
-  protected def newExpectationException(message: String, methodName: Option[Symbol] = None): ExpectationException
+  protected[scalamock] def newExpectationException(message: String, methodName: Option[Symbol] = None): ExpectationException
 
   private[scalamock] def add[E <: CallHandler[_]](e: E) = {
     assert(currentExpectationContext != null, "Null expectation context - missing withExpectations?")

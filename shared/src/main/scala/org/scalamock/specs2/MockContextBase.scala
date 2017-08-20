@@ -36,7 +36,7 @@ trait MockContextBase extends MockFactoryBase {
 
   type ExpectationException = FailureException
 
-  protected override def newExpectationException(message: String, methodName: Option[Symbol]) =
+  protected[scalamock] override def newExpectationException(message: String, methodName: Option[Symbol]) =
     new ExpectationException(Failure(message))
 
   protected def wrapAsResult[T: AsResult](body: => T) = {

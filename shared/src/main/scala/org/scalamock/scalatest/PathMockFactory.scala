@@ -37,7 +37,7 @@ trait PathMockFactory extends SuiteMixin with MockFactoryBase with Mock { this: 
   
   type ExpectationException = TestFailedException
 
-  protected def newExpectationException(message: String, methodName: Option[Symbol]) =
+  protected[scalamock] def newExpectationException(message: String, methodName: Option[Symbol]) =
     new TestFailedException((_: StackDepthException) => Some(message), None, failedCodeStackDepthFn(methodName))
 
   /**
