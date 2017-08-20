@@ -138,3 +138,9 @@ import org.scalatest.TestSuite
  * See [[org.scalamock]] for overview documentation.
  */
 trait MockFactory extends AbstractMockFactory with Mock with TestSuite
+
+trait SeqMockFactory extends MockFactory {
+  override protected def withExpectations[T](what: => T): T = {
+    super.withExpectations(inSequence(what))
+  }
+}
