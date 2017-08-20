@@ -25,10 +25,9 @@ import org.scalamock.scalatest.MockFactory
 import org.scalatest._
 
 class MockTestManyParams extends FreeSpec with MockFactory with Matchers {
-  autoVerify = false
 
   "Mocks should" - {
-    "mock a trait containing method with many params" in withExpectations {
+    "mock a trait containing method with many params" in {
       val m = mock[ManyParamsTrait]
 
       (m.methodWith1Ints _).expects(1).returning(99)
@@ -98,7 +97,7 @@ class MockTestManyParams extends FreeSpec with MockFactory with Matchers {
       assertResult(78) { m.methodWith22Ints(1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1)}
     }
 
-    "mock a class containing method with many params" in withExpectations {
+    "mock a class containing method with many params" in {
       val m = mock[ManyParamsClass]
 
       (m.methodWith1Ints _).expects(1).returning(99)

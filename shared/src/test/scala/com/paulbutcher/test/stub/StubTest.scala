@@ -23,22 +23,21 @@ package com.paulbutcher.test.stub
 import com.paulbutcher.test.{ IsolatedSpec, TestTrait }
 
 class StubTest extends IsolatedSpec {
-  autoVerify = false
   val m = stub[TestTrait]
 
   behavior of "Stub"
 
-  it can "have its methods called any number of times" in withExpectations {
+  it can "have its methods called any number of times" in {
     m.oneParam(42)
     m.oneParam(42)
     m.twoParams(1, 1.23)
   }
 
-  it should "return null unless told otherwise" in withExpectations {
+  it should "return null unless told otherwise" in {
     m.oneParam(42) shouldBe null
   }
 
-  it should "return what they're told to" in withExpectations {
+  it should "return what they're told to" in {
     (m.twoParams _).when(42, 1.23).returns("a return value")
     m.twoParams(42, 1.23) shouldBe "a return value"
   }
@@ -53,7 +52,7 @@ class StubTest extends IsolatedSpec {
     m.oneParam(2) shouldBe null
   }
 
-  it should "verify calls" in withExpectations {
+  it should "verify calls" in {
     m.twoParams(42, 1.23)
     m.twoParams(42, 1.23)
     (m.twoParams _).verify(42, 1.23).twice

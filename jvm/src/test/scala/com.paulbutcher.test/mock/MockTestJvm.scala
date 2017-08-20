@@ -26,15 +26,11 @@ import com.paulbutcher.test._
 
 class MockTestJvm extends FreeSpec with MockFactory with Matchers {
   
-  autoVerify = false
-  
   "Mocks should" - {
     "mock java.io.File" in {
       class MyFile extends java.io.File("")
 
-      withExpectations {
-        val m = mock[MyFile]
-      }
+      val m = mock[MyFile]
     }
   }
 }

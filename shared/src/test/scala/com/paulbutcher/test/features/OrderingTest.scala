@@ -24,14 +24,12 @@ import com.paulbutcher.test.IsolatedSpec
 
 class OrderingTest extends IsolatedSpec {
 
-  autoVerify = false
-
   val intFunMock = mockFunction[Int, Int]
   val stringFunMock = mockFunction[String, Int]
 
   behavior of "Mock function"
 
-  it should "accept calls in any order by default" in withExpectations {
+  it should "accept calls in any order by default" in {
     intFunMock.expects(1).returning(1)
     intFunMock.expects(2).returning(2)
 
@@ -39,7 +37,7 @@ class OrderingTest extends IsolatedSpec {
     intFunMock(1) shouldBe 1
   }
 
-  it should "accept calls in any order when inAnyOrder" in withExpectations {
+  it should "accept calls in any order when inAnyOrder" in {
     inAnyOrder {
       intFunMock.expects(1).returning(1)
       intFunMock.expects(2).returning(2)
@@ -49,7 +47,7 @@ class OrderingTest extends IsolatedSpec {
     intFunMock(1) shouldBe 1
   }
 
-  it should "handle a sequence of calls" in withExpectations {
+  it should "handle a sequence of calls" in {
     inSequence {
       intFunMock.expects(1).returning(1)
       intFunMock.expects(2).returning(2)
@@ -61,7 +59,7 @@ class OrderingTest extends IsolatedSpec {
     intFunMock(3) shouldBe 3
   }
 
-  it should "handle a degenerate sequence" in withExpectations {
+  it should "handle a degenerate sequence" in {
     inSequence {
       intFunMock.expects(42).returning(10)
     }
@@ -79,13 +77,11 @@ class OrderingTest extends IsolatedSpec {
   }
 
   it should "handle a sequence of calls (call count)" in new InSequenceTest {
-    withExpectations {
-      setupExpectations()
+    setupExpectations()
 
-      repeat(5) { intFunMock(1) shouldBe 1 }
-      repeat(1) { intFunMock(2) shouldBe 2 }
-      repeat(2) { intFunMock(3) shouldBe 3 }
-    }
+    repeat(5) { intFunMock(1) shouldBe 1 }
+    repeat(1) { intFunMock(2) shouldBe 2 }
+    repeat(2) { intFunMock(3) shouldBe 3 }
   }
 
   it should "fail if the entire sequence isn't called (none)" in new InSequenceTest {
@@ -139,7 +135,7 @@ class OrderingTest extends IsolatedSpec {
     }
   }
 
-  it should "not match a previous item in the sequence" in withExpectations {
+  it should "not match a previous item in the sequence" in {
     inSequence {
       intFunMock.expects(1).returning(1).anyNumberOfTimes
       intFunMock.expects(2).returning(2).once
@@ -178,13 +174,11 @@ class OrderingTest extends IsolatedSpec {
   }
 
   it should "handle a sequence of calls (multiple mocks)" in new InSequenceMultipleMocksTest {
-    withExpectations {
-      setupExpectations()
+    setupExpectations()
 
-      m1(1) shouldBe 1
-      m2(2) shouldBe 2
-      m3(3) shouldBe 3
-    }
+    m1(1) shouldBe 1
+    m2(2) shouldBe 2
+    m3(3) shouldBe 3
   }
 
   it should "fail if the sequence is called out of order (1,3,2) - multiple mocks" in new InSequenceMultipleMocksTest {
@@ -206,7 +200,7 @@ class OrderingTest extends IsolatedSpec {
     }
   }
 
-  it should "handle a combination of ordered and unordered expectations" in withExpectations {
+  it should "handle a combination of ordered and unordered expectations" in {
     val m = mockFunction[Int, Unit]
 
     m.expects(1)
@@ -232,7 +226,7 @@ class OrderingTest extends IsolatedSpec {
     m(13)
   }
 
-  it should "handle a sequence in which functions are called zero times" in withExpectations {
+  it should "handle a sequence in which functions are called zero times" in {
     val m = mockFunction[Int, Unit]
     inSequence {
       m.expects(1).once
@@ -266,47 +260,41 @@ class OrderingTest extends IsolatedSpec {
   }
 
   it should "handle valid deeply nested expectation contexts (1)" in new NestedExpectationsTest {
-    withExpectations {
-      setupExpectations()
-      m("2.1")
-      m("1")
-      m("2.2.3")
-      m("2.2.2.1")
-      m("2.2.2.2")
-      m("2.2.1")
-      m("3")
-      m("2.2.3")
-      m("2.3")
-    }
+    setupExpectations()
+    m("2.1")
+    m("1")
+    m("2.2.3")
+    m("2.2.2.1")
+    m("2.2.2.2")
+    m("2.2.1")
+    m("3")
+    m("2.2.3")
+    m("2.3")
   }
 
   it should "handle valid deeply nested expectation contexts (2)" in new NestedExpectationsTest {
-    withExpectations {
-      setupExpectations()
-      m("2.1")
-      m("1")
-      m("2.2.3")
-      m("2.2.2.1")
-      m("2.2.1")
-      m("2.2.2.2")
-      m("3")
-      m("2.2.3")
-      m("2.3")
-    }
+    setupExpectations()
+    m("2.1")
+    m("1")
+    m("2.2.3")
+    m("2.2.2.1")
+    m("2.2.1")
+    m("2.2.2.2")
+    m("3")
+    m("2.2.3")
+    m("2.3")
   }
 
   it should "handle valid deeply nested expectation contexts (3)" in new NestedExpectationsTest {
-    withExpectations {
-      setupExpectations()
-      m("2.1")
-      m("1")
-      m("2.2.3")
-      m("2.2.2.1")
-      m("2.2.2.2")
-      m("2.2.1")
-      m("3")
-      m("2.3")
-    }
+    setupExpectations()
+    m("2.1")
+    m("1")
+    m("2.2.3")
+    m("2.2.2.1")
+    m("2.2.2.2")
+    m("2.2.1")
+    m("3")
+    m("2.3")
   }
 
   it should "handle invalid deeply nested expectation contexts" in {

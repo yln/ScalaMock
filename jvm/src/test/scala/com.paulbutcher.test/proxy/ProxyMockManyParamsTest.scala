@@ -26,10 +26,8 @@ import org.scalatest.FreeSpec
 
 class ProxyMockManyParamsTest extends FreeSpec with MockFactory {
 
-  autoVerify = false
-
   "Mocking trait should" - {
-    "allow expectations to be set on methods with many parameters" in withExpectations {
+    "allow expectations to be set on methods with many parameters" in {
       val m = mock[ManyParamsTrait]
 
       m.expects('methodWith1Ints)(1).returning(99)

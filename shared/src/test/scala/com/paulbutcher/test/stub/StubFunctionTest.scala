@@ -25,8 +25,6 @@ import org.scalatest.FreeSpec
 
 class StubFunctionTest extends FreeSpec with MockFactory {
   
-  autoVerify = false
-  
   def repeat(n: Int)(what: => Unit) {
     for (i <- 0 until n)
       what
@@ -37,77 +35,59 @@ class StubFunctionTest extends FreeSpec with MockFactory {
   "Stub functions should" - {
 
     "return null by default" in {
-      withExpectations {
-        val m = stubFunction[String]
-        assertResult(null) { m() }
-      }
+      val m = stubFunction[String]
+      assertResult(null) { m() }
     }
     
     "return a null-like default value for non reference types" in {
-      withExpectations {
-        val m = stubFunction[Int]
-        assertResult(0) { m() }
-      }
+      val m = stubFunction[Int]
+      assertResult(0) { m() }
     }
     
     "return what they're told to" in {
-      withExpectations {
-        val m = stubFunction[String]
-        m.when().returns("a return value")
-        assertResult("a return value") { m() }
-      }
+      val m = stubFunction[String]
+      m.when().returns("a return value")
+      assertResult("a return value") { m() }
     }
     
     "throw what they're told to" in {
-      withExpectations {
-        val m = stubFunction[String]
-        m.when().throws(new TestException)
-        intercept[TestException]{ m() }
-      }
+      val m = stubFunction[String]
+      m.when().throws(new TestException)
+      intercept[TestException]{ m() }
     }
     
     "default to anyNumberOfTimes" in {
-      withExpectations {
-        val m = stubFunction[String]
-        m.when().returns("a return value")
-        assertResult("a return value") { m() }
-        assertResult("a return value") { m() }
-        assertResult("a return value") { m() }
-      }
+      val m = stubFunction[String]
+      m.when().returns("a return value")
+      assertResult("a return value") { m() }
+      assertResult("a return value") { m() }
+      assertResult("a return value") { m() }
     }
     
     "unless told otherwise" in {
-      withExpectations {
-        val m = stubFunction[String]
-        m.when().returns("a return value").twice
-        assertResult("a return value") { m() }
-        assertResult("a return value") { m() }
-        assertResult(null) { m() }
-      }
+      val m = stubFunction[String]
+      m.when().returns("a return value").twice
+      assertResult("a return value") { m() }
+      assertResult("a return value") { m() }
+      assertResult(null) { m() }
     }
     
     "match literal arguments" in {
-      withExpectations {
-        val m = stubFunction[String, Int, Int]
-        m("foo", 42)
-        m.verify("foo", 42)
-      }
+      val m = stubFunction[String, Int, Int]
+      m("foo", 42)
+      m.verify("foo", 42)
     }
     
     "match wildcard arguments" in {
-      withExpectations {
-        val m = stubFunction[String, Int, Int]
-        m("foo", 42)
-        m.verify(*, 42)
-      }
+      val m = stubFunction[String, Int, Int]
+      m("foo", 42)
+      m.verify(*, 42)
     }
     
     "match epsilon arguments" in {
-      withExpectations {
-        val m = stubFunction[String, Double, Int]
-        m("foo", 1.0001)
-        m.verify("foo", ~1.0)
-      }
+      val m = stubFunction[String, Double, Int]
+      m("foo", 1.0001)
+      m.verify("foo", ~1.0)
     }
 
     "fail if an expectation is not met" in {
@@ -137,48 +117,40 @@ class StubFunctionTest extends FreeSpec with MockFactory {
     
     "match arguments" - {
       "when stubbing" in {
-        withExpectations {
-          val m = stubFunction[Int, Int, String]
-          m.when(where { _ < _ }).returns("lower")
-          m.when(where { _ > _ }).returns("higher")
-          assertResult("lower"){ m(1, 2) }
-          assertResult("higher"){ m(2, 1) }
-        }
+        val m = stubFunction[Int, Int, String]
+        m.when(where { _ < _ }).returns("lower")
+        m.when(where { _ > _ }).returns("higher")
+        assertResult("lower"){ m(1, 2) }
+        assertResult("higher"){ m(2, 1) }
       }
       
       "when verifying" in {
-        withExpectations {
-          val m = stubFunction[Int, Int, String]
-          m(1, 2)
-          m(2, 1)
-          m(2, 1)
-          m.verify(where { _ < _}).once
-          m.verify(where { _ > _}).twice
-        }
+        val m = stubFunction[Int, Int, String]
+        m(1, 2)
+        m(2, 1)
+        m(2, 1)
+        m.verify(where { _ < _}).once
+        m.verify(where { _ > _}).twice
       }
     }
     
     "handle a degenerate sequence" in {
-      withExpectations {
-        val m = stubFunction[Int, Int]
-        m(42)
-        inSequence {
-          m.verify(42)
-        }
+      val m = stubFunction[Int, Int]
+      m(42)
+      inSequence {
+        m.verify(42)
       }
     }
     
     "handle a sequence of calls" in {
-      withExpectations {
-        val m = stubFunction[Int, Int]
-        repeat(5) { m(42) }
-        repeat(1) { m(43) }
-        repeat(2) { m(44) }
-        inSequence {
-          m.verify(42).repeated(3 to 7)
-          m.verify(43).once
-          m.verify(44).twice
-        }
+      val m = stubFunction[Int, Int]
+      repeat(5) { m(42) }
+      repeat(1) { m(43) }
+      repeat(2) { m(44) }
+      inSequence {
+        m.verify(42).repeated(3 to 7)
+        m.verify(43).once
+        m.verify(44).twice
       }
     }
     
@@ -209,90 +181,82 @@ class StubFunctionTest extends FreeSpec with MockFactory {
     }
     
     "not match a previous item in the sequence" in {
-      withExpectations {
-        val m = stubFunction[Int, Int]
-        m(42)
-        m(43)
-        m(42)
-        inSequence {
-          m.verify(42).anyNumberOfTimes
-          m.verify(43)
-          m.verify(42)
-        }
+      val m = stubFunction[Int, Int]
+      m(42)
+      m(43)
+      m(42)
+      inSequence {
+        m.verify(42).anyNumberOfTimes
+        m.verify(43)
+        m.verify(42)
       }
     }
 
     "handle a combination of ordered and unordered expectations" in {
-      withExpectations {
-        val m = stubFunction[Int, Unit]
-        
-        m(21)
-        m(31)
-        m(11)
-        m(12)
-        m(1)
-        m(32)
-        m(41)
-        m(13)
-  
-        m.verify(1)
-        inSequence {
-          m.verify(11)
-          m.verify(12)
-          m.verify(13)
-        }
-        m.verify(21)
-        inSequence {
-          m.verify(31)
-          m.verify(32)
-        }
-        m.verify(41)
-      }      
+      val m = stubFunction[Int, Unit]
+
+      m(21)
+      m(31)
+      m(11)
+      m(12)
+      m(1)
+      m(32)
+      m(41)
+      m(13)
+
+      m.verify(1)
+      inSequence {
+        m.verify(11)
+        m.verify(12)
+        m.verify(13)
+      }
+      m.verify(21)
+      inSequence {
+        m.verify(31)
+        m.verify(32)
+      }
+      m.verify(41)
     }
 
     "handle a sequence in which functions are called zero times" in {
-      withExpectations {
-        val m = stubFunction[Int, Unit]
-        m(1)
-        m(4)
-        inSequence {
-          m.verify(1).once
-          m.verify(2).never
-          m.verify(3).anyNumberOfTimes
-          m.verify(4).once
-        }
+      val m = stubFunction[Int, Unit]
+      m(1)
+      m(4)
+      inSequence {
+        m.verify(1).once
+        m.verify(2).never
+        m.verify(3).anyNumberOfTimes
+        m.verify(4).once
       }
     }
 
     "handle valid deeply nested expectation contexts" in {
-      withExpectations {
-        val m = stubFunction[String, Unit]
-        
-        m("2.1")
-        m("1")
-        m("2.2.3")
-        m("2.2.2.1")
-        m("2.2.2.2")
-        m("2.2.1")
-        m("3")
-        m("2.2.3")
-        m("2.3")
-        
-        m.verify("1")
-        inSequence {
-          m.verify("2.1")
-          inAnyOrder {
-            m.verify("2.2.1")
-            inSequence {
-              m.verify("2.2.2.1")
-              m.verify("2.2.2.2")
-            }
-            m.verify("2.2.3").anyNumberOfTimes
+      val m = stubFunction[String, Unit]
+
+      m("2.1")
+      m("1")
+      m("2.2.3")
+      m("2.2.2.1")
+      m("2.2.2.2")
+      m("2.2.1")
+      m("3")
+      m("2.2.3")
+      m("2.3")
+
+      m.verify("1")
+      inSequence {
+        m.verify("2.1")
+        inAnyOrder {
+          m.verify("2.2.1")
+          inSequence {
+            m.verify("2.2.2.1")
+            m.verify("2.2.2.2")
           }
-          m.verify("2.3")
+          m.verify("2.2.3").anyNumberOfTimes
         }
-        m.verify("3")
-      }      
+        m.verify("2.3")
+      }
+      m.verify("3")
     }
 
     "handle invalid deeply nested expectation contexts" in {
@@ -318,23 +282,21 @@ class StubFunctionTest extends FreeSpec with MockFactory {
           m.verify("2.3")
         }
         m.verify("3")
-      })    
+      })
     }
     
     "cope with multiple stubs" in {
-      withExpectations {
-        val m1 = stubFunction[Int, String]
-        val m2 = stubFunction[Int, String]
-        
-        m1.when(42).returns("m1")
-        m2.when(42).returns("m2")
-        
-        assertResult("m1") { m1(42) }
-        assertResult("m2") { m2(42) }
-        
-        m1.verify(42).once
-        m2.verify(42).once
-      }      
+      val m1 = stubFunction[Int, String]
+      val m2 = stubFunction[Int, String]
+
+      m1.when(42).returns("m1")
+      m2.when(42).returns("m2")
+
+      assertResult("m1") { m1(42) }
+      assertResult("m2") { m2(42) }
+
+      m1.verify(42).once
+      m2.verify(42).once
     }
   }
 }

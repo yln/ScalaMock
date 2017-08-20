@@ -25,37 +25,29 @@ import org.scalatest.FreeSpec
 
 class MockFunctionTest extends FreeSpec with MockFactory {
   
-  autoVerify = false
-  
   def repeat(n: Int)(what: => Unit) {
     for (i <- 0 until n)
       what
   }
-  
+
   "Mock functions should" - {
 
     "match literal arguments" in {
-      withExpectations {
-        val m = mockFunction[String, Int, Int]
-        m.expects("foo", 42)
-        m("foo", 42)
-      }
+      val m = mockFunction[String, Int, Int]
+      m.expects("foo", 42)
+      m("foo", 42)
     }
     
     "match wildcard arguments" in {
-      withExpectations {
-        val m = mockFunction[String, Int, Int]
-        m.expects(*, 42)
-        m("foo", 42)
-      }
+      val m = mockFunction[String, Int, Int]
+      m.expects(*, 42)
+      m("foo", 42)
     }
     
     "match epsilon arguments" in {
-      withExpectations {
-        val m = mockFunction[String, Double, Int]
-        m.expects("foo", ~1.0)
-        m("foo", 1.0001)
-      }
+      val m = mockFunction[String, Double, Int]
+      m.expects("foo", ~1.0)
+      m("foo", 1.0001)
     }
     
     "fail if an expectation is not met" in {
@@ -66,13 +58,11 @@ class MockFunctionTest extends FreeSpec with MockFactory {
     }
     
     "match arguments" in {
-      withExpectations {
-        val m = mockFunction[Int, Int, String]
-        m.expects(where { _ < _ }).returning("less")
-        m.expects(where { _ > _ }).returning("more")
-        assertResult("less"){ m(1, 2) }
-        assertResult("more"){ m(2, 1) }
-      }
+      val m = mockFunction[Int, Int, String]
+      m.expects(where { _ < _ }).returning("less")
+      m.expects(where { _ > _ }).returning("more")
+      assertResult("less"){ m(1, 2) }
+      assertResult("more"){ m(2, 1) }
     }
   }
 }

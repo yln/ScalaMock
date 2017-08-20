@@ -35,15 +35,13 @@ case class UserMatcher(name: Option[String] = None) extends Matcher[User] {
 
 class MatchersTest extends IsolatedSpec {
 
-  autoVerify = false
-
   val mockedMultiplication = mockFunction[Double, Double, Double]
   val testMock = mock[TestTrait]
   val userDatabaseMock = mock[UserDatabase]
 
   behavior of "MatchEpsilon"
 
-  it should "match anything that's close to the given value" in withExpectations {
+  it should "match anything that's close to the given value" in {
     mockedMultiplication.expects(~5.0, ~10.0)
     mockedMultiplication(5.0001, 9.9999)
   }
@@ -57,7 +55,7 @@ class MatchersTest extends IsolatedSpec {
 
   behavior of "MatchAny"
 
-  it should "match anything" in withExpectations {
+  it should "match anything" in {
     (testMock.polymorphic _).expects(*).repeat(3)
 
     testMock.polymorphic(List("55"))
@@ -67,7 +65,7 @@ class MatchersTest extends IsolatedSpec {
 
   behavior of "where matcher"
 
-  it can "be used to create complex predicates (one parameter)" in withExpectations {
+  it can "be used to create complex predicates (one parameter)" in {
     (userDatabaseMock.storeUser _).expects(where { user: User => user.age > 18 && user.name.startsWith("A") }).returning("matched").twice
     (userDatabaseMock.storeUser _).expects(*).returning("unmatched").once
 
@@ -76,7 +74,7 @@ class MatchersTest extends IsolatedSpec {
     userDatabaseMock.storeUser(User("Anna", 21)) shouldBe "matched"
   }
 
-  it can "be used to create complex predicates (two parameters)" in withExpectations {
+  it can "be used to create complex predicates (two parameters)" in {
     (testMock.twoParams _).expects(where { (x, y) => x + y > 100 }).returning("matched").twice
     (testMock.twoParams _).expects(*, *).returning("unmatched").once
 
@@ -87,7 +85,7 @@ class MatchersTest extends IsolatedSpec {
 
   behavior of "argThat matcher"
 
-  it can "be used to create complex predicates" in withExpectations {
+  it can "be used to create complex predicates" in {
     (userDatabaseMock.addUserAddress _)
       .expects(*, argThat { address: Address => address.city == "Berlin" })
       .returning("matched")
@@ -101,14 +99,14 @@ class MatchersTest extends IsolatedSpec {
     userDatabaseMock.addUserAddress(User("John", 23), Address("London", "Baker Street 221b")) shouldBe "matched"
   }
 
-  it should "be displayed correctly" in withExpectations {
+  it should "be displayed correctly" in {
     val expectation = (userDatabaseMock.addUserAddress _) expects (*, argThat[Address] { _ => true }) never ()
     expectation.toString() should include("UserDatabase.addUserAddress(*, <matcher>)")
   }
 
   behavior of "custom matcher"
 
-  it can "be used to create complex predicates" in withExpectations {
+  it can "be used to create complex predicates" in {
     (userDatabaseMock.addUserAddress _) expects (UserMatcher().withName("Alan"), *) returning "matched"
     (userDatabaseMock.addUserAddress _) expects (UserMatcher().withName("Bob"), *) returning "matched"
     (userDatabaseMock.addUserAddress _) expects (*, *) returning "unmatched"
@@ -118,7 +116,7 @@ class MatchersTest extends IsolatedSpec {
     userDatabaseMock.addUserAddress(User("Bob", 23), Address("London", "Baker Street 221b")) shouldBe "matched"
   }
 
-  it should "be displayed correctly" in withExpectations {
+  it should "be displayed correctly" in {
     val expectation = (userDatabaseMock.addUserAddress _) expects (UserMatcher().withName("Alan"), *) never ()
     expectation.toString() should include("UserDatabase.addUserAddress(UserMatcher(name=Alan), *)")
   }
