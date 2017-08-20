@@ -97,6 +97,8 @@ trait MockFactoryBase extends AbstractMockFactoryBase with MockContext {
   }
 
   private def verifyExpectations() {
+    if (expectationContext == null) return
+
     callLog foreach expectationContext.verify _
 
     val oldCallLog = callLog
